@@ -27,7 +27,7 @@ def r(x, y):
     return x * 2 + y ** 2
 
 
-def perlin(g ,n):
+def perlin(graine, taille):
     tab = np.linspace(1, 10, 1500, endpoint=False)
 
     # création de grille en utilisant le tableau 1d
@@ -35,7 +35,7 @@ def perlin(g ,n):
 
     # On crée une permutation en fonction du nb de pixels
     # On utilise la fonction seed parce que numpy chiale si on le fait pas
-    np.random.seed(g)
+    np.random.seed(graine)
     perm = np.arange(256, dtype=int)
     np.random.shuffle(perm)
 
@@ -64,36 +64,37 @@ def perlin(g ,n):
     # C'est ce qui fait que la transition de couleurs des pixels est clean
     x1 = lerp(n00, n10, xf)
     x2 = lerp(n01, n11, xf)
+
     plt.close("all")
     resultat = lerp(x1, x2, yf)
     resultat += 0.5
-    resultat *= n
+    resultat *= taille
 
-    tab2 = np.linspace(0, n, n, endpoint=False)
+    tab2 = np.linspace(0, taille, taille, endpoint=False)
 
     # création de grille en utilisant le tableau 1d
     X, Y = np.meshgrid(tab2, tab2)
-    D = np.zeros((n, n))
+    D = np.zeros((taille, taille))
 
-    for i in range(n):
-        D[i] = resultat[i][0:n]
-    autre = D / n
+    for i in range(taille):
+        D[i] = resultat[i][0:taille]
+    autre = D / taille
     autre *= 7
-    plt.imshow(D, origin='upper', cmap='gray', vmin=0, vmax=n)
+    plt.imshow(D, origin='upper', cmap='gray', vmin=0, vmax=taille)
     plt.xlabel('Y')
     plt.ylabel('X')
     plt.colorbar()
-    plt.title('Bruit de Perlin en 2D (seed = ' + str(g) + ')')
+    plt.title('Bruit de Perlin en 2D (seed = ' + str(graine) + ')')
     plt.savefig(f"2_Dimensions/Height_Map.jpg")
-    T = np.array([[D[i, j] for i in range(n)] for j in range(n)])
+    T = np.array([[D[i, j] for i in range(taille)] for j in range(taille)])
     plt.close("all")
     ax = plt.axes(projection="3d")
     ax.set_xlabel('X')
     ax.set_ylabel('Y')
     ax.set_zlabel('Z')
     ax.invert_zaxis()
-    ax.plot_surface(X, Y, T, cmap='gray', vmin=0, vmax=n)
-    plt.title('Heightmap (seed = ' + str(g) + ')')
+    ax.plot_surface(X, Y, T, cmap='gray', vmin=0, vmax=taille)
+    plt.title('Heightmap (seed = ' + str(graine) + ')')
     plt.savefig("2_Dimensions/Height_map")
 
     return D, autre

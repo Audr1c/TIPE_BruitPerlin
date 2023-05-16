@@ -109,10 +109,10 @@ def spline_cube(da, db, a, b, A, B, X, Y, alpha):
 ## Bruit de Perlin
 
 
-def bruit_de_perlin1D(i, g: int, p):  # permet de généreer un suites de points aléatoires
+def bruit_de_perlin1D(i, p):  # permet de généreer un suites de points aléatoires
     x = linspace(0, i, p)  # liste des abcisses ( espacées à inetrvalle régulié )
     u = x[1] - x[0]  # distance entre 2 abcisses concécutives
-    y = [(4057 ** g + 70 * g - 69 * g ** 2 + 57 + g) % (i // 2) + 12]  # liste des ordonnées, initiées
+    y = [random.randint(0, i - 1)]  # liste des ordonnées, initiées
     for k in range(len(x) - 1):
         a = y[k] + random1(u)
         y.append(a)  # ajouts des autres ordonnées en fonction des précédentes
@@ -129,7 +129,7 @@ def liste_aleatoire(i, j, p):
 # Sinusoidal
 
 def bruit_de_perlin1D_sin(i, g, p, alpha):
-    x, y = bruit_de_perlin1D(i, g, p)  # liste du bruit
+    x, y = bruit_de_perlin1D(i, p)  # liste du bruit
     X = []  # création de nouvelle liste d'abcisses
     Y = []  # création de nouvelle liste d'ordonnés
     for k in range(p - 1):  # interpolation entre deux points de la liste
@@ -159,9 +159,22 @@ def bruit_de_perlin1D_sin_random(i, p, alpha):  # fonction avec une seed aléato
 # Polynomial
 
 def bruit_de_perlin1D_spline1(i, g, p, alpha):
-    x, y = bruit_de_perlin1D(i, g, p)  # liste du bruit
+    x, y = bruit_de_perlin1D(i, p)  # liste du bruit
     X = []  # création de nouvelle liste d'abcisses
     Y = []  # création de nouvelle liste d'ordonnés
+    d1 = 0
+    d2 = random_int()
+    for k in range(p - 1):  # interpolation entre trois points de la liste
+        X, Y, d1 = spline_cube(d1, d2, x[k], x[k + 1], y[k], y[k + 1], X, Y, alpha)
+        d2 = plus_ou_moins() * random_int()
+    X.append(x[-1])
+    Y.append(y[-1])
+    return X, Y  # liste avec l'interpolation
+
+def liste_aleatoire_spline1(i, j, p, alpha):
+    x, y = liste_aleatoire(i, j, p)  # liste du bruit
+    X = []  # création de nouvelle liste d'abcisses
+    Y = []
     d1 = 0
     d2 = random_int()
     for k in range(p - 1):  # interpolation entre trois points de la liste
@@ -176,13 +189,11 @@ def liste_aleatoire_spline(i, j, p, alpha):
     x, y = liste_aleatoire(i, j, p)  # liste du bruit
     X = []  # création de nouvelle liste d'abcisses
     Y = []  # création de nouvelle liste d'ordonnés
-    d1 = 0
-    d2 = random_int()
     for k in range(p - 1):  # interpolation entre trois points de la liste
-        X, Y = lissage_bis(x[k], x[k + 1], y[k], y[k + 1], X, Y, alpha)
+        lissage_bis(x[k], x[k + 1], y[k], y[k + 1], X, Y, alpha)
     X.append(x[-1])
     Y.append(y[-1])
-    return (X, Y)  # liste avec l'interpolation
+    return X, Y  # liste avec l'interpolation
 
 
 def bruit_de_perlin1D_spline_random(i, p):  # fonction avec une seed aléatoire
@@ -191,27 +202,27 @@ def bruit_de_perlin1D_spline_random(i, p):  # fonction avec une seed aléatoire
 
 ##
 def bruit_de_perlin1D_spline(i, g, p, alpha):
-    x, y = bruit_de_perlin1D(i, g, p)  # liste du bruit
+    x, y = bruit_de_perlin1D(i, p)  # liste du bruit
     X = []  # création de nouvelle liste d'abcisses
     Y = []  # création de nouvelle liste d'ordonnés
     for k in range(p - 1):  # interpolation entre trois points de la liste
-        X, Y = lissage_bis(x[k], x[k + 1], y[k], y[k + 1], X, Y, alpha)
+        lissage_bis(x[k], x[k + 1], y[k], y[k + 1], X, Y, alpha)
     X.append(x[-1])
     Y.append(y[-1])
-    return (X, Y)
+    return X, Y
 
 
 def lissage_bis(a, b, A, B, X, Y, alpha):
-    u = (b - a) / alpha
-    i = 0
-    r = 1 / alpha  # définition du pas
-    t = 0  # initialisation
+    dx = (b - a) / alpha
+    deltaX = 0
+    dy = 1 / alpha  # définition du pas
+    deltaY = 0  # initialisation
     for j in range(alpha):
-        X.append(a + i)  # ajout d'abcisse
-        Y.append(A + (B - A) * (6 * t ** 5 - 15 * t ** 4 + 10 * t ** 3))  # ajout d'ordonné
-        t += r  # passage au point suivant
-        i += u
-    return X, Y
+        X.append(a + deltaX)  # ajout d'abcisse
+        Y.append(A + (B - A) * (6 * deltaY ** 5 - 15 * deltaY ** 4 + 10 * deltaY ** 3))  # ajout d'ordonné
+        deltaY += dy  # passage au point suivant
+        deltaX += dx
+    # tableau modifie avec effet de bord
 
 
 if __name__ == "__main__":
@@ -227,7 +238,7 @@ if __name__ == "__main__":
     # Fonction
 
     x, y = bruit_de_perlin1D_spline(i, g, p, alpha)
-    z, t = bruit_de_perlin1D(i, g, p)
+    z, t = bruit_de_perlin1D(i, p)
     u, p = bruit_de_perlin1D_sin(i, g, p, alpha)
 
     # Affichage

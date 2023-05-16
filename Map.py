@@ -1,3 +1,6 @@
+import time
+
+import numpy
 import numpy as np
 import matplotlib.pyplot as plt
 import random
@@ -308,11 +311,12 @@ def minerais(CarteListe3D, BruitP2D, ax):
 
 
 def grotte(CarteListe3D, ax):
+    numy = numpy.array(CarteListe3D)
     alpha = 100
     u = 5
-    Ag, Xg = liste_aleatoire_spline(Taille, Taille, u, alpha)
-    Ag, Zg = liste_aleatoire_spline(Taille, hauteur, u, alpha)
-    Ag, Yg = liste_aleatoire_spline(Taille, Taille, u, alpha)
+    _, Xg = liste_aleatoire_spline1(Taille, Taille, u, alpha)
+    _, Zg = liste_aleatoire_spline1(Taille, hauteur, u, alpha)
+    _, Yg = liste_aleatoire_spline1(Taille, Taille, u, alpha)
 
     '''
     plt.close("all")
@@ -325,25 +329,25 @@ def grotte(CarteListe3D, ax):
     plt.close()
     '''
 
-    ax.scatter(Xg, Yg, Zg, c='purple')
+    ax.scatter(Xg, Yg, Zg)
 
-    for i in trange((u - 1) * alpha + 1):
+    for i in range((u - 1) * alpha + 1):
         explose(CarteListe3D, int(Xg[i]), int(Zg[i]) + Taille // 2, int(Yg[i]))
 
 
 def ajout_detail(graine, CarteListe3D, BruitP2D, sable, eau):
-    print(graine)
+
 
     plt.close("all")
     ax = plt.axes(projection="3d")
 
     minerais(CarteListe3D, BruitP2D, ax)
 
+    nbGrotte = 8
     # grotte 1
-    grotte(CarteListe3D, ax)
+    for _ in trange(nbGrotte):
+        grotte(CarteListe3D, ax)
 
-    # grotte 2
-    grotte(CarteListe3D, ax)
 
     # eau
     for e in eau:
@@ -366,9 +370,9 @@ def ajout_detail(graine, CarteListe3D, BruitP2D, sable, eau):
 
     ax.set_title('Grotte seed=' + str(graine))
     plt.savefig("Affichage_de_la_map/Grotte")
-    plt.show()
 
-    # GIF
+
+def gif():
     frames = []
     for i in trange(Taille):
         image = imageio.v2.imread(f"Affichage_de_la_map/Frame/TIPE{i}.jpg")
@@ -377,12 +381,33 @@ def ajout_detail(graine, CarteListe3D, BruitP2D, sable, eau):
 
 
 def fait_une_map(graine):
+    startAll = time.time()
     random.seed(graine)
+    print(f"Graine: {graine}")
+
+    start = time.time()
+    print("Start Bruit Perlin")
     M, autre = perlin(graine, Taille)
+    print(f"End Bruit Perlin TimeToFinish: {time.time() - start:.2f} s")
+
+    start = time.time()
+    print("Start Patron")
     N, sable, eau = Patron_carte(M, autre)
-    return ajout_detail(graine, N, M, sable, eau)
+    print(f"End Patron TimeToFinish: {time.time() - start:.2f} s")
 
+    start = time.time()
+    print("Start Detail")
+    ajout_detail(graine, N, M, sable, eau)
+    print(f"End Detail TimeToFinish: {time.time() - start:.2f} s")
 
+    start = time.time()
+    print("Start Gif")
+    gif()
+    print(f"End Gif TimeToFinish: {time.time() - start:.2f} s")
+
+    finTime = time.time() - startAll
+    plt.show()
+    print(f"Program Finished in {finTime:.2f} s")
 ##
 ## Modélisation de la carte
 Taille = 400
