@@ -234,7 +234,7 @@ def Patron_carte(BruitP2D, autre):
     eau = []
     sable = []
     CarteListe3D = [[[1 for y in range(Taille)] for z in range(hauteur)] for x in range(Taille)]
-    Heau = hauteur // 3
+    Heau = 130
     for x in trange(Taille):
         for y in range(Taille):
             Hsurface = int(BruitP2D[x, y])
@@ -291,7 +291,7 @@ def minerais(CarteListe3D, BruitP2D, ax):
     Ao, Yo = liste_aleatoire(k, Taille - 1, k)
     Ao, Xo = liste_aleatoire(k, Taille - 1, k)
     Ao, Z = liste_aleatoire(k, Taille // 2 - 1, k)
-    Zo = [i + Taille for i in Z]
+    Zo = [i + 0 for i in Z]
     for i in range(k):
         gold(CarteListe3D, int(Xo[i]), int(Zo[i]), int(Yo[i]))
 
@@ -386,7 +386,7 @@ def fait_une_map(graine):
 
     start = time.time()
     print("Start Bruit Perlin")
-    M, autre = perlinfzej(graine, Taille)
+    M, autre = perlinfzej(graine, Taille, hauteur)
 
     print(f"End Bruit Perlin TimeToFinish: {time.time() - start:.2f} s")
 
@@ -412,8 +412,8 @@ def fait_une_map(graine):
 
 ##
 ## Modélisation de la carte
-Taille = 200
-hauteur = int(Taille * 1.5)
+Taille = 500
+hauteur = 300
 graine = randrange(10000)
 fait_une_map(8490)
 
