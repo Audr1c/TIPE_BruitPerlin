@@ -28,14 +28,14 @@ def r(x, y):
 
 
 def perlin(graine, taille):
-    tab = np.linspace(1, 10, 1500, endpoint=False)
+    tab = np.linspace(1, 10, 500, endpoint=False)
 
     # création de grille en utilisant le tableau 1d
     x, y = np.meshgrid(tab, tab)
 
     # On crée une permutation en fonction du nb de pixels
     # On utilise la fonction seed parce que numpy chiale si on le fait pas
-    np.random.seed(graine)
+
     perm = np.arange(256, dtype=int)
     np.random.shuffle(perm)
 
@@ -67,19 +67,42 @@ def perlin(graine, taille):
 
     plt.close("all")
     resultat = lerp(x1, x2, yf)
-    resultat += 0.5
-    resultat *= taille
 
+    """
+    """
+
+    return resultat
+
+
+def perlinfzej(graine, taille):
+
+    # creation Base ( grosse forme)
+    res1 = perlin(graine, taille)
+
+    # creation petit bruit
+    res2 = perlin(graine, taille)
+
+    # si grosse :
+    res1 += 0.5
+    res1 **= 3
+    res1 *= taille
+
+    # sinon
+    res2 *= 20
+
+    resultat = res1 + res2
     tab2 = np.linspace(0, taille, taille, endpoint=False)
 
     # création de grille en utilisant le tableau 1d
     X, Y = np.meshgrid(tab2, tab2)
-    D = np.zeros((taille, taille))
 
+    D = np.zeros((taille, taille))
     for i in range(taille):
         D[i] = resultat[i][0:taille]
     autre = D / taille
     autre *= 7
+
+
     plt.imshow(D, origin='upper', cmap='gray', vmin=0, vmax=taille)
     plt.xlabel('Y')
     plt.ylabel('X')
@@ -96,5 +119,6 @@ def perlin(graine, taille):
     ax.plot_surface(X, Y, T, cmap='gray', vmin=0, vmax=taille)
     plt.title('Heightmap (seed = ' + str(graine) + ')')
     plt.savefig("2_Dimensions/Height_map")
+
 
     return D, autre

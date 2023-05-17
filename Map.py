@@ -329,25 +329,22 @@ def grotte(CarteListe3D, ax):
     plt.close()
     '''
 
-    ax.scatter(Xg, Yg, Zg)
+    ax.scatter(Xg, Yg, Zg, linewidths=.2)
 
     for i in range((u - 1) * alpha + 1):
         explose(CarteListe3D, int(Xg[i]), int(Zg[i]) + Taille // 2, int(Yg[i]))
 
 
 def ajout_detail(graine, CarteListe3D, BruitP2D, sable, eau):
-
-
     plt.close("all")
     ax = plt.axes(projection="3d")
 
     minerais(CarteListe3D, BruitP2D, ax)
 
-    nbGrotte = 8
+    nbGrotte = 4
     # grotte 1
     for _ in trange(nbGrotte):
         grotte(CarteListe3D, ax)
-
 
     # eau
     for e in eau:
@@ -383,11 +380,14 @@ def gif():
 def fait_une_map(graine):
     startAll = time.time()
     random.seed(graine)
+    np.random.seed(graine)
+
     print(f"Graine: {graine}")
 
     start = time.time()
     print("Start Bruit Perlin")
-    M, autre = perlin(graine, Taille)
+    M, autre = perlinfzej(graine, Taille)
+
     print(f"End Bruit Perlin TimeToFinish: {time.time() - start:.2f} s")
 
     start = time.time()
@@ -408,9 +408,14 @@ def fait_une_map(graine):
     finTime = time.time() - startAll
     plt.show()
     print(f"Program Finished in {finTime:.2f} s")
+
+
 ##
 ## Modélisation de la carte
-Taille = 400
+Taille = 200
 hauteur = int(Taille * 1.5)
 graine = randrange(10000)
-fait_une_map(graine)
+fait_une_map(8490)
+
+# prendre un bruit de perlin en basse resolution et faire **5
+# ajouter un bruit de perlin tres leger max 3 bloc entre min et max
