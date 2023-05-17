@@ -28,7 +28,7 @@ def r(x, y):
 
 
 def perlin(graine, taille):
-    tab = np.linspace(1, 10, 500, endpoint=False)
+    tab = np.linspace(1, 10, 1500, endpoint=False)
 
     # création de grille en utilisant le tableau 1d
     x, y = np.meshgrid(tab, tab)
@@ -74,7 +74,7 @@ def perlin(graine, taille):
     return resultat
 
 
-def perlinfzej(graine, taille):
+def perlinfzej(graine, taille, hauteur):
 
     # creation Base ( grosse forme)
     res1 = perlin(graine, taille)
@@ -84,11 +84,12 @@ def perlinfzej(graine, taille):
 
     # si grosse :
     res1 += 0.5
-    res1 **= 3
-    res1 *= taille
+    res1 **= 2
+    res1 *= 200 
+    res1 += 50
 
     # sinon
-    res2 *= 20
+    res2 *= 2
 
     resultat = res1 + res2
     tab2 = np.linspace(0, taille, taille, endpoint=False)
@@ -103,7 +104,7 @@ def perlinfzej(graine, taille):
     autre *= 7
 
 
-    plt.imshow(D, origin='upper', cmap='gray', vmin=0, vmax=taille)
+    plt.imshow(D, origin='upper', cmap='gray')
     plt.xlabel('Y')
     plt.ylabel('X')
     plt.colorbar()
@@ -116,7 +117,7 @@ def perlinfzej(graine, taille):
     ax.set_ylabel('Y')
     ax.set_zlabel('Z')
     ax.invert_zaxis()
-    ax.plot_surface(X, Y, T, cmap='gray', vmin=0, vmax=taille)
+    ax.plot_surface(X, Y, T, cmap='gray')
     plt.title('Heightmap (seed = ' + str(graine) + ')')
     plt.savefig("2_Dimensions/Height_map")
 
