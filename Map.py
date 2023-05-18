@@ -415,7 +415,7 @@ def fait_une_map(graine):
 Taille = 500
 hauteur = 300
 graine = randrange(10000)
-fait_une_map(8490)
+fait_une_map(graine)
 
 # prendre un bruit de perlin en basse resolution et faire **5
 # ajouter un bruit de perlin tres leger max 3 bloc entre min et max
