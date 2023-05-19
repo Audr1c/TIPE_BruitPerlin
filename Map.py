@@ -236,40 +236,34 @@ def Patron_carte(BruitP2D, autre):
     eau = []
     sable = []
     CarteListe3D = [[[1 for y in range(Taille)] for z in range(hauteur)] for x in range(Taille)]
-    Heau = 100
+    Heau = 110
     for x in trange(Taille):
         for y in range(Taille):
             Hsurface = int(BruitP2D[x, y])
-            if Hsurface >= Heau:
-                z = 0
-                while z < Hsurface:
-                    if z < Heau:
-                        CarteListe3D[x][z][y] = 0
-                    else:
-                        eau.append((x, y, z))
-                    z += 1
-                sable.append((x, y, z))
-                a = 5
-                for i in range(a):
-                    CarteListe3D[x][z + i][y] = 5
-            else:
-                z = 0
-                while z < Hsurface:
-                    CarteListe3D[x][z][y] = 0
-                    z += 1
-                CarteListe3D[x][z][y] = 2
+            z=0
+            while z < Hsurface:
+                CarteListe3D[x][z][y] = 0
+                if z >= Heau:
+                    eau.append((x, y, z))
                 z += 1
-                a = 5
-                for i in range(a):
-                    if z + i >= Heau:
-                        CarteListe3D[x][z + i][y] = 5
-                    else:
-                        CarteListe3D[x][z + i][y] = 3
-            if random.random() < 1 / 3:
-                CarteListe3D[x][hauteur - 3][y] = 6
-            if random.random() < 1 / 2:
-                CarteListe3D[x][hauteur - 2][y] = 6
-            CarteListe3D[x][hauteur - 1][y] = 6
+            if z<Heau-4:
+                CarteListe3D[x][z][y] = 2
+            else:
+                CarteListe3D[x][z][y] = 5
+                if z>=Heau:
+                    sable.append((x,y,z))
+            z += 1
+            a = 3
+            for i in range(a):
+                if z + i >= Heau-4:
+                    CarteListe3D[x][z + i][y] = 5
+                else:
+                    CarteListe3D[x][z + i][y] = 3
+        if random.random() < 1 / 3:
+            CarteListe3D[x][hauteur - 3][y] = 6
+        if random.random() < 1 / 2:
+            CarteListe3D[x][hauteur - 2][y] = 6
+        CarteListe3D[x][hauteur - 1][y] = 6
 
     return CarteListe3D, sable, eau ,Heau
 
@@ -314,7 +308,7 @@ def minerais(CarteListe3D, BruitP2D, ax):
 
 def grotte(CarteListe3D, ax):
     numy = numpy.array(CarteListe3D)
-    alpha = 100
+    alpha = 200
     u = 5
     _, Xg = liste_aleatoire_spline1(Taille, Taille, u, alpha)
     _, Zg = liste_aleatoire_spline1(Taille, hauteur, u, alpha)
@@ -445,7 +439,7 @@ def fait_une_map(graine):
 
 ##
 ## Modélisation de la carte
-Taille = 200
+Taille = 500
 hauteur = 200
 graine = randrange(10000)
 fait_une_map(graine)
