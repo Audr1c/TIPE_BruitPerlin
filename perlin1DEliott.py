@@ -17,6 +17,9 @@ def plus_ou_moins():
 
 
 def random_int():
+    """
+    :return: random integer in [0,3]
+    """
     return random.randint(0, 3)  # renvoie un entier aléatoire entre 0 et 4
 
 

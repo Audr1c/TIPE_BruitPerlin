@@ -14,24 +14,39 @@ from tqdm import trange
 from perlin2DEliott import *
 from perlin1DEliott import *
 
+from nbtschematic import SchematicFile
+
+
+correspondanceID = {0: 0,  # white = Air
+                    1: 1,  # gray = Stone
+                    2: 2,  # green = Grass
+                    3: 3,  # brown = Dirt
+                    4: 9,  # blue = Water
+                    5: 12,  # yellow = Sand
+                    6: 7,  # black = Bedrock or coal
+                    7: 73,  # red = Redstone
+                    8: 56,  # aqua = Diamond
+                    9: 14,  # gold = Gold
+                    }
+
 
 ## Fonctions prédéfinies
 def sauvegarder_grille(grille: list, g, i, nom_de_fichier: str) -> None:
     echelle = ListedColormap(['white', 'gray', 'green', 'brown', 'blue', 'yellow', 'black', 'red', 'aqua', 'gold'], 9)
     plt.matshow(grille, cmap=echelle, vmin=0, vmax=9)
-    plt.title('x=' + str(i) + ' g=' + str(g))
+    plt.title(f"x={i} g={g}") #'x=' + str(i) + ' g=' + str(g)
     plt.xlabel('y')
     plt.ylabel('z')
     plt.savefig(nom_de_fichier)
 
 
-def afficher_grille(grille: list) -> None:
-    echelle = ListedColormap(['white', 'gray', 'green', 'brown', 'blue', 'yellow', 'black'], 6)
-    plt.matshow(grille, cmap=echelle)  # vmin=0,vmax=6
-    plt.colorbar()
-    plt.title('e=' + str(i))
-    plt.show()
-    return None
+# def afficher_grille(grille: list) -> None:
+#     echelle = ListedColormap(['white', 'gray', 'green', 'brown', 'blue', 'yellow', 'black'], 6)
+#     plt.matshow(grille, cmap=echelle)  # vmin=0,vmax=6
+#     plt.colorbar()
+#     plt.title('e=' + str(i))
+#     plt.show()
+#     return None
 
 
 ## Eléments suplémentaire sur la carte
@@ -84,11 +99,13 @@ def gold(C, x, z, y):
 
 def explose(C, x, z, y):  # fait disparaitre les blocs autour du bloc de coordonnées
 
+
+
     # regarde si le bloc n'est pas trop près des bords
 
     if z < 1 or z > hauteur - 2 or y < 1 or y > Taille - 2 or x < 1 or x > Taille - 2:
 
-        return C
+        return None
 
     # fait l'explosion
 
@@ -186,7 +203,6 @@ def explose(C, x, z, y):  # fait disparaitre les blocs autour du bloc de coordon
             C[x - 1][z - 1][y - 2] = 0
             C[x][z - 1][y - 2] = 0
 
-        return C
 
 
 def troue(C, sable):
@@ -293,7 +309,8 @@ def minerais(CarteListe3D, BruitP2D, ax):
     Ao, Z = liste_aleatoire(k, Taille // 2 - 1, k)
     Zo = [i + 0 for i in Z]
     for i in range(k):
-        gold(CarteListe3D, int(Xo[i]), int(Zo[i]), int(Yo[i]))
+        pass
+        # gold(CarteListe3D, int(Xo[i]), int(Zo[i]), int(Yo[i]))
 
     # diamant
     k = random_int()
@@ -332,7 +349,7 @@ def grotte(CarteListe3D, ax):
     ax.scatter(Xg, Yg, Zg, linewidths=.2)
 
     for i in range((u - 1) * alpha + 1):
-        explose(CarteListe3D, int(Xg[i]), int(Zg[i]) + Taille // 2, int(Yg[i]))
+        explose(CarteListe3D, int(Xg[i]), int(Zg[i]), int(Yg[i]))
 
 
 def ajout_detail(graine, CarteListe3D, BruitP2D, sable, eau):
@@ -368,6 +385,8 @@ def ajout_detail(graine, CarteListe3D, BruitP2D, sable, eau):
     ax.set_title('Grotte seed=' + str(graine))
     plt.savefig("Affichage_de_la_map/Grotte")
 
+    return CarteListe3D
+
 
 def gif():
     frames = []
@@ -375,6 +394,17 @@ def gif():
         image = imageio.v2.imread(f"Affichage_de_la_map/Frame/TIPE{i}.jpg")
         frames.append(image)
     imageio.mimsave(f"Affichage_de_la_map/GIF.gif", frames, duration=7)
+
+
+def creteMapSchem(grid: list, deltaX: int, deltaY: int, deltaZ: int, graine):
+    sf = SchematicFile(shape=(deltaZ, deltaY, deltaX)) # z = hauteur faux mais pas grave
+    for x in trange(deltaX):
+        for y in range(deltaY):
+            for z in range(deltaZ):
+                sf.blocks[z, y, x] = correspondanceID[grid[x][-z-1][y]] # carte renversé
+    print("Exporting in :", f'OutSchem/Carte{graine}.schematic ...')
+    sf.save(f'OutSchem/Carte{graine}.schematic')
+    print("Done.")
 
 
 def fait_une_map(graine):
@@ -397,13 +427,18 @@ def fait_une_map(graine):
 
     start = time.time()
     print("Start Detail")
-    ajout_detail(graine, N, M, sable, eau)
+    finished = ajout_detail(graine, N, M, sable, eau)
     print(f"End Detail TimeToFinish: {time.time() - start:.2f} s")
 
     start = time.time()
     print("Start Gif")
     gif()
     print(f"End Gif TimeToFinish: {time.time() - start:.2f} s")
+
+    start = time.time()
+    print("Start Schematic")
+    creteMapSchem(finished, Taille, Taille, hauteur, graine)
+    print(f"End Schematic TimeToFinish: {time.time() - start:.2f} s")
 
     finTime = time.time() - startAll
     plt.show()
@@ -412,7 +447,7 @@ def fait_une_map(graine):
 
 ##
 ## Modélisation de la carte
-Taille = 500
+Taille = 10
 hauteur = 300
 graine = randrange(10000)
 fait_une_map(graine)
