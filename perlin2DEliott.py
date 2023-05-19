@@ -1,5 +1,6 @@
 import numpy as np
 import matplotlib.pyplot as plt
+from tqdm import trange
 
 
 def lerp(a, b, x):
@@ -27,8 +28,8 @@ def r(x, y):
     return x * 2 + y ** 2
 
 
-def perlin(graine, taille):
-    tab = np.linspace(1, 10, 1500, endpoint=False)
+def perlin(precsision, taille):
+    tab = np.linspace(1, precsision, taille, endpoint=False)
 
     # création de grille en utilisant le tableau 1d
     x, y = np.meshgrid(tab, tab)
@@ -36,7 +37,7 @@ def perlin(graine, taille):
     # On crée une permutation en fonction du nb de pixels
     # On utilise la fonction seed parce que numpy chiale si on le fait pas
 
-    perm = np.arange(256, dtype=int)
+    perm = np.arange(16 * (precsision // 10), dtype=int)
     np.random.shuffle(perm)
 
     # on fait un tableau 2d qu'on applatit
@@ -75,23 +76,20 @@ def perlin(graine, taille):
 
 
 def perlinfzej(graine, taille, hauteur):
+    precsision = 10
+    amplitude = 100
+    resultats = []
+    for _ in trange(8):
+        temporaire = perlin(precsision, 1500)
+        temporaire += 0.5
+        temporaire *= amplitude
 
-    # creation Base ( grosse forme)
-    res1 = perlin(graine, taille)
+        precsision *= 2
+        amplitude /= 2
 
-    # creation petit bruit
-    res2 = perlin(graine, taille)
+        resultats.append(temporaire)
 
-    # si grosse :
-    res1 += 0.5
-    res1 **= 2
-    res1 *= 200 
-    res1 += 50
-
-    # sinon
-    res2 *= 2
-
-    resultat = res1 + res2
+    resultat = sum(resultats)
     tab2 = np.linspace(0, taille, taille, endpoint=False)
 
     # création de grille en utilisant le tableau 1d
@@ -102,7 +100,6 @@ def perlinfzej(graine, taille, hauteur):
         D[i] = resultat[i][0:taille]
     autre = D / taille
     autre *= 7
-
 
     plt.imshow(D, origin='upper', cmap='gray')
     plt.xlabel('Y')
@@ -120,6 +117,5 @@ def perlinfzej(graine, taille, hauteur):
     ax.plot_surface(X, Y, T, cmap='gray')
     plt.title('Heightmap (seed = ' + str(graine) + ')')
     plt.savefig("2_Dimensions/Height_map")
-
 
     return D, autre

@@ -1,13 +1,10 @@
 import time
 
 import numpy
-import numpy as np
-import matplotlib.pyplot as plt
-import random
-from random import randrange
+
 from numpy.random import rand
 from matplotlib.colors import ListedColormap
-from mpl_toolkits import mplot3d
+
 import imageio
 from tqdm import trange
 
@@ -17,24 +14,11 @@ from perlin1DEliott import *
 from nbtschematic import SchematicFile
 
 
-correspondanceID = {0: 0,  # white = Air
-                    1: 1,  # gray = Stone
-                    2: 2,  # green = Grass
-                    3: 3,  # brown = Dirt
-                    4: 9,  # blue = Water
-                    5: 12,  # yellow = Sand
-                    6: 7,  # black = Bedrock or coal
-                    7: 73,  # red = Redstone
-                    8: 56,  # aqua = Diamond
-                    9: 14,  # gold = Gold
-                    }
-
-
 ## Fonctions prédéfinies
 def sauvegarder_grille(grille: list, g, i, nom_de_fichier: str) -> None:
     echelle = ListedColormap(['white', 'gray', 'green', 'brown', 'blue', 'yellow', 'black', 'red', 'aqua', 'gold'], 9)
     plt.matshow(grille, cmap=echelle, vmin=0, vmax=9)
-    plt.title(f"x={i} g={g}") #'x=' + str(i) + ' g=' + str(g)
+    plt.title(f"x={i} g={g}")  # 'x=' + str(i) + ' g=' + str(g)
     plt.xlabel('y')
     plt.ylabel('z')
     plt.savefig(nom_de_fichier)
@@ -98,8 +82,6 @@ def gold(C, x, z, y):
 
 
 def explose(C, x, z, y):  # fait disparaitre les blocs autour du bloc de coordonnées
-
-
 
     # regarde si le bloc n'est pas trop près des bords
 
@@ -204,7 +186,6 @@ def explose(C, x, z, y):  # fait disparaitre les blocs autour du bloc de coordon
             C[x][z - 1][y - 2] = 0
 
 
-
 def troue(C, sable):
     tot = len(sable)
     ex_sable = []
@@ -219,30 +200,35 @@ stonks = []
 
 
 def percolation(C, ex_sable):
+    for (x,y,z) in ex_sable:
+        C[x][z][y] = 4
     while len(ex_sable) != 0:
-        e = ex_sable[0]
+        e = ex_sable[-1]
         stonks.append(len(ex_sable))
         x, y, z = e
-        C[x][z][y] = 4
 
-        if z != hauteur - 1 and C[x][z + 1][y] == 0 and not (x, y, z + 1) in ex_sable:
+        if z != hauteur - 1 and C[x][z + 1][y] == 0 :
             ex_sable.append((x, y, z + 1))
-        if x != 0 and C[x - 1][z][y] == 0 and not (x - 1, y, z) in ex_sable:
+            C[x][z+1][y]=4
+        if x != 0 and C[x - 1][z][y] == 0 :
             ex_sable.append((x - 1, y, z))
-        if x != Taille - 1 and C[x + 1][z][y] == 0 and not (x + 1, y, z) in ex_sable:
+            C[x-1][z][y]=4
+        if x != Taille - 1 and C[x + 1][z][y] == 0 :
             ex_sable.append((x + 1, y, z))
-        if y != 0 and C[x][z][y - 1] == 0 and not (x, y - 1, z) in ex_sable:
+            C[x+1][z][y]=4
+        if y != 0 and C[x][z][y - 1] == 0:
             ex_sable.append((x, y - 1, z))
-        if y != Taille - 1 and C[x][z][y + 1] == 0 and not (x, y + 1, z) in ex_sable:
+            C[x][z][y - 1]=4
+        if y != Taille - 1 and C[x][z][y + 1] == 0:
             ex_sable.append((x, y + 1, z))
-        ex_sable.pop(0)
-        if z - 1 >= hauteur // 3 and C[x][z - 1][y] == 0 and not (x, y, z - 1) in ex_sable:
+            C[x][z][y + 1] =4
+        if z - 1 >= hauteur // 3 and C[x][z - 1][y] == 0 :
             ex_sable.append((x, y, z - 1))
-
+            C[x][z - 1][y]=4
+        ex_sable.pop(-1)
+        print(f"\r percolation taille pile {len(ex_sable)}", end= "")
     # plt.plot([i for i in range(len(stonks))],stonks)
     # plt.show()
-
-
 #
 
 
@@ -396,12 +382,25 @@ def gif():
     imageio.mimsave(f"Affichage_de_la_map/GIF.gif", frames, duration=7)
 
 
+correspondanceID = {0: 0,  # white = Air
+                    1: 1,  # gray = Stone
+                    2: 2,  # green = Grass
+                    3: 3,  # brown = Dirt
+                    4: 9,  # blue = Water
+                    5: 12,  # yellow = Sand
+                    6: 7,  # black = Bedrock or coal
+                    7: 73,  # red = Redstone
+                    8: 56,  # aqua = Diamond
+                    9: 14,  # gold = Gold
+                    }
+
+
 def creteMapSchem(grid: list, deltaX: int, deltaY: int, deltaZ: int, graine):
-    sf = SchematicFile(shape=(deltaZ, deltaY, deltaX)) # z = hauteur faux mais pas grave
+    sf = SchematicFile(shape=(deltaZ, deltaY, deltaX))  # z = hauteur faux mais pas grave
     for x in trange(deltaX):
         for y in range(deltaY):
             for z in range(deltaZ):
-                sf.blocks[z, y, x] = correspondanceID[grid[x][-z-1][y]] # carte renversé
+                sf.blocks[z, y, x] = correspondanceID[grid[x][-z - 1][y]]  # carte renversé
     print("Exporting in :", f'OutSchem/Carte{graine}.schematic ...')
     sf.save(f'OutSchem/Carte{graine}.schematic')
     print("Done.")
@@ -447,8 +446,8 @@ def fait_une_map(graine):
 
 ##
 ## Modélisation de la carte
-Taille = 10
-hauteur = 300
+Taille = 100
+hauteur = 200
 graine = randrange(10000)
 fait_une_map(graine)
 
