@@ -199,11 +199,11 @@ def troue(C, sable):
 stonks = []
 
 
-def percolation(C, ex_sable):
+def percolation(C, ex_sable,Heau):
     for (x,y,z) in ex_sable:
         C[x][z][y] = 4
     while len(ex_sable) != 0:
-        e = ex_sable[-1]
+        e = ex_sable[0]
         stonks.append(len(ex_sable))
         x, y, z = e
 
@@ -222,10 +222,10 @@ def percolation(C, ex_sable):
         if y != Taille - 1 and C[x][z][y + 1] == 0:
             ex_sable.append((x, y + 1, z))
             C[x][z][y + 1] =4
-        if z - 1 >= hauteur // 3 and C[x][z - 1][y] == 0 :
+        if z - 1 >= hauteur // 3 and C[x][z - 1][y] == 0 and z>Heau:
             ex_sable.append((x, y, z - 1))
             C[x][z - 1][y]=4
-        ex_sable.pop(-1)
+        ex_sable.pop(0)
         print(f"\r percolation taille pile {len(ex_sable)}", end= "")
     # plt.plot([i for i in range(len(stonks))],stonks)
     # plt.show()
@@ -236,7 +236,7 @@ def Patron_carte(BruitP2D, autre):
     eau = []
     sable = []
     CarteListe3D = [[[1 for y in range(Taille)] for z in range(hauteur)] for x in range(Taille)]
-    Heau = 130
+    Heau = 100
     for x in trange(Taille):
         for y in range(Taille):
             Hsurface = int(BruitP2D[x, y])
@@ -249,7 +249,7 @@ def Patron_carte(BruitP2D, autre):
                         eau.append((x, y, z))
                     z += 1
                 sable.append((x, y, z))
-                a = 7 - int(autre[x, y])
+                a = 5
                 for i in range(a):
                     CarteListe3D[x][z + i][y] = 5
             else:
@@ -259,7 +259,7 @@ def Patron_carte(BruitP2D, autre):
                     z += 1
                 CarteListe3D[x][z][y] = 2
                 z += 1
-                a = 7 - int(autre[x, y])
+                a = 5
                 for i in range(a):
                     if z + i >= Heau:
                         CarteListe3D[x][z + i][y] = 5
@@ -271,7 +271,7 @@ def Patron_carte(BruitP2D, autre):
                 CarteListe3D[x][hauteur - 2][y] = 6
             CarteListe3D[x][hauteur - 1][y] = 6
 
-    return CarteListe3D, sable, eau
+    return CarteListe3D, sable, eau ,Heau
 
 
 def minerais(CarteListe3D, BruitP2D, ax):
@@ -292,11 +292,10 @@ def minerais(CarteListe3D, BruitP2D, ax):
     k *= h
     Ao, Yo = liste_aleatoire(k, Taille - 1, k)
     Ao, Xo = liste_aleatoire(k, Taille - 1, k)
-    Ao, Z = liste_aleatoire(k, Taille // 2 - 1, k)
-    Zo = [i + 0 for i in Z]
+    Ao, Z = liste_aleatoire(k, hauteur // 2 - 1, k)
+    Zo = [i + hauteur//2 for i in Z]
     for i in range(k):
-        pass
-        # gold(CarteListe3D, int(Xo[i]), int(Zo[i]), int(Yo[i]))
+        gold(CarteListe3D, int(Xo[i]), int(Zo[i]), int(Yo[i]))
 
     # diamant
     k = random_int()
@@ -338,7 +337,7 @@ def grotte(CarteListe3D, ax):
         explose(CarteListe3D, int(Xg[i]), int(Zg[i]), int(Yg[i]))
 
 
-def ajout_detail(graine, CarteListe3D, BruitP2D, sable, eau):
+def ajout_detail(graine, CarteListe3D, BruitP2D, sable, eau ,Heau):
     plt.close("all")
     ax = plt.axes(projection="3d")
 
@@ -354,7 +353,7 @@ def ajout_detail(graine, CarteListe3D, BruitP2D, sable, eau):
         x, y, z = e
         CarteListe3D[x][z][y] = 4
     ex_sable = troue(CarteListe3D, sable)
-    percolation(CarteListe3D, ex_sable)
+    percolation(CarteListe3D, ex_sable, Heau)
 
     # frames
     for i in trange(Taille):
@@ -421,12 +420,12 @@ def fait_une_map(graine):
 
     start = time.time()
     print("Start Patron")
-    N, sable, eau = Patron_carte(M, autre)
+    N, sable, eau, Heau = Patron_carte(M, autre)
     print(f"End Patron TimeToFinish: {time.time() - start:.2f} s")
 
     start = time.time()
     print("Start Detail")
-    finished = ajout_detail(graine, N, M, sable, eau)
+    finished = ajout_detail(graine, N, M, sable, eau,Heau)
     print(f"End Detail TimeToFinish: {time.time() - start:.2f} s")
 
     start = time.time()
@@ -446,7 +445,7 @@ def fait_une_map(graine):
 
 ##
 ## Modélisation de la carte
-Taille = 100
+Taille = 200
 hauteur = 200
 graine = randrange(10000)
 fait_une_map(graine)
