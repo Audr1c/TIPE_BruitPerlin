@@ -30,39 +30,36 @@ def diamant(C, x, z, y):
     for j in range(1):
         for k in range(1):
             for i in range(1):
-                if C[x+i][z+k][y+j]==0 and random.random()<0.4:
+                if C[x+i][z+k][y+j]==1 and random.random()<0.4:
                     C[x+i][z+k][y+j] = 8
-
 
 def charbon(C, x, z, y):
     for j in range(3):
         for k in range(3):
             for i in range(3):
-                if C[x+i][z+k][y+j]==0 and random.random()<0.6:
+                if C[x+i][z+k][y+j]==1 and random.random()<0.6:
                     C[x+i][z+k][y+j] = 6
 
 def redstone(C, x, z, y):
     for j in range(3):
         for k in range(3):
             for i in range(3):
-                if C[x+i][z+k][y+j]==0 and random.random()<0.6:
+                if C[x+i][z+k][y+j]==1 and random.random()<0.6:
                     C[x+i][z+k][y+j] = 7
 
 def iron(C, x, z, y):
     for j in range(2):
         for k in range(2):
             for i in range(2):
-                if C[x+i][z+k][y+j]==0 and random.random()<0.6:
+                if C[x+i][z+k][y+j]==1 and random.random()<0.6:
                     C[x+i][z+k][y+j] = 12
-
 
 def gold(C, x, z, y):
     for j in range(1):
         for k in range(1):
             for i in range(1):
-                if C[x+i][z+k][y+j]==0 and random.random()<0.5:
+                if C[x+i][z+k][y+j]==1 and random.random()<0.5:
                     C[x+i][z+k][y+j] = 9
-
 
 def explose(C, x, z, y):  # fait disparaitre les blocs autour du bloc de coordonnées
 
@@ -168,7 +165,6 @@ def explose(C, x, z, y):  # fait disparaitre les blocs autour du bloc de coordon
             C[x - 1][z - 1][y - 2] = 0
             C[x][z - 1][y - 2] = 0
 
-
 def troue(C, sable):
     tot = len(sable)
     ex_sable = []
@@ -178,9 +174,7 @@ def troue(C, sable):
             ex_sable.append(e)
     return ex_sable
 
-
 stonks = []
-
 
 def percolation(C, ex_sable, Heau):
     for (x, y, z) in ex_sable:
@@ -391,6 +385,7 @@ correspondanceID = {0 : 0,  # white = Air
                     9 : 14,  # gold = Gold
                     10: 7,  # noir = Bedrock
                     11: 80,  # = neige
+                    12:71,
                     }
 
 
