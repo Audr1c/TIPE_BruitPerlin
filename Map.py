@@ -16,21 +16,12 @@ from nbtschematic import SchematicFile
 
 ## Fonctions prédéfinies
 def sauvegarder_grille(grille: list, g, i, nom_de_fichier: str) -> None:
-    echelle = ListedColormap(['white', 'gray', 'green', 'brown', 'blue', 'yellow', 'black', 'red', 'aqua', 'gold'], 9)
-    plt.matshow(grille, cmap=echelle, vmin=0, vmax=9)
+    echelle = ListedColormap(['white', 'gray', 'green', 'brown', 'blue', 'yellow', 'black', 'red', 'aqua', 'gold','0.3','0.8'], 11)
+    plt.matshow(grille, cmap=echelle, vmin=0, vmax=11)
     plt.title(f"x={i} g={g}")  # 'x=' + str(i) + ' g=' + str(g)
     plt.xlabel('y')
     plt.ylabel('z')
     plt.savefig(nom_de_fichier)
-
-
-# def afficher_grille(grille: list) -> None:
-#     echelle = ListedColormap(['white', 'gray', 'green', 'brown', 'blue', 'yellow', 'black'], 6)
-#     plt.matshow(grille, cmap=echelle)  # vmin=0,vmax=6
-#     plt.colorbar()
-#     plt.title('e=' + str(i))
-#     plt.show()
-#     return None
 
 
 ## Eléments suplémentaire sur la carte
@@ -248,6 +239,8 @@ def Patron_carte(BruitP2D, autre):
                 z += 1
             if z<Heau-4:
                 CarteListe3D[x][z][y] = 2
+            elif z<50:
+                CarteListe3D[x][z][y] = 11
             else:
                 CarteListe3D[x][z][y] = 5
                 if z>=Heau:
@@ -259,11 +252,11 @@ def Patron_carte(BruitP2D, autre):
                     CarteListe3D[x][z + i][y] = 5
                 else:
                     CarteListe3D[x][z + i][y] = 3
-        if random.random() < 1 / 3:
-            CarteListe3D[x][hauteur - 3][y] = 6
-        if random.random() < 1 / 2:
-            CarteListe3D[x][hauteur - 2][y] = 6
-        CarteListe3D[x][hauteur - 1][y] = 6
+            if random.random() < 1 / 3:
+                CarteListe3D[x][hauteur - 3][y] = 10
+            if random.random() < 1 / 2:
+                CarteListe3D[x][hauteur - 2][y] = 10
+            CarteListe3D[x][hauteur - 1][y] = 10
 
     return CarteListe3D, sable, eau ,Heau
 
@@ -381,10 +374,11 @@ correspondanceID = {0: 0,  # white = Air
                     3: 3,  # brown = Dirt
                     4: 9,  # blue = Water
                     5: 12,  # yellow = Sand
-                    6: 7,  # black = Bedrock or coal
+                    6: 16,  # black = Coal
                     7: 73,  # red = Redstone
                     8: 56,  # aqua = Diamond
                     9: 14,  # gold = Gold
+                    10: 7,  # 484545 = Bedrock
                     }
 
 
@@ -439,7 +433,7 @@ def fait_une_map(graine):
 
 ##
 ## Modélisation de la carte
-Taille = 500
+Taille = 200
 hauteur = 200
 graine = randrange(10000)
 fait_une_map(graine)
