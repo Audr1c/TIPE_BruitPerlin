@@ -55,6 +55,7 @@ def Patron_carte(BruitP2D):
     return CarteListe3D, sable, eau
 
 ## Images
+
 def sauvegarder_grille(grille: list, g, i, nom_de_fichier: str) -> None:
     echelle = ListedColormap(['white', 'gray', 'green', 'brown', 'blue', 'yellow', 'black', 'red', 'aqua', 'gold', '0.3', '0.8','beige'], 12)
     plt.matshow(grille, cmap=echelle, vmin=0, vmax=12)
@@ -320,7 +321,7 @@ def troue(C, sable):
             ex_sable.append(e)
     return ex_sable
 
-def percolation(C, ex_sable, Heau):
+def percolation(C, ex_sable):
     for (x, y, z) in ex_sable:
         C[x][z][y] = 4
     while len(ex_sable) != 0:
@@ -347,38 +348,6 @@ def percolation(C, ex_sable, Heau):
             C[x][z - 1][y] = 4
         ex_sable.pop(0)
         print(f"\r percolation taille pile {len(ex_sable)}", end="")
-    # plt.plot([i for i in range(len(stonks))],stonks)
-    # plt.show()
-
-def ajout_detail(graine, CarteListe3D, sable, eau, Heau):
-    plt.close("all")
-    ax = plt.axes(projection="3d")
-
-    minerais(CarteListe3D, ax)
-
-    # grotte
-    for _ in trange(nbGrotte):
-        grotte(CarteListe3D, ax)
-
-    # eau
-    Eau(N, eau)
-    ex_sable = troue(CarteListe3D, sable)
-    percolation(CarteListe3D, ex_sable, Heau)
-
-    # frames
-    frames()
-
-    # grotte 3D
-
-    ax.set_xlabel('X')
-    ax.set_ylabel('Y')
-    ax.set_zlabel('Z')
-    ax.invert_zaxis()
-
-    ax.set_title('Grotte seed=' + str(graine))
-    plt.savefig("Affichage_de_la_map/Grotte")
-
-    return CarteListe3D
 
 ## Conversion pour Minecraft
 
@@ -445,7 +414,7 @@ def fait_une_map(graine):
     print("Start Eau")
     Eau(Map, eau)
     ex_sable = troue(Map, sable)
-    percolation(Map, ex_sable, Heau)
+    percolation(Map, ex_sable)
     print(f"End Eau TimeToFinish: {time.time() - start:.2f} s")
 
     start = time.time()
@@ -464,7 +433,6 @@ def fait_une_map(graine):
     print(f"End Schematic TimeToFinish: {time.time() - start:.2f} s")
 
     finTime = time.time() - startAll
-    plt.show()
     print(f"Program Finished in {finTime:.2f} s")
 
 ## Paramètres de la carte
