@@ -16,7 +16,7 @@ from nbtschematic import SchematicFile
 
 ## Fonctions prédéfinies
 def sauvegarder_grille(grille: list, g, i, nom_de_fichier: str) -> None:
-    echelle = ListedColormap(['white', 'gray', 'green', 'brown', 'blue', 'yellow', 'black', 'red', 'aqua', 'gold','0.3','0.8'], 11)
+    echelle = ListedColormap(['white', 'gray', 'green', 'brown', 'blue', 'yellow', 'black', 'red', 'aqua', 'gold', '0.3', '0.8'], 11)
     plt.matshow(grille, cmap=echelle, vmin=0, vmax=11)
     plt.title(f"x={i} g={g}")  # 'x=' + str(i) + ' g=' + str(g)
     plt.xlabel('y')
@@ -190,65 +190,69 @@ def troue(C, sable):
 stonks = []
 
 
-def percolation(C, ex_sable,Heau):
-    for (x,y,z) in ex_sable:
+def percolation(C, ex_sable, Heau):
+    for (x, y, z) in ex_sable:
         C[x][z][y] = 4
     while len(ex_sable) != 0:
         e = ex_sable[0]
         stonks.append(len(ex_sable))
         x, y, z = e
 
-        if z != hauteur - 1 and C[x][z + 1][y] == 0 :
+        if z != hauteur - 1 and C[x][z + 1][y] == 0:
             ex_sable.append((x, y, z + 1))
-            C[x][z+1][y]=4
-        if x != 0 and C[x - 1][z][y] == 0 :
+            C[x][z + 1][y] = 4
+        if x != 0 and C[x - 1][z][y] == 0:
             ex_sable.append((x - 1, y, z))
-            C[x-1][z][y]=4
-        if x != Taille - 1 and C[x + 1][z][y] == 0 :
+            C[x - 1][z][y] = 4
+        if x != Taille - 1 and C[x + 1][z][y] == 0:
             ex_sable.append((x + 1, y, z))
-            C[x+1][z][y]=4
+            C[x + 1][z][y] = 4
         if y != 0 and C[x][z][y - 1] == 0:
             ex_sable.append((x, y - 1, z))
-            C[x][z][y - 1]=4
+            C[x][z][y - 1] = 4
         if y != Taille - 1 and C[x][z][y + 1] == 0:
             ex_sable.append((x, y + 1, z))
-            C[x][z][y + 1] =4
-        if z - 1 >= hauteur // 3 and C[x][z - 1][y] == 0 and z>Heau:
+            C[x][z][y + 1] = 4
+        if z - 1 >= hauteur // 3 and C[x][z - 1][y] == 0 and z > Heau:
             ex_sable.append((x, y, z - 1))
-            C[x][z - 1][y]=4
+            C[x][z - 1][y] = 4
         ex_sable.pop(0)
-        print(f"\r percolation taille pile {len(ex_sable)}", end= "")
+        print(f"\r percolation taille pile {len(ex_sable)}", end="")
     # plt.plot([i for i in range(len(stonks))],stonks)
     # plt.show()
+
+
 #
 
 
 def Patron_carte(BruitP2D, autre):
     eau = []
     sable = []
-    CarteListe3D = [[[1 for y in range(Taille)] for z in range(hauteur)] for x in range(Taille)]
-    Heau = 110
+    print("Creation tableaux vide")
+    CarteListe3D = [[[1 for y in range(Taille)] for z in range(hauteur)] for x in trange(Taille)]
+    print("fin creation tablaux")
+
     for x in trange(Taille):
         for y in range(Taille):
             Hsurface = int(BruitP2D[x, y])
-            z=0
+            z = 0
             while z < Hsurface:
                 CarteListe3D[x][z][y] = 0
                 if z >= Heau:
                     eau.append((x, y, z))
                 z += 1
-            if z<Heau-4:
+            if z < Heau - 4:
                 CarteListe3D[x][z][y] = 2
-            elif z<50:
+            elif z < 50:
                 CarteListe3D[x][z][y] = 11
             else:
                 CarteListe3D[x][z][y] = 5
-                if z>=Heau:
-                    sable.append((x,y,z))
+                if z >= Heau:
+                    sable.append((x, y, z))
             z += 1
             a = 3
             for i in range(a):
-                if z + i >= Heau-4:
+                if z + i >= Heau - 4:
                     CarteListe3D[x][z + i][y] = 5
                 else:
                     CarteListe3D[x][z + i][y] = 3
@@ -258,7 +262,7 @@ def Patron_carte(BruitP2D, autre):
                 CarteListe3D[x][hauteur - 2][y] = 10
             CarteListe3D[x][hauteur - 1][y] = 10
 
-    return CarteListe3D, sable, eau ,Heau
+    return CarteListe3D, sable, eau, Heau
 
 
 def minerais(CarteListe3D, BruitP2D, ax):
@@ -280,7 +284,7 @@ def minerais(CarteListe3D, BruitP2D, ax):
     Ao, Yo = liste_aleatoire(k, Taille - 1, k)
     Ao, Xo = liste_aleatoire(k, Taille - 1, k)
     Ao, Z = liste_aleatoire(k, hauteur // 2 - 1, k)
-    Zo = [i + hauteur//2 for i in Z]
+    Zo = [i + hauteur // 2 for i in Z]
     for i in range(k):
         gold(CarteListe3D, int(Xo[i]), int(Zo[i]), int(Yo[i]))
 
@@ -324,13 +328,12 @@ def grotte(CarteListe3D, ax):
         explose(CarteListe3D, int(Xg[i]), int(Zg[i]), int(Yg[i]))
 
 
-def ajout_detail(graine, CarteListe3D, BruitP2D, sable, eau ,Heau):
+def ajout_detail(graine, CarteListe3D, BruitP2D, sable, eau, Heau):
     plt.close("all")
     ax = plt.axes(projection="3d")
 
     minerais(CarteListe3D, BruitP2D, ax)
 
-    nbGrotte = 4
     # grotte 1
     for _ in trange(nbGrotte):
         grotte(CarteListe3D, ax)
@@ -368,17 +371,18 @@ def gif():
     imageio.mimsave(f"Affichage_de_la_map/GIF.gif", frames, duration=7)
 
 
-correspondanceID = {0: 0,  # white = Air
-                    1: 1,  # gray = Stone
-                    2: 2,  # green = Grass
-                    3: 3,  # brown = Dirt
-                    4: 9,  # blue = Water
-                    5: 12,  # yellow = Sand
-                    6: 16,  # black = Coal
-                    7: 73,  # red = Redstone
-                    8: 56,  # aqua = Diamond
-                    9: 14,  # gold = Gold
-                    10: 7,  # 484545 = Bedrock
+correspondanceID = {0 : 0,  # white = Air
+                    1 : 1,  # gray = Stone
+                    2 : 2,  # green = Grass
+                    3 : 3,  # brown = Dirt
+                    4 : 9,  # blue = Water
+                    5 : 12,  # yellow = Sand
+                    6 : 16,  # black = Coal
+                    7 : 73,  # red = Redstone
+                    8 : 56,  # aqua = Diamond
+                    9 : 14,  # gold = Gold
+                    10: 7,  # noir = Bedrock
+                    11: 80,  # = neige
                     }
 
 
@@ -413,7 +417,7 @@ def fait_une_map(graine):
 
     start = time.time()
     print("Start Detail")
-    finished = ajout_detail(graine, N, M, sable, eau,Heau)
+    finished = ajout_detail(graine, N, M, sable, eau, Heau)
     print(f"End Detail TimeToFinish: {time.time() - start:.2f} s")
 
     start = time.time()
@@ -433,8 +437,10 @@ def fait_une_map(graine):
 
 ##
 ## Modélisation de la carte
-Taille = 200
-hauteur = 200
+Heau = 150
+nbGrotte = 80
+Taille = 2000
+hauteur = 256
 graine = randrange(10000)
 fait_une_map(graine)
 

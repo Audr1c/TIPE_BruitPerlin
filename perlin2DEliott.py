@@ -77,10 +77,10 @@ def perlin(precsision, taille):
 
 def perlinfzej(graine, taille, hauteur):
     precsision = 10
-    amplitude = 100
+    amplitude = 128
     resultats = []
-    for _ in trange(8):
-        temporaire = perlin(precsision, 1500)
+    for _ in trange(7):
+        temporaire = perlin(precsision, 3000)
         temporaire += 0.5
         temporaire *= amplitude
 
