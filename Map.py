@@ -17,66 +17,69 @@ from nbtschematic import SchematicFile
 ## Fonctions prédéfinies
 def sauvegarder_grille(grille: list, g, i, nom_de_fichier: str) -> None:
     echelle = ListedColormap(['white', 'gray', 'green', 'brown', 'blue', 'yellow', 'black', 'red', 'aqua', 'gold', '0.3', '0.8'], 11)
+    a = plt.axes()
+    a.invert_yaxis()
     plt.matshow(grille, cmap=echelle, vmin=0, vmax=11)
     plt.title(f"x={i} g={g}")  # 'x=' + str(i) + ' g=' + str(g)
-    plt.xlabel('y')
-    plt.ylabel('z')
+    plt.xlabel('z')
+    plt.ylabel('y')
+
     plt.savefig(nom_de_fichier)
 
 
 ## Eléments suplémentaire sur la carte
 
-def diamant(C, x, z, y):
-    C[x][z][y] = 8
+def diamant(C, x, y, z):
+    C[x, y, z] = 8
     if random_int() % 2 == 0:
-        C[x + 1][z][y] = 8
+        C[x+1, y, z] = 8
     if random_int() % 2 == 1:
-        C[x + 1][z + 1][y] = 8
+        C[x+1, y+1, z] = 8
     if random_int() % 2 == 1:
-        C[x + 1][z][y + 1] = 8
+        C[x+1, y, z+1] = 8
     if random_int() == 0:
-        C[x + 1][z + 1][y + 1] = 8
+        C[x+1, y+1, z+1] = 8
     if random_int() == 0:
-        C[x][z + 1][y] = 8
+        C[x, y+1, z] = 8
     if random_int() % 2 == 1:
-        C[x][z][y + 1] = 8
+        C[x, y, z+1] = 8
     if random_int() == 0:
-        C[x][z + 1][y + 1] = 8
+        C[x, y+1, z+1] = 8
 
 
-def charbon(C, B, x, z, y):
-    if z > B[x][y]:
-        C[x][z][y] = 6
-        C[x + 1][z][y] = 6
-        C[x - 1][z][y] = 6
-        C[x][z + 1][y] = 6
-        C[x][z - 1][y] = 6
-        C[x][z][y + 1] = 6
-        C[x][z][y - 1] = 6
+def charbon(C, B, x, y, z):
+    if z > B[x,z]:
+        C[x, y, z] = 6
+        C[x+1, y, z] = 6
+        C[x-1, y, z] = 6
+        C[x, y+1, z] = 6
+        C[x, y-1, z] = 6
+        C[x, y, z+1] = 6
+        C[x, y, z-1] = 6
 
 
-def gold(C, x, z, y):
-    C[x][z][y] = 9
-    C[x + 1][z][y] = 9
+def gold(C, x, y, z):
+    C[x, y, z] = 9
+    C[x+1, y, z] = 9
     if random_int() % 2 == 1:
-        C[x + 1][z + 1][y] = 9
+        C[x+1, y+1, z] = 9
     if random_int() % 2 == 1:
-        C[x + 1][z][y + 1] = 9
+        C[x+1, y, z+1] = 9
     if random_int() % 2 == 0:
-        C[x + 1][z + 1][y + 1] = 9
+        C[x+1, y+1, z+1] = 9
     if random_int() == 0:
-        C[x][z + 1][y] = 9
+        C[x+1, y+1, z+1] = 9
     if random_int() % 2 == 1:
-        C[x][z][y + 1] = 9
+        C[x, y, z+1] = 9
     if random_int() == 0:
-        C[x][z + 1][y + 1] = 9
+        C[x, y+1, z+1] = 9
 
 
-def explose(C, x, z, y):  # fait disparaitre les blocs autour du bloc de coordonnées
+def explose(C, x, y, z):  # fait disparaitre les blocs autour du bloc de coordonnées
 
     # regarde si le bloc n'est pas trop près des bords
 
-    if z < 1 or z > hauteur - 2 or y < 1 or y > Taille - 2 or x < 1 or x > Taille - 2:
+    if z < 1 or y > hauteur - 2 or y < 1 or z > Taille - 2 or x < 1 or x > Taille - 2:
 
         return None
 
@@ -84,97 +87,97 @@ def explose(C, x, z, y):  # fait disparaitre les blocs autour du bloc de coordon
 
     else:  # explose un cube de 3*3 autour du cube
 
-        C[x][z][y] = 0
-        C[x][z + 1][y] = 0
-        C[x][z - 1][y] = 0
-        C[x][z + 1][y + 1] = 0
-        C[x][z][y + 1] = 0
-        C[x][z - 1][y + 1] = 0
-        C[x][z + 1][y - 1] = 0
-        C[x][z][y - 1] = 0
-        C[x][z - 1][y - 1] = 0
+        C[x, y, z] = 0
+        C[x, y, z+1] = 0
+        C[x, y, z-1] = 0
+        C[x, y+1, z+1] = 0
+        C[x, y+1, z] = 0
+        C[x, y+1, z-1] = 0
+        C[x, y-1, z+1] = 0
+        C[x, y-1, z] = 0
+        C[x, y-1, z-1] = 0
 
-        C[x + 1][z][y] = 0
-        C[x + 1][z + 1][y] = 0
-        C[x + 1][z - 1][y] = 0
-        C[x + 1][z + 1][y + 1] = 0
-        C[x + 1][z][y + 1] = 0
-        C[x + 1][z - 1][y + 1] = 0
-        C[x + 1][z + 1][y - 1] = 0
-        C[x + 1][z][y - 1] = 0
-        C[x + 1][z - 1][y - 1] = 0
+        C[x+1, y, z] = 0
+        C[x+1, y, z+1] = 0
+        C[x+1, y, z-1] = 0
+        C[x+1, y+1, z+1] = 0
+        C[x+1, y+1, z] = 0
+        C[x+1, y+1, z-1] = 0
+        C[x+1, y-1, z+1] = 0
+        C[x+1, y-1, z] = 0
+        C[x+1, y-1, z-1] = 0
 
-        C[x - 1][z][y] = 0
-        C[x - 1][z + 1][y] = 0
-        C[x - 1][z - 1][y] = 0
-        C[x - 1][z + 1][y + 1] = 0
-        C[x - 1][z][y + 1] = 0
-        C[x - 1][z - 1][y + 1] = 0
-        C[x - 1][z + 1][y - 1] = 0
-        C[x - 1][z][y - 1] = 0
-        C[x - 1][z - 1][y - 1] = 0
+        C[x-1, y, z] = 0
+        C[x-1, y, z+1] = 0
+        C[x-1, y, z-1] = 0
+        C[x-1, y+1, z+1] = 0
+        C[x-1, y+1, z] = 0
+        C[x-1, y+1, z-1] = 0
+        C[x-1, y-1, z+1] = 0
+        C[x-1, y-1, z] = 0
+        C[x-1, y-1, z-1] = 0
 
-        if z != 1 and z != hauteur - 2 and y != 1 and y != Taille - 2 and x != 1 and x != Taille - 2:  # explose un bloc de 5*5 sans les arretes si le bloc n'est pas trop près des bords
+        if z != 1 and y != hauteur - 2 and y != 1 and z != Taille - 2 and x != 1 and x != Taille - 2:  # explose un bloc de 5*5 sans les arretes si le bloc n'est pas trop près des bords
 
-            C[x + 2][z][y] = 0
-            C[x + 2][z + 1][y] = 0
-            C[x + 2][z - 1][y] = 0
-            C[x + 2][z + 1][y + 1] = 0
-            C[x + 2][z][y + 1] = 0
-            C[x + 2][z - 1][y + 1] = 0
-            C[x + 2][z + 1][y - 1] = 0
-            C[x + 2][z][y - 1] = 0
-            C[x + 2][z - 1][y - 1] = 0
+            C[x+2, y, z] = 0
+            C[x+2, y, z+1] = 0
+            C[x+2, y, z-1] = 0
+            C[x+2, y+1, z+1] = 0
+            C[x+2, y+1, z] = 0
+            C[x+2, y+1, z-1] = 0
+            C[x+2, y-1, z+1] = 0
+            C[x+2, y-1, z] = 0
+            C[x+2, y-1, z-1] = 0
 
-            C[x - 2][z][y] = 0
-            C[x - 2][z + 1][y] = 0
-            C[x - 2][z - 1][y] = 0
-            C[x - 2][z + 1][y + 1] = 0
-            C[x - 2][z][y + 1] = 0
-            C[x - 2][z - 1][y + 1] = 0
-            C[x - 2][z + 1][y - 1] = 0
-            C[x - 2][z][y - 1] = 0
-            C[x - 2][z - 1][y - 1] = 0
+            C[x-2, y, z] = 0
+            C[x-2, y, z+1] = 0
+            C[x-2, y, z-1] = 0
+            C[x-2, y+1, z+1] = 0
+            C[x-2, y+1, z] = 0
+            C[x-2, y+1, z-1] = 0
+            C[x-2, y-1, z+1] = 0
+            C[x-2, y-1, z] = 0
+            C[x-2, y-1, z-1] = 0
 
-            C[x + 1][z + 2][y + 1] = 0
-            C[x - 1][z + 2][y + 1] = 0
-            C[x][z + 2][y + 1] = 0
-            C[x + 1][z + 2][y] = 0
-            C[x - 1][z + 2][y] = 0
-            C[x][z + 2][y] = 0
-            C[x + 1][z + 2][y - 1] = 0
-            C[x - 1][z + 2][y - 1] = 0
-            C[x][z + 2][y - 1] = 0
+            C[x+1, y+1, z+2] = 0
+            C[x-1, y+1, z+2] = 0
+            C[x, y+1, z+2] = 0
+            C[x+1, y, z+2] = 0
+            C[x-1, y, z+2] = 0
+            C[x, y, z+2] = 0
+            C[x+1, y-1, z+2] = 0
+            C[x-1, y-1, z+2] = 0
+            C[x, y-1, z+2] = 0
 
-            C[x + 1][z - 2][y + 1] = 0
-            C[x - 1][z - 2][y + 1] = 0
-            C[x][z - 2][y + 1] = 0
-            C[x + 1][z - 2][y] = 0
-            C[x - 1][z - 2][y] = 0
-            C[x][z - 2][y] = 0
-            C[x + 1][z - 2][y - 1] = 0
-            C[x - 1][z - 2][y - 1] = 0
-            C[x][z - 2][y - 1] = 0
+            C[x+1, y+1, z-2] = 0
+            C[x-1, y+1, z-2] = 0
+            C[x, y+1, z-2] = 0
+            C[x+1, y, z-2] = 0
+            C[x-1, y, z-2] = 0
+            C[x, y, z-2] = 0
+            C[x+1, y-1, z-2] = 0
+            C[x-1, y-1, z-2] = 0
+            C[x, y-1, z-2] = 0
 
-            C[x + 1][z + 1][y + 2] = 0
-            C[x - 1][z + 1][y + 2] = 0
-            C[x][z + 1][y + 2] = 0
-            C[x + 1][z][y + 2] = 0
-            C[x - 1][z][y + 2] = 0
-            C[x][z][y + 2] = 0
-            C[x + 1][z - 1][y + 2] = 0
-            C[x - 1][z - 1][y + 2] = 0
-            C[x][z - 1][y + 2] = 0
+            C[x+1, y+2, z+1] = 0
+            C[x-1, y+2, z+1] = 0
+            C[x, y+2, z+1] = 0
+            C[x+1, y+2, z] = 0
+            C[x-1, y+2, z] = 0
+            C[x, y+2, z] = 0
+            C[x+1, y+2, z-1] = 0
+            C[x-1, y+2, z-1] = 0
+            C[x, y+2, z-1] = 0
 
-            C[x + 1][z + 1][y - 2] = 0
-            C[x - 1][z + 1][y - 2] = 0
-            C[x][z + 1][y - 2] = 0
-            C[x + 1][z][y - 2] = 0
-            C[x - 1][z][y - 2] = 0
-            C[x][z][y - 2] = 0
-            C[x + 1][z - 1][y - 2] = 0
-            C[x - 1][z - 1][y - 2] = 0
-            C[x][z - 1][y - 2] = 0
+            C[x+1, y-2, z+1] = 0
+            C[x-1, y-2, z+1] = 0
+            C[x, y-2, z+1] = 0
+            C[x+1, y-2, z] = 0
+            C[x-1, y-2, z] = 0
+            C[x, y-2, z] = 0
+            C[x+1, y-2, z-1] = 0
+            C[x-1, y-2, z-1] = 0
+            C[x, y-2, z-1] = 0
 
 
 def troue(C, sable):
@@ -182,7 +185,7 @@ def troue(C, sable):
     ex_sable = []
     for e in sable:
         x, y, z = e
-        if C[x][z][y] == 0:
+        if C[x, y, z] == 0:
             ex_sable.append(e)
     return ex_sable
 
@@ -192,30 +195,30 @@ stonks = []
 
 def percolation(C, ex_sable, Heau):
     for (x, y, z) in ex_sable:
-        C[x][z][y] = 4
+        C[x, y, z] = 4
     while len(ex_sable) != 0:
         e = ex_sable[0]
         stonks.append(len(ex_sable))
         x, y, z = e
 
-        if z != hauteur - 1 and C[x][z + 1][y] == 0:
+        if z != hauteur - 1 and C[x, y, z+1] == 0:
             ex_sable.append((x, y, z + 1))
-            C[x][z + 1][y] = 4
-        if x != 0 and C[x - 1][z][y] == 0:
+            C[x, y, z+1] = 4
+        if x != 0 and C[x-1, y, z] == 0:
             ex_sable.append((x - 1, y, z))
-            C[x - 1][z][y] = 4
-        if x != Taille - 1 and C[x + 1][z][y] == 0:
+            C[x-1, y, z] = 4
+        if x != Taille - 1 and C[x+1, y, z] == 0:
             ex_sable.append((x + 1, y, z))
-            C[x + 1][z][y] = 4
-        if y != 0 and C[x][z][y - 1] == 0:
+            C[x+1, y, z] = 4
+        if y != 0 and C[x, y-1, z] == 0:
             ex_sable.append((x, y - 1, z))
-            C[x][z][y - 1] = 4
-        if y != Taille - 1 and C[x][z][y + 1] == 0:
+            C[x, y-1, z] = 4
+        if y != Taille - 1 and C[x, y+1, z] == 0 and y < Heau:
             ex_sable.append((x, y + 1, z))
-            C[x][z][y + 1] = 4
-        if z - 1 >= hauteur // 3 and C[x][z - 1][y] == 0 and z > Heau:
+            C[x, y+1, z] = 4
+        if z - 1 >= hauteur // 3 and [x, y, z-1] == 0:
             ex_sable.append((x, y, z - 1))
-            C[x][z - 1][y] = 4
+            C[x, y, z-1] = 4
         ex_sable.pop(0)
         print(f"\r percolation taille pile {len(ex_sable)}", end="")
     # plt.plot([i for i in range(len(stonks))],stonks)
@@ -229,38 +232,38 @@ def Patron_carte(BruitP2D, autre):
     eau = []
     sable = []
     print("Creation tableaux vide")
-    CarteListe3D = [[[1 for y in range(Taille)] for z in range(hauteur)] for x in trange(Taille)]
+    CarteListe3D = np.array([[[1 for z in range(Taille)] for y in range(hauteur)] for x in trange(Taille)])
     print("fin creation tablaux")
 
     for x in trange(Taille):
-        for y in range(Taille):
-            Hsurface = int(BruitP2D[x, y])
-            z = 0
-            while z < Hsurface:
-                CarteListe3D[x][z][y] = 0
-                if z >= Heau:
+        for z in range(Taille):
+            Hsurface = int(BruitP2D[x, z])
+            y = hauteur-1
+            while y > Hsurface:
+                CarteListe3D[x,y,z] = 0
+                if y <= Heau:
                     eau.append((x, y, z))
-                z += 1
-            if z < Heau - 4:
-                CarteListe3D[x][z][y] = 2
-            elif z < 50:
-                CarteListe3D[x][z][y] = 11
+                y -= 1
+            if y > Heau - 4:
+                CarteListe3D[x,y,z] = 2
+            elif y > 50:
+                CarteListe3D[x,y,z] = 11
             else:
-                CarteListe3D[x][z][y] = 5
-                if z >= Heau:
+                CarteListe3D[x,y,z] = 5
+                if y <= Heau:
                     sable.append((x, y, z))
-            z += 1
+            y -= 1
             a = 3
             for i in range(a):
-                if z + i >= Heau - 4:
-                    CarteListe3D[x][z + i][y] = 5
+                if y - i <= Heau - 4:
+                    CarteListe3D[x, y-i, z] = 5
                 else:
-                    CarteListe3D[x][z + i][y] = 3
+                    CarteListe3D[x, y-i, z] = 3
             if random.random() < 1 / 3:
-                CarteListe3D[x][hauteur - 3][y] = 10
+                CarteListe3D[x, 2, z] = 10
             if random.random() < 1 / 2:
-                CarteListe3D[x][hauteur - 2][y] = 10
-            CarteListe3D[x][hauteur - 1][y] = 10
+                CarteListe3D[x, 1, z] = 10
+            CarteListe3D[x, 0, z] = 10
 
     return CarteListe3D, sable, eau, Heau
 
@@ -271,45 +274,44 @@ def minerais(CarteListe3D, BruitP2D, ax):
     # charbon
     k = random_int() + 4
     k *= h
-    Ac, Yc = liste_aleatoire(k, Taille - 2, k)
+    Ac, Zc = liste_aleatoire(k, Taille - 2, k)
     Ac, Xc = liste_aleatoire(k, Taille - 2, k)
-    Ac, Z = liste_aleatoire(k, hauteur // 2 - 1, k)
-    Zc = [i + hauteur // 2 for i in Z]
+    Ac, Y = liste_aleatoire(k, hauteur // 2 - 1, k)
+    Yc = [i + hauteur // 2 for i in Y]
     for i in range(k):
-        charbon(CarteListe3D, BruitP2D, int(Xc[i] + 1), int(Zc[i]), int(Yc[i] + 1))
+        charbon(CarteListe3D, BruitP2D, int(Xc[i] + 1), int(Yc[i]), int(Zc[i] + 1))
 
     # or
     k = random_int() + 2
     k *= h
-    Ao, Yo = liste_aleatoire(k, Taille - 1, k)
+    Ao, Zo = liste_aleatoire(k, Taille - 1, k)
     Ao, Xo = liste_aleatoire(k, Taille - 1, k)
-    Ao, Z = liste_aleatoire(k, hauteur // 2 - 1, k)
-    Zo = [i + hauteur // 2 for i in Z]
+    Ao, Y = liste_aleatoire(k, hauteur // 2 - 1, k)
+    Yo = [i + hauteur // 2 for i in Y]
     for i in range(k):
-        gold(CarteListe3D, int(Xo[i]), int(Zo[i]), int(Yo[i]))
+        gold(CarteListe3D, int(Xo[i]), int(Yo[i]), int(Zo[i]))
 
     # diamant
     k = random_int()
     k *= h
-    Ad, Yd = liste_aleatoire(k, Taille - 1, k)
+    Ad, Zd = liste_aleatoire(k, Taille - 1, k)
     Ad, Xd = liste_aleatoire(k, Taille - 1, k)
-    Ad, Z = liste_aleatoire(k, hauteur // 5 - 1, k)
-    Zd = [i + 4 * (hauteur // 5) for i in Z]
+    Ad, Y = liste_aleatoire(k, hauteur // 5 - 1, k)
+    Yd = [i + 4 * (hauteur // 5) for i in Y]
     for i in range(k):
-        diamant(CarteListe3D, int(Xd[i]), int(Zd[i]), int(Yd[i]))
+        diamant(CarteListe3D, int(Xd[i]), int(Yd[i]), int(Zd[i]))
 
-    ax.scatter(Xo, Yo, Zo, c='gold')
-    ax.scatter(Xc, Yc, Zc, c='black')
-    ax.scatter(Xd, Yd, Zd, c='aqua')
+    ax.scatter(Xo, Zo, Yo, c='gold')
+    ax.scatter(Xc, Zc, Yc, c='black')
+    ax.scatter(Xd, Zd, Yd, c='aqua')
 
 
 def grotte(CarteListe3D, ax):
-    numy = numpy.array(CarteListe3D)
     alpha = 200
     u = 5
     _, Xg = liste_aleatoire_spline1(Taille, Taille, u, alpha)
-    _, Zg = liste_aleatoire_spline1(Taille, hauteur, u, alpha)
-    _, Yg = liste_aleatoire_spline1(Taille, Taille, u, alpha)
+    _, Yg = liste_aleatoire_spline1(Taille, hauteur, u, alpha)
+    _, Zg = liste_aleatoire_spline1(Taille, Taille, u, alpha)
 
     '''
     plt.close("all")
@@ -322,10 +324,10 @@ def grotte(CarteListe3D, ax):
     plt.close()
     '''
 
-    ax.scatter(Xg, Yg, Zg, linewidths=.2)
+    ax.scatter(Xg, Zg, Yg, s=.6)
 
     for i in range((u - 1) * alpha + 1):
-        explose(CarteListe3D, int(Xg[i]), int(Zg[i]), int(Yg[i]))
+        explose(CarteListe3D, int(Xg[i]), int(Yg[i]), int(Zg[i]))
 
 
 def ajout_detail(graine, CarteListe3D, BruitP2D, sable, eau, Heau):
@@ -341,7 +343,7 @@ def ajout_detail(graine, CarteListe3D, BruitP2D, sable, eau, Heau):
     # eau
     for e in eau:
         x, y, z = e
-        CarteListe3D[x][z][y] = 4
+        CarteListe3D[x, y, z] = 4
     ex_sable = troue(CarteListe3D, sable)
     percolation(CarteListe3D, ex_sable, Heau)
 
@@ -353,9 +355,8 @@ def ajout_detail(graine, CarteListe3D, BruitP2D, sable, eau, Heau):
     # grotte 3D
 
     ax.set_xlabel('X')
-    ax.set_ylabel('Y')
-    ax.set_zlabel('Z')
-    ax.invert_zaxis()
+    ax.set_ylabel('Z')
+    ax.set_zlabel('Y')
 
     ax.set_title('Grotte seed=' + str(graine))
     plt.savefig("Affichage_de_la_map/Grotte")
@@ -387,11 +388,8 @@ correspondanceID = {0 : 0,  # white = Air
 
 
 def creteMapSchem(grid: list, deltaX: int, deltaY: int, deltaZ: int, graine):
-    sf = SchematicFile(shape=(deltaZ, deltaY, deltaX))  # z = hauteur faux mais pas grave
-    for x in trange(deltaX):
-        for y in range(deltaY):
-            for z in range(deltaZ):
-                sf.blocks[z, y, x] = correspondanceID[grid[x][-z - 1][y]]  # carte renversé
+    sf = SchematicFile(shape=(deltaY, deltaX, deltaZ))  # y = hauteur 
+    sf.blocks = correspondanceID[grid]
     print("Exporting in :", f'OutSchem/Carte{graine}.schematic ...')
     sf.save(f'OutSchem/Carte{graine}.schematic')
     print("Done.")
@@ -438,8 +436,8 @@ def fait_une_map(graine):
 ##
 ## Modélisation de la carte
 Heau = 150
-nbGrotte = 80
-Taille = 2000
+nbGrotte = 8
+Taille = 50
 hauteur = 256
 graine = randrange(10000)
 fait_une_map(graine)

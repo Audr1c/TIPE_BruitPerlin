@@ -102,7 +102,7 @@ def perlinfzej(graine, taille, hauteur):
     autre *= 7
 
     plt.imshow(D, origin='upper', cmap='gray')
-    plt.xlabel('Y')
+    plt.xlabel('Z')
     plt.ylabel('X')
     plt.colorbar()
     plt.title('Bruit de Perlin en 2D (seed = ' + str(graine) + ')')
@@ -111,9 +111,8 @@ def perlinfzej(graine, taille, hauteur):
     plt.close("all")
     ax = plt.axes(projection="3d")
     ax.set_xlabel('X')
-    ax.set_ylabel('Y')
-    ax.set_zlabel('Z')
-    ax.invert_zaxis()
+    ax.set_ylabel('Z')
+    ax.set_zlabel('Y')
     ax.plot_surface(X, Y, T, cmap='gray')
     plt.title('Heightmap (seed = ' + str(graine) + ')')
     plt.savefig("2_Dimensions/Height_map")
