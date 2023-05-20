@@ -340,7 +340,7 @@ def grotte(CarteListe3D, ax):
     plt.close()
     '''
 
-    ax.scatter(Xg, Yg, Zg, linewidths=.2)
+    ax.scatter(Xg, Yg, Zg, linewidths=.2, s=0.7)
 
     for i in range((u - 1) * alpha + 1):
         explose(CarteListe3D, int(Xg[i]), int(Zg[i]) + Taille // 2, int(Yg[i]))
@@ -388,6 +388,36 @@ def gif():
     imageio.mimsave(f"Affichage_de_la_map/GIF.gif", frames, duration=7)
 
 
+<<<<<<< Updated upstream
+=======
+correspondanceID = {0: 0,  # white = Air
+                    1: 1,  # gray = Stone
+                    2: 2,  # green = Grass
+                    3: 3,  # brown = Dirt
+                    4: 9,  # blue = Water
+                    5: 12,  # yellow = Sand
+                    6: 16,  # black = Coal
+                    7: 73,  # red = Redstone
+                    8: 56,  # aqua = Diamond
+                    9: 14,  # gold = Gold
+                    10: 7,  # noir = Bedrock
+                    11: 80,  # = neige
+                    12: 15 # iron
+                    }
+
+
+def creteMapSchem(grid: list, deltaX: int, deltaY: int, deltaZ: int, graine):
+    sf = SchematicFile(shape=(deltaZ, deltaY, deltaX))  # z = hauteur faux mais pas grave
+    for x in trange(deltaX):
+        for y in range(deltaY):
+            for z in range(deltaZ):
+                sf.blocks[z, y, x] = correspondanceID[grid[x][-z - 1][y]]  # carte renversé
+    print("Exporting in :", f'OutSchem/Carte{graine}.schematic ...')
+    sf.save(f'OutSchem/Carte{graine}.schematic')
+    print("Done.")
+
+
+>>>>>>> Stashed changes
 def fait_une_map(graine):
     startAll = time.time()
     random.seed(graine)
