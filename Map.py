@@ -16,8 +16,8 @@ from nbtschematic import SchematicFile
 
 ## Fonctions prédéfinies
 def sauvegarder_grille(grille: list, g, i, nom_de_fichier: str) -> None:
-    echelle = ListedColormap(['white', 'gray', 'green', 'brown', 'blue', 'yellow', 'black', 'red', 'aqua', 'gold', '0.3', '0.8'], 11)
-    plt.matshow(grille, cmap=echelle, vmin=0, vmax=11)
+    echelle = ListedColormap(['white', 'gray', 'green', 'brown', 'blue', 'yellow', 'black', 'red', 'aqua', 'gold', '0.3', '0.8','beige'], 12)
+    plt.matshow(grille, cmap=echelle, vmin=0, vmax=12)
     plt.title(f"x={i} g={g}")  # 'x=' + str(i) + ' g=' + str(g)
     plt.xlabel('y')
     plt.ylabel('z')
@@ -27,49 +27,41 @@ def sauvegarder_grille(grille: list, g, i, nom_de_fichier: str) -> None:
 ## Eléments suplémentaire sur la carte
 
 def diamant(C, x, z, y):
-    C[x][z][y] = 8
-    if random_int() % 2 == 0:
-        C[x + 1][z][y] = 8
-    if random_int() % 2 == 1:
-        C[x + 1][z + 1][y] = 8
-    if random_int() % 2 == 1:
-        C[x + 1][z][y + 1] = 8
-    if random_int() == 0:
-        C[x + 1][z + 1][y + 1] = 8
-    if random_int() == 0:
-        C[x][z + 1][y] = 8
-    if random_int() % 2 == 1:
-        C[x][z][y + 1] = 8
-    if random_int() == 0:
-        C[x][z + 1][y + 1] = 8
+    for j in range(1):
+        for k in range(1):
+            for i in range(1):
+                if C[x+i][z+k][y+j]==0 and random()<0.4:
+                    C[x+i][z+k][y+j] = 8
 
 
-def charbon(C, B, x, z, y):
-    if z > B[x][y]:
-        C[x][z][y] = 6
-        C[x + 1][z][y] = 6
-        C[x - 1][z][y] = 6
-        C[x][z + 1][y] = 6
-        C[x][z - 1][y] = 6
-        C[x][z][y + 1] = 6
-        C[x][z][y - 1] = 6
+def charbon(C, x, z, y):
+    for j in range(3):
+        for k in range(3):
+            for i in range(3):
+                if C[x+i][z+k][y+j]==0 and random()<0.6:
+                    C[x+i][z+k][y+j] = 6
+
+def redstone(C, x, z, y):
+    for j in range(3):
+        for k in range(3):
+            for i in range(3):
+                if C[x+i][z+k][y+j]==0 and random()<0.6:
+                    C[x+i][z+k][y+j] = 6
+
+def iron(C, x, z, y):
+    for j in range(2):
+        for k in range(2):
+            for i in range(2):
+                if C[x+i][z+k][y+j]==0 and random()<0.6:
+                    C[x+i][z+k][y+j] = 12
 
 
 def gold(C, x, z, y):
-    C[x][z][y] = 9
-    C[x + 1][z][y] = 9
-    if random_int() % 2 == 1:
-        C[x + 1][z + 1][y] = 9
-    if random_int() % 2 == 1:
-        C[x + 1][z][y + 1] = 9
-    if random_int() % 2 == 0:
-        C[x + 1][z + 1][y + 1] = 9
-    if random_int() == 0:
-        C[x][z + 1][y] = 9
-    if random_int() % 2 == 1:
-        C[x][z][y + 1] = 9
-    if random_int() == 0:
-        C[x][z + 1][y + 1] = 9
+    for j in range(1):
+        for k in range(1):
+            for i in range(1):
+                if C[x+i][z+k][y+j]==0 and random()<0.5:
+                    C[x+i][z+k][y+j] = 9
 
 
 def explose(C, x, z, y):  # fait disparaitre les blocs autour du bloc de coordonnées
@@ -265,46 +257,62 @@ def Patron_carte(BruitP2D, autre):
     return CarteListe3D, sable, eau, Heau
 
 
-def minerais(CarteListe3D, BruitP2D, ax):
-    h = (Taille // 50) ** 2
+def minerais(CarteListe3D, ax):
+    h = ((Taille**2)/2500)
 
     # charbon
-    k = random_int() + 4
-    k *= h
-    Ac, Yc = liste_aleatoire(k, Taille - 2, k)
-    Ac, Xc = liste_aleatoire(k, Taille - 2, k)
-    Ac, Z = liste_aleatoire(k, hauteur // 2 - 1, k)
+    k = int(15*h)
+    _, Yc = liste_aleatoire(k, Taille - 4, k)
+    _, Xc = liste_aleatoire(k, Taille - 4, k)
+    _, Z = liste_aleatoire(k, hauteur // 2 - 3, k)
     Zc = [i + hauteur // 2 for i in Z]
     for i in range(k):
-        charbon(CarteListe3D, BruitP2D, int(Xc[i] + 1), int(Zc[i]), int(Yc[i] + 1))
+        charbon(CarteListe3D, int(Xc[i]), int(Zc[i]), int(Yc[i]))
+
+    # redstone
+    k = int(11*h)
+    _, Yr = liste_aleatoire(k, Taille - 4, k)
+    _, Xr = liste_aleatoire(k, Taille - 4, k)
+    _, Z = liste_aleatoire(k, hauteur // 4 - 3, k)
+    Zr = [i + 3*(hauteur // 2) for i in Z]
+    for i in range(k):
+        redstone(CarteListe3D, int(Xr[i]), int(Zr[i]), int(Yr[i]))
+
+    # fer
+    k = int(11*h)
+    _, Yi = liste_aleatoire(k, Taille - 3, k)
+    _, Xi = liste_aleatoire(k, Taille - 3, k)
+    _, Z = liste_aleatoire(k, hauteur // 3 - 3, k)
+    Zi = [i + 2*(hauteur // 3) for i in Z]
+    for i in range(k):
+        iron(CarteListe3D, int(Xi[i]), int(Zi[i]), int(Yi[i]))
 
     # or
-    k = random_int() + 2
-    k *= h
-    Ao, Yo = liste_aleatoire(k, Taille - 1, k)
-    Ao, Xo = liste_aleatoire(k, Taille - 1, k)
-    Ao, Z = liste_aleatoire(k, hauteur // 2 - 1, k)
+    k = int(8*h)
+    _, Yo = liste_aleatoire(k, Taille - 2, k)
+    _, Xo = liste_aleatoire(k, Taille - 2, k)
+    _, Z = liste_aleatoire(k, hauteur // 2 - 2, k)
     Zo = [i + hauteur // 2 for i in Z]
     for i in range(k):
         gold(CarteListe3D, int(Xo[i]), int(Zo[i]), int(Yo[i]))
 
     # diamant
-    k = random_int()
-    k *= h
-    Ad, Yd = liste_aleatoire(k, Taille - 1, k)
-    Ad, Xd = liste_aleatoire(k, Taille - 1, k)
-    Ad, Z = liste_aleatoire(k, hauteur // 5 - 1, k)
+    k = int(5*h)
+    _, Yd = liste_aleatoire(k, Taille - 2, k)
+    _, Xd = liste_aleatoire(k, Taille - 2, k)
+    _, Z = liste_aleatoire(k, hauteur // 5 - 2, k)
     Zd = [i + 4 * (hauteur // 5) for i in Z]
     for i in range(k):
         diamant(CarteListe3D, int(Xd[i]), int(Zd[i]), int(Yd[i]))
 
-    ax.scatter(Xo, Yo, Zo, c='gold')
-    ax.scatter(Xc, Yc, Zc, c='black')
-    ax.scatter(Xd, Yd, Zd, c='aqua')
+    ax.scatter(Xr, Yr, Zr, c='red', s=0.7)
+    ax.scatter(Xi, Yi, Zi, c='beige', s=0.7)
+    ax.scatter(Xo, Yo, Zo, c='gold', s=0.7)
+    ax.scatter(Xc, Yc, Zc, c='black', s=0.7)
+    ax.scatter(Xd, Yd, Zd, c='aqua', s=0.7)
 
 
 def grotte(CarteListe3D, ax):
-    numy = numpy.array(CarteListe3D)
     alpha = 200
     u = 5
     _, Xg = liste_aleatoire_spline1(Taille, Taille, u, alpha)
@@ -332,7 +340,7 @@ def ajout_detail(graine, CarteListe3D, BruitP2D, sable, eau, Heau):
     plt.close("all")
     ax = plt.axes(projection="3d")
 
-    minerais(CarteListe3D, BruitP2D, ax)
+    minerais(CarteListe3D, ax)
 
     # grotte 1
     for _ in trange(nbGrotte):
