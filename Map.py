@@ -241,10 +241,10 @@ def Patron_carte(BruitP2D, autre):
                 if z >= Heau:
                     eau.append((x, y, z))
                 z += 1
-            if z < Heau - 4:
-                CarteListe3D[x][z][y] = 2
-            elif z < 50:
+            if z < Hneige:
                 CarteListe3D[x][z][y] = 11
+            elif z < Heau - 4:
+                CarteListe3D[x][z][y] = 2
             else:
                 CarteListe3D[x][z][y] = 5
                 if z >= Heau:
@@ -437,9 +437,10 @@ def fait_une_map(graine):
 
 ##
 ## Modélisation de la carte
+Hneige = 60
 Heau = 150
-nbGrotte = 80
-Taille = 2000
+nbGrotte = 8
+Taille = 200
 hauteur = 256
 graine = randrange(10000)
 fait_une_map(graine)
