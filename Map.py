@@ -16,9 +16,7 @@ from nbtschematic import SchematicFile
 
 ## Fonctions prédéfinies
 def sauvegarder_grille(grille: list, g, i, nom_de_fichier: str) -> None:
-    echelle = ListedColormap(
-        ['white', 'gray', 'green', 'brown', 'blue', 'yellow', 'black', 'red', 'aqua', 'gold', '0.3', '0.8', 'beige'],
-        12)
+    echelle = ListedColormap(['white', 'gray', 'green', 'brown', 'blue', 'yellow', 'black', 'red', 'aqua', 'gold', '0.3', '0.8','beige'], 12)
     plt.matshow(grille, cmap=echelle, vmin=0, vmax=12)
     plt.title(f"x={i} g={g}")  # 'x=' + str(i) + ' g=' + str(g)
     plt.xlabel('y')
@@ -32,40 +30,38 @@ def diamant(C, x, z, y):
     for j in range(1):
         for k in range(1):
             for i in range(1):
-                if C[x + i][z + k][y + j] == 1 and random.random() < 0.4:
-                    C[x + i][z + k][y + j] = 8
+                if C[x+i][z+k][y+j]==0 and random.random()<0.4:
+                    C[x+i][z+k][y+j] = 8
 
 
 def charbon(C, x, z, y):
     for j in range(3):
         for k in range(3):
             for i in range(3):
-                if C[x + i][z + k][y + j] == 1 and random.random() < 0.6:
-                    C[x + i][z + k][y + j] = 6
-
+                if C[x+i][z+k][y+j]==0 and random.random()<0.6:
+                    C[x+i][z+k][y+j] = 6
 
 def redstone(C, x, z, y):
     for j in range(3):
         for k in range(3):
             for i in range(3):
-                if C[x + i][z + k][y + j] == 1 and random.random() < 0.6:
-                    C[x + i][z + k][y + j] = 7
-
+                if C[x+i][z+k][y+j]==0 and random.random()<0.6:
+                    C[x+i][z+k][y+j] = 7
 
 def iron(C, x, z, y):
     for j in range(2):
         for k in range(2):
             for i in range(2):
-                if C[x + i][z + k][y + j] == 1 and random.random() < 0.6:
-                    C[x + i][z + k][y + j] = 12
+                if C[x+i][z+k][y+j]==0 and random.random()<0.6:
+                    C[x+i][z+k][y+j] = 12
 
 
 def gold(C, x, z, y):
     for j in range(1):
         for k in range(1):
             for i in range(1):
-                if C[x + i][z + k][y + j] == 1 and random.random() < 0.5:
-                    C[x + i][z + k][y + j] = 9
+                if C[x+i][z+k][y+j]==0 and random.random()<0.5:
+                    C[x+i][z+k][y+j] = 9
 
 
 def explose(C, x, z, y):  # fait disparaitre les blocs autour du bloc de coordonnées
@@ -262,10 +258,10 @@ def Patron_carte(BruitP2D, autre):
 
 
 def minerais(CarteListe3D, ax):
-    h = ((Taille ** 2) / 2500)
+    h = ((Taille**2)/2500)
 
     # charbon
-    k = int(15 * h)
+    k = int(15*h)
     _, Yc = liste_aleatoire(k, Taille - 4, k)
     _, Xc = liste_aleatoire(k, Taille - 4, k)
     _, Z = liste_aleatoire(k, hauteur // 2 - 4, k)
@@ -274,25 +270,25 @@ def minerais(CarteListe3D, ax):
         charbon(CarteListe3D, int(Xc[i]), int(Zc[i]), int(Yc[i]))
 
     # redstone
-    k = int(11 * h)
+    k = int(11*h)
     _, Yr = liste_aleatoire(k, Taille - 4, k)
     _, Xr = liste_aleatoire(k, Taille - 4, k)
     _, Z = liste_aleatoire(k, hauteur // 4 - 4, k)
-    Zr = [i + 3 * (hauteur // 4) for i in Z]
+    Zr = [i + 3*(hauteur // 4) for i in Z]
     for i in range(k):
         redstone(CarteListe3D, int(Xr[i]), int(Zr[i]), int(Yr[i]))
 
     # fer
-    k = int(11 * h)
+    k = int(11*h)
     _, Yi = liste_aleatoire(k, Taille - 3, k)
     _, Xi = liste_aleatoire(k, Taille - 3, k)
     _, Z = liste_aleatoire(k, hauteur // 3 - 3, k)
-    Zi = [i + 2 * (hauteur // 3) for i in Z]
+    Zi = [i + 2*(hauteur // 3) for i in Z]
     for i in range(k):
         iron(CarteListe3D, int(Xi[i]), int(Zi[i]), int(Yi[i]))
 
     # or
-    k = int(8 * h)
+    k = int(8*h)
     _, Yo = liste_aleatoire(k, Taille - 2, k)
     _, Xo = liste_aleatoire(k, Taille - 2, k)
     _, Z = liste_aleatoire(k, hauteur // 2 - 2, k)
@@ -301,7 +297,7 @@ def minerais(CarteListe3D, ax):
         gold(CarteListe3D, int(Xo[i]), int(Zo[i]), int(Yo[i]))
 
     # diamant
-    k = int(5 * h)
+    k = int(5*h)
     _, Yd = liste_aleatoire(k, Taille - 2, k)
     _, Xd = liste_aleatoire(k, Taille - 2, k)
     _, Z = liste_aleatoire(k, hauteur // 5 - 2, k)
@@ -383,16 +379,16 @@ def gif():
     imageio.mimsave(f"Affichage_de_la_map/GIF.gif", frames, duration=7)
 
 
-correspondanceID = {0: 0,  # white = Air
-                    1: 1,  # gray = Stone
-                    2: 2,  # green = Grass
-                    3: 3,  # brown = Dirt
-                    4: 9,  # blue = Water
-                    5: 12,  # yellow = Sand
-                    6: 16,  # black = Coal
-                    7: 73,  # red = Redstone
-                    8: 56,  # aqua = Diamond
-                    9: 14,  # gold = Gold
+correspondanceID = {0 : 0,  # white = Air
+                    1 : 1,  # gray = Stone
+                    2 : 2,  # green = Grass
+                    3 : 3,  # brown = Dirt
+                    4 : 9,  # blue = Water
+                    5 : 12,  # yellow = Sand
+                    6 : 16,  # black = Coal
+                    7 : 73,  # red = Redstone
+                    8 : 56,  # aqua = Diamond
+                    9 : 14,  # gold = Gold
                     10: 7,  # noir = Bedrock
                     11: 80,  # = neige
                     }
@@ -449,7 +445,7 @@ def fait_une_map(graine):
 
 ##
 ## Modélisation de la carte
-Hneige = 80
+Hneige = 60
 Heau = 150
 nbGrotte = 8
 Taille = 200
