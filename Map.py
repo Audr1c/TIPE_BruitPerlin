@@ -117,48 +117,53 @@ def minerais(CarteListe3D, ax):
     h = ((Taille**2)/2500)
 
     # charbon
+    print("charbon")
     k = int(15*h)
     _, Yc = liste_aleatoire(k, Taille - 4, k)
     _, Xc = liste_aleatoire(k, Taille - 4, k)
     _, Z = liste_aleatoire(k, hauteur // 2 - 4, k)
     Zc = [i + hauteur // 2 for i in Z]
-    for i in range(k):
+    for i in trange(k):
         charbon(CarteListe3D, int(Xc[i]), int(Zc[i]), int(Yc[i]))
 
     # redstone
+    print("redstone")
     k = int(11*h)
     _, Yr = liste_aleatoire(k, Taille - 4, k)
     _, Xr = liste_aleatoire(k, Taille - 4, k)
     _, Z = liste_aleatoire(k, hauteur // 4 - 4, k)
     Zr = [i + 3*(hauteur // 4) for i in Z]
-    for i in range(k):
+    for i in trange(k):
         redstone(CarteListe3D, int(Xr[i]), int(Zr[i]), int(Yr[i]))
 
     # fer
+    print("fer")
     k = int(11*h)
     _, Yi = liste_aleatoire(k, Taille - 3, k)
     _, Xi = liste_aleatoire(k, Taille - 3, k)
     _, Z = liste_aleatoire(k, hauteur // 3 - 3, k)
     Zi = [i + 2*(hauteur // 3) for i in Z]
-    for i in range(k):
+    for i in trange(k):
         iron(CarteListe3D, int(Xi[i]), int(Zi[i]), int(Yi[i]))
 
     # or
+    print("or")
     k = int(8*h)
     _, Yo = liste_aleatoire(k, Taille - 2, k)
     _, Xo = liste_aleatoire(k, Taille - 2, k)
     _, Z = liste_aleatoire(k, hauteur // 2 - 2, k)
     Zo = [i + hauteur // 2 for i in Z]
-    for i in range(k):
+    for i in trange(k):
         gold(CarteListe3D, int(Xo[i]), int(Zo[i]), int(Yo[i]))
 
     # diamant
+    print("diamant")
     k = int(5*h)
     _, Yd = liste_aleatoire(k, Taille - 2, k)
     _, Xd = liste_aleatoire(k, Taille - 2, k)
     _, Z = liste_aleatoire(k, hauteur // 5 - 2, k)
     Zd = [i + 4 * (hauteur // 5) for i in Z]
-    for i in range(k):
+    for i in trange(k):
         diamant(CarteListe3D, int(Xd[i]), int(Zd[i]), int(Yd[i]))
 
     ax.scatter(Xr, Yr, Zr, c='red', s=0.7)
@@ -372,68 +377,86 @@ def creteMapSchem(grid: list, deltaX: int, deltaY: int, deltaZ: int, graine):
         for y in range(deltaY):
             for z in range(deltaZ):
                 sf.blocks[z, y, x] = correspondanceID[grid[x][-z - 1][y]]  # carte renversé
-    print("Exporting in :", f'OutSchem/Carte{graine}.schematic ...')
     sf.save(f'OutSchem/Carte{graine}.schematic')
-    print("Done.")
 
 ## Fonction final
 
 def fait_une_map(graine):
     
+    # Timer et parametrage du random
     startAll = time.time()
     random.seed(graine)
     np.random.seed(graine)
+    print('')
 
     print(f"Graine: {graine}")
+    print('')
 
+    # Bruit
     start = time.time()
     print("Start Bruit Perlin")
     M  = perlinfzej(graine, Taille, hauteur)
     print(f"End Bruit Perlin TimeToFinish: {time.time() - start:.2f} s")
+    print('')
 
+    # Patron
     start = time.time()
     print("Start Patron")
     Map, sable, eau = Patron_carte(M)
     print(f"End Patron TimeToFinish: {time.time() - start:.2f} s")
+    print('')
 
+    # Minerai
     start = time.time()
     print("Start Minerai")
     plt.close("all")
     ax = plt.axes(projection="3d")
     minerais(Map, ax)
     print(f"End Minerai TimeToFinish: {time.time() - start:.2f} s")
+    print('')
 
+    # Grotte
     start = time.time()
     print("Start Grotte")
     for _ in trange(nbGrotte):
         grotte(Map, ax)
     grotte_3D(ax)
     print(f"End Grotte TimeToFinish: {time.time() - start:.2f} s")
+    print('')
 
+    # Eau
     start = time.time()
     print("Start Eau")
     Eau(Map, eau)
     ex_sable = troue(Map, sable)
     percolation(Map, ex_sable)
     print(f"End Eau TimeToFinish: {time.time() - start:.2f} s")
+    print('')
 
+    # Frame
     start = time.time()
     print("Start Frame")
     frames(Map)
     print(f"End Frame TimeToFinish: {time.time() - start:.2f} s")
+    print('')
 
+    # GIF
     start = time.time()
     print("Start Gif")
     gif()
     print(f"End Gif TimeToFinish: {time.time() - start:.2f} s")
+    print('')
 
+    # Schematic
     start = time.time()
     print("Start Schematic")
     creteMapSchem(Map, Taille, Taille, hauteur, graine)
     print(f"End Schematic TimeToFinish: {time.time() - start:.2f} s")
+    print('')
 
     finTime = time.time() - startAll
     print(f"Program Finished in {finTime:.2f} s")
+    print('')
 
 ## Paramètres de la carte
 alpha = 400
