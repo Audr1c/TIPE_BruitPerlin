@@ -21,7 +21,7 @@ def random_int():
 
 
 def random1(u):
-    return random.random()*4*u * plus_ou_moins()
+    return random.random() * 4 * u * plus_ou_moins()
 
 
 # Interpolation
@@ -122,7 +122,7 @@ def bruit_de_perlin1D(i, p):  # permet de généreer un suites de points aléato
 
 def liste_aleatoire(i, j, p):
     x = linspace(0, i, p)
-    y = [random.randint(0,j-1) for k in range(p)]
+    y = [random.randint(0, j - 1) for k in range(p)]
     return x, y
 
 
@@ -171,6 +171,7 @@ def bruit_de_perlin1D_spline1(i, g, p, alpha):
     Y.append(y[-1])
     return X, Y  # liste avec l'interpolation
 
+
 def liste_aleatoire_spline1(i, j, p, alpha):
     x, y = liste_aleatoire(i, j, p)  # liste du bruit
     X = []  # création de nouvelle liste d'abcisses
@@ -183,6 +184,7 @@ def liste_aleatoire_spline1(i, j, p, alpha):
     X.append(x[-1])
     Y.append(y[-1])
     return X, Y  # liste avec l'interpolation
+
 
 
 def liste_aleatoire_spline(i, j, p, alpha):

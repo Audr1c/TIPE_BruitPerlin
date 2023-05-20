@@ -233,8 +233,15 @@ def percolation(C, ex_sable):
 def Patron_carte(BruitP2D, autre):
     eau = []
     sable = []
+<<<<<<< Updated upstream
     CarteListe3D = [[[1 for y in range(Taille)] for z in range(hauteur)] for x in range(Taille)]
     Heau = 130
+=======
+    print("Creation Tablaux vide")
+    CarteListe3D = [[[1 for y in range(Taille)] for z in range(hauteur)] for x in trange(Taille)]
+    print("Fin creation Tablaux vide")
+    Heau = 110
+>>>>>>> Stashed changes
     for x in trange(Taille):
         for y in range(Taille):
             Hsurface = int(BruitP2D[x, y])
@@ -312,7 +319,11 @@ def minerais(CarteListe3D, BruitP2D, ax):
 
 def grotte(CarteListe3D, ax):
     numy = numpy.array(CarteListe3D)
+<<<<<<< Updated upstream
     alpha = 100
+=======
+    alpha = Taille//10
+>>>>>>> Stashed changes
     u = 5
     _, Xg = liste_aleatoire_spline1(Taille, Taille, u, alpha)
     _, Zg = liste_aleatoire_spline1(Taille, hauteur, u, alpha)
@@ -355,7 +366,7 @@ def ajout_detail(graine, CarteListe3D, BruitP2D, sable, eau):
 
     # frames
     for i in trange(Taille):
-        sauvegarder_grille(CarteListe3D[i], graine, i, f"Affichage_de_la_map/Frame/TIPE{i}.jpg")
+        #sauvegarder_grille(CarteListe3D[i], graine, i, f"Affichage_de_la_map/Frame/TIPE{i}.jpg")
         plt.close()
 
     # grotte 3D
@@ -402,7 +413,7 @@ def fait_une_map(graine):
 
     start = time.time()
     print("Start Gif")
-    gif()
+    #gif()
     print(f"End Gif TimeToFinish: {time.time() - start:.2f} s")
 
     finTime = time.time() - startAll

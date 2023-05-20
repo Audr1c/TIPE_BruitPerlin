@@ -75,6 +75,16 @@ def perlin(graine, taille):
 
 
 def perlinfzej(graine, taille, hauteur):
+<<<<<<< Updated upstream
+=======
+    precsision = 10
+    amplitude = 100
+    resultats = []
+    for _ in trange(8):
+        temporaire = perlin(precsision, taille)
+        temporaire += 0.5
+        temporaire *= amplitude
+>>>>>>> Stashed changes
 
     # creation Base ( grosse forme)
     res1 = perlin(graine, taille)
