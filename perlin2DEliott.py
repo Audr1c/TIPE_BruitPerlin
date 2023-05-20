@@ -1,17 +1,17 @@
+## Importation
 import numpy as np
 import matplotlib.pyplot as plt
 from tqdm import trange
+from matplotlib.colors import ListedColormap
 
-
+## Fonctions utiles
 def lerp(a, b, x):
     "interpolation linéaire (produit scalaire)"
     return a + x * (b - a)
 
-
 def lissage(f):
     "Lisse le bordel (à changer pour obtenir autre chose qu'un labyrinthe)"
     return 6 * f ** 5 - 15 * f ** 4 + 10 * f ** 3
-
 
 def gradient(c, x, y):
     "On chope les coords des vecteurs de gradient"
@@ -19,16 +19,9 @@ def gradient(c, x, y):
     co_gradient = vecteurs[c % 8]
     return co_gradient[:, :, 0] * x + co_gradient[:, :, 1] * y
 
+## Bruit de Perlin
 
-def f(x, y, M):
-    return M[x, y]
-
-
-def r(x, y):
-    return x * 2 + y ** 2
-
-
-def perlin(precsision, taille):
+def Perlin(precsision, taille):
     tab = np.linspace(1, precsision, taille, endpoint=False)
 
     # création de grille en utilisant le tableau 1d
@@ -74,13 +67,12 @@ def perlin(precsision, taille):
 
     return resultat
 
-
-def perlinfzej(graine, taille, hauteur):
+def Bruit_de_map(graine, taille, hauteur):
     precsision = 10
     amplitude = 128
     resultats = []
     for _ in trange(7):
-        temporaire = perlin(precsision, 3000)
+        temporaire = Perlin(precsision, 4000)
         temporaire += 0.5
         temporaire *= amplitude
 
@@ -99,20 +91,49 @@ def perlinfzej(graine, taille, hauteur):
     for i in range(taille):
         D[i] = resultat[i][0:taille]
 
+    echelle = ListedColormap(['#141872','#0970a6', '#119fe9','#eeec7e', '#5df147', '#38be2a','#336e1c','white'], 7)
     plt.imshow(D, origin='upper', cmap='gray')
     plt.xlabel('Y')
     plt.ylabel('X')
     plt.colorbar()
     plt.title('Bruit de Perlin en 2D (seed = ' + str(graine) + ')')
     plt.savefig(f"2_Dimensions/Height_Map.jpg")
-    T = np.array([[D[i, j] for i in range(taille)] for j in range(taille)])
+
+    T = np.array([[0 for i in range(taille)] for j in range(taille)])
+    for i in range(taille):
+        for j in range(taille):
+            s=D[i,j]
+            if 256>=s>180:
+                T[i,j]=0
+            elif 180>=s>160:
+                T[i,j]=1
+            elif 160>=s>150:
+                T[i,j]=2
+            elif 150>=s>147:
+                T[i,j]=3
+            elif 147>=s>120:
+                T[i,j]=4
+            elif 120>=s>90:
+                T[i,j]=5
+            elif 90>=s>60:
+                T[i,j]=6
+            elif 60>=s:
+                T[i,j]=7
+    plt.close("all")
+    plt.imshow(T, origin='upper', cmap=echelle, vmin=0, vmax=7)
+    plt.xlabel('Y')
+    plt.ylabel('X')
+    plt.colorbar()
+    plt.title('Bruit de Perlin en 2D (seed = ' + str(graine) + ')')
+    plt.savefig(f"2_Dimensions/Map.jpg")
+
     plt.close("all")
     ax = plt.axes(projection="3d")
     ax.set_xlabel('X')
     ax.set_ylabel('Y')
     ax.set_zlabel('Z')
     ax.invert_zaxis()
-    ax.plot_surface(X, Y, T, cmap='gray')
+    ax.plot_surface(X, Y, D, cmap='gray')
     plt.title('Heightmap (seed = ' + str(graine) + ')')
     plt.savefig("2_Dimensions/Height_map")
 

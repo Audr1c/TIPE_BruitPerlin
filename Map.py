@@ -1,18 +1,13 @@
 ## Importations
 
 import time
-
 import numpy
-
 from numpy.random import rand
 from matplotlib.colors import ListedColormap
-
 import imageio
 from tqdm import trange
-
 from perlin2DEliott import *
 from perlin1DEliott import *
-
 from nbtschematic import SchematicFile
 
 ## Carte
@@ -395,7 +390,7 @@ def fait_une_map(graine):
     # Bruit
     start = time.time()
     print("Start Bruit Perlin")
-    M  = perlinfzej(graine, Taille, hauteur)
+    M  = Bruit_de_map(graine, Taille, hauteur)
     print(f"End Bruit Perlin TimeToFinish: {time.time() - start:.2f} s")
     print('')
 
@@ -459,11 +454,12 @@ def fait_une_map(graine):
     print('')
 
 ## Paramètres de la carte
+
 alpha = 400
 Hneige = 60
 Heau = 150
 nbGrotte = 10
-Taille = 100
+Taille = 500
 hauteur = 256
 graine = randrange(10000)
 
