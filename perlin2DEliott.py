@@ -98,8 +98,6 @@ def perlinfzej(graine, taille, hauteur):
     D = np.zeros((taille, taille))
     for i in range(taille):
         D[i] = resultat[i][0:taille]
-    autre = D / taille
-    autre *= 7
 
     plt.imshow(D, origin='upper', cmap='gray')
     plt.xlabel('Y')
@@ -118,4 +116,4 @@ def perlinfzej(graine, taille, hauteur):
     plt.title('Heightmap (seed = ' + str(graine) + ')')
     plt.savefig("2_Dimensions/Height_map")
 
-    return D, autre
+    return D
