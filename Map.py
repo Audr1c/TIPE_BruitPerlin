@@ -46,7 +46,7 @@ def redstone(C, x, z, y):
         for k in range(3):
             for i in range(3):
                 if C[x+i][z+k][y+j]==0 and random.random()<0.6:
-                    C[x+i][z+k][y+j] = 6
+                    C[x+i][z+k][y+j] = 7
 
 def iron(C, x, z, y):
     for j in range(2):
@@ -264,7 +264,7 @@ def minerais(CarteListe3D, ax):
     k = int(15*h)
     _, Yc = liste_aleatoire(k, Taille - 4, k)
     _, Xc = liste_aleatoire(k, Taille - 4, k)
-    _, Z = liste_aleatoire(k, hauteur // 2 - 3, k)
+    _, Z = liste_aleatoire(k, hauteur // 2 - 4, k)
     Zc = [i + hauteur // 2 for i in Z]
     for i in range(k):
         charbon(CarteListe3D, int(Xc[i]), int(Zc[i]), int(Yc[i]))
@@ -273,8 +273,8 @@ def minerais(CarteListe3D, ax):
     k = int(11*h)
     _, Yr = liste_aleatoire(k, Taille - 4, k)
     _, Xr = liste_aleatoire(k, Taille - 4, k)
-    _, Z = liste_aleatoire(k, hauteur // 4 - 3, k)
-    Zr = [i + 3*(hauteur // 2) for i in Z]
+    _, Z = liste_aleatoire(k, hauteur // 4 - 4, k)
+    Zr = [i + 3*(hauteur // 4) for i in Z]
     for i in range(k):
         redstone(CarteListe3D, int(Xr[i]), int(Zr[i]), int(Yr[i]))
 
