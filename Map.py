@@ -30,7 +30,7 @@ def diamant(C, x, z, y):
     for j in range(1):
         for k in range(1):
             for i in range(1):
-                if C[x+i][z+k][y+j]==0 and random()<0.4:
+                if C[x+i][z+k][y+j]==0 and random.random()<0.4:
                     C[x+i][z+k][y+j] = 8
 
 
@@ -38,21 +38,21 @@ def charbon(C, x, z, y):
     for j in range(3):
         for k in range(3):
             for i in range(3):
-                if C[x+i][z+k][y+j]==0 and random()<0.6:
+                if C[x+i][z+k][y+j]==0 and random.random()<0.6:
                     C[x+i][z+k][y+j] = 6
 
 def redstone(C, x, z, y):
     for j in range(3):
         for k in range(3):
             for i in range(3):
-                if C[x+i][z+k][y+j]==0 and random()<0.6:
+                if C[x+i][z+k][y+j]==0 and random.random()<0.6:
                     C[x+i][z+k][y+j] = 6
 
 def iron(C, x, z, y):
     for j in range(2):
         for k in range(2):
             for i in range(2):
-                if C[x+i][z+k][y+j]==0 and random()<0.6:
+                if C[x+i][z+k][y+j]==0 and random.random()<0.6:
                     C[x+i][z+k][y+j] = 12
 
 
@@ -60,7 +60,7 @@ def gold(C, x, z, y):
     for j in range(1):
         for k in range(1):
             for i in range(1):
-                if C[x+i][z+k][y+j]==0 and random()<0.5:
+                if C[x+i][z+k][y+j]==0 and random.random()<0.5:
                     C[x+i][z+k][y+j] = 9
 
 
