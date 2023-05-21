@@ -21,8 +21,8 @@ def gradient(c, x, y):
 
 ## Bruit de Perlin
 
-def Perlin(precsision, taille):
-    tab = np.linspace(1, precsision, taille, endpoint=False)
+def Perlin(precsision, pixels):
+    tab = np.linspace(1, precsision, pixels, endpoint=False)
 
     # création de grille en utilisant le tableau 1d
     x, y = np.meshgrid(tab, tab)
@@ -67,12 +67,10 @@ def Perlin(precsision, taille):
 
     return resultat
 
-def Bruit_de_map(graine, taille, hauteur):
-    precsision = 10
-    amplitude = 128
+def Bruit_de_map(graine, taille, hauteur, pixels, precsision, amplitude):
     resultats = []
     for _ in trange(7):
-        temporaire = Perlin(precsision, 4000)
+        temporaire = Perlin(precsision, pixels)
         temporaire += 0.5
         temporaire *= amplitude
 

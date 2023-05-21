@@ -1,61 +1,37 @@
 ## Importaion
 import random
-from math import pi
 from random import randrange
 
 from numpy import linspace
 import matplotlib.pyplot as plt
-from math import sin
 
-
-## Fonctions préliminaires
-
-# Aléatoire
+## Aléatoire
 
 def plus_ou_moins():
     return (-1) ** (random.randint(0, 1))
 
 
 def random_int():
-    """
-    :return: random integer in [0,3]
-    """
     return random.randint(0, 3)  # renvoie un entier aléatoire entre 0 et 4
 
 
 def random1(u):
-    return random.random()*4*u * plus_ou_moins()
+    return random.random()*u * plus_ou_moins()
 
 
-# Interpolation
+## Interpolation
 
-def sinusoidal_pair(x1, x2, y1, y2, X, Y, alpha):
-    M = (y2 + y1) / 2  # valeur moyenne de l'interpolation
-    m = (y2 - y1) / 2  # amplitude du sinus
-    w = pi / (x2 - x1)  # frequence du sinus
-    phi = w * x1 + pi / 2  # déphasage du sinus
-    r = (x2 - x1) / alpha  # definition du pas
-    t = 0  # initialisation
-    for i in range(alpha):
-        X.append(x1 + t)  # ajout d'abcisse
-        Y.append(M + m * sin(w * t - phi))  # ajout d'ordonné
-        t += r  # passage au point d'après
-    return X, Y
-
-
-def sinusoidal_impair(x1, x2, y1, y2, X, Y, alpha):
-    M = (y2 + y1) / 2  # valeur moyenne de l'interpolation
-    m = (y2 - y1) / 2  # amplitude du sinus
-    w = pi / (x2 - x1)  # frequence du sinus
-    phi = w * x1 - pi / 2  # déphasage du sinus
-    r = (x2 - x1) / alpha  # definition du pas
-    t = 0  # initialisation
-    for i in range(alpha):
-        X.append(x1 + t)  # ajout d'abcisse
-        Y.append(M + m * sin(w * t - phi))  # ajout d'ordonné
-        t += r  # passage au point d'après
-    return X, Y
-
+def lissage_sin(a, b, A, B, X, Y, alpha):
+    dx = (b - a) / alpha
+    deltaX = 0
+    dy = 1 / alpha  # définition du pas
+    deltaY = 0  # initialisation
+    for j in range(alpha):
+        X.append(a + deltaX)  # ajout d'abcisse
+        Y.append(A + (B - A) * (6 * deltaY ** 5 - 15 * deltaY ** 4 + 10 * deltaY ** 3))  # ajout d'ordonné
+        deltaY += dy  # passage au point suivant
+        deltaX += dx
+    # tableau modifie avec effet de bord
 
 def spline_cube(da, db, a, b, A, B, X, Y, alpha):
     # coefficients de la matrice pour que la dérivée en a soit égal à d1
@@ -108,60 +84,19 @@ def spline_cube(da, db, a, b, A, B, X, Y, alpha):
     da = db
     return X, Y, da
 
-
 ## Bruit de Perlin
-
 
 def bruit_de_perlin1D(i, p):  # permet de généreer un suites de points aléatoires
     x = linspace(0, i, p)  # liste des abcisses ( espacées à inetrvalle régulié )
     u = x[1] - x[0]  # distance entre 2 abcisses concécutives
-    y = [random.randint(0, i - 1)]  # liste des ordonnées, initiées
+    y = [random.randint(50, i -50)]  # liste des ordonnées, initiées
     for k in range(len(x) - 1):
         a = y[k] + random1(u)
         y.append(a)  # ajouts des autres ordonnées en fonction des précédentes
 
     return (x, y)
 
-
-def liste_aleatoire(i, j, p):
-    x = linspace(0, i, p)
-    y = [random.randint(0,j-1) for k in range(p)]
-    return x, y
-
-
-# Sinusoidal
-
-def bruit_de_perlin1D_sin(i, g, p, alpha):
-    x, y = bruit_de_perlin1D(i, p)  # liste du bruit
-    X = []  # création de nouvelle liste d'abcisses
-    Y = []  # création de nouvelle liste d'ordonnés
-    for k in range(p - 1):  # interpolation entre deux points de la liste
-        if k % 2 == 0:
-            X, Y = sinusoidal_pair(x[k], x[k + 1], y[k], y[k + 1], X, Y, alpha)
-        else:
-            X, Y = sinusoidal_impair(x[k], x[k + 1], y[k], y[k + 1], X, Y, alpha)
-    return (X, Y)  # liste avec l'interpolation
-
-
-def liste_aleatoire_sin(i, j, p, alpha):
-    x, y = liste_aleatoire(i, j, p)  # liste du bruit
-    X = []  # création de nouvelle liste d'abcisses
-    Y = []  # création de nouvelle liste d'ordonnés
-    for k in range(p - 1):  # interpolation entre deux points de la liste
-        if k % 2 == 0:
-            X, Y = sinusoidal_pair(x[k], x[k + 1], y[k], y[k + 1], X, Y, alpha)
-        else:
-            X, Y = sinusoidal_impair(x[k], x[k + 1], y[k], y[k + 1], X, Y, alpha)
-    return (X, Y)  # liste avec l'interpolation
-
-
-def bruit_de_perlin1D_sin_random(i, p, alpha):  # fonction avec une seed aléatoire
-    return bruit_de_perlin1D_sin(i, randrange(10000), p, alpha)
-
-
-# Polynomial
-
-def bruit_de_perlin1D_spline1(i, g, p, alpha):
+def bruit_de_perlin1D_spline(i, p, alpha):
     x, y = bruit_de_perlin1D(i, p)  # liste du bruit
     X = []  # création de nouvelle liste d'abcisses
     Y = []  # création de nouvelle liste d'ordonnés
@@ -174,7 +109,24 @@ def bruit_de_perlin1D_spline1(i, g, p, alpha):
     Y.append(y[-1])
     return X, Y  # liste avec l'interpolation
 
-def liste_aleatoire_spline1(i, j, p, alpha):
+def bruit_de_perlin1D_sin(i, p, alpha):
+    x, y = bruit_de_perlin1D(i, p)  # liste du bruit
+    X = []  # création de nouvelle liste d'abcisses
+    Y = []  # création de nouvelle liste d'ordonnés
+    for k in range(p - 1):  # interpolation entre trois points de la liste
+        lissage_sin(x[k], x[k + 1], y[k], y[k + 1], X, Y, alpha)
+    X.append(x[-1])
+    Y.append(y[-1])
+    return X, Y
+
+## Liste aléatoire
+
+def liste_aleatoire(i, j, p):
+    x = linspace(0, i, p)
+    y = [random.randint(0,j-1) for k in range(p)]
+    return x, y
+
+def liste_aleatoire_spline(i, j, p, alpha):
     x, y = liste_aleatoire(i, j, p)  # liste du bruit
     X = []  # création de nouvelle liste d'abcisses
     Y = []
@@ -187,98 +139,67 @@ def liste_aleatoire_spline1(i, j, p, alpha):
     Y.append(y[-1])
     return X, Y  # liste avec l'interpolation
 
-
-def liste_aleatoire_spline(i, j, p, alpha):
+def liste_aleatoire_sin(i, j, p, alpha):
     x, y = liste_aleatoire(i, j, p)  # liste du bruit
     X = []  # création de nouvelle liste d'abcisses
     Y = []  # création de nouvelle liste d'ordonnés
     for k in range(p - 1):  # interpolation entre trois points de la liste
-        lissage_bis(x[k], x[k + 1], y[k], y[k + 1], X, Y, alpha)
+        lissage_sin(x[k], x[k + 1], y[k], y[k + 1], X, Y, alpha)
     X.append(x[-1])
     Y.append(y[-1])
     return X, Y  # liste avec l'interpolation
 
 
-def bruit_de_perlin1D_spline_random(i, p):  # fonction avec une seed aléatoire
-    return bruit_de_perlin1D_spline(i, randrange(10000))
+## Test 1
 
+# Paramètre
 
-##
-def bruit_de_perlin1D_spline(i, g, p, alpha):
-    x, y = bruit_de_perlin1D(i, p)  # liste du bruit
-    X = []  # création de nouvelle liste d'abcisses
-    Y = []  # création de nouvelle liste d'ordonnés
-    for k in range(p - 1):  # interpolation entre trois points de la liste
-        lissage_bis(x[k], x[k + 1], y[k], y[k + 1], X, Y, alpha)
-    X.append(x[-1])
-    Y.append(y[-1])
-    return X, Y
+g = randrange(10000)  # seed généré aléatoirement entr 0 et 10000
+i = 100  # taille de l'intervalle des abcisses, ici [0;50]
+p = 25  # nombre de points dans l'intervalle choisi aléatoirement
+alpha = 30  # nombre de points interpolés
 
+# Fonction
 
-def lissage_bis(a, b, A, B, X, Y, alpha):
-    dx = (b - a) / alpha
-    deltaX = 0
-    dy = 1 / alpha  # définition du pas
-    deltaY = 0  # initialisation
-    for j in range(alpha):
-        X.append(a + deltaX)  # ajout d'abcisse
-        Y.append(A + (B - A) * (6 * deltaY ** 5 - 15 * deltaY ** 4 + 10 * deltaY ** 3))  # ajout d'ordonné
-        deltaY += dy  # passage au point suivant
-        deltaX += dx
-    # tableau modifie avec effet de bord
+x, y = bruit_de_perlin1D_spline(i, p, alpha)
+z, t = bruit_de_perlin1D(i, p)
+u, p = bruit_de_perlin1D_sin(i, p, alpha)
 
+# Affichage
+plt.close("all")
+plt.plot(z, t, '* k', label='Points aléatoires')
+plt.plot(u, p, 'r', label='Interpolation sinusoidale')
+plt.plot(x, y, 'b', label='Interpolation cubique')
+plt.title('Bruit de Perlin en 1D (seed = ' + str(g) + ')')
+plt.xlabel('x')
+plt.ylabel('f(x)')
+plt.legend(loc=0)
+plt.savefig("1_Dimension/Bruit_de_Perlin_1D")
 
-if __name__ == "__main__":
-    ## Test 1
+## Test 2
 
-    # Paramètre
+# Paramètre
 
-    g = randrange(10000)  # seed généré aléatoirement entr 0 et 10000
-    i = 100  # taille de l'intervalle des abcisses, ici [0;50]
-    p = 25  # nombre de points dans l'intervalle choisi aléatoirement
-    alpha = 30  # nombre de points interpolés
+g = randrange(10000)  # seed généré aléatoirement entr 0 et 10000
+i = 100  # taille de l'intervalle des abcisses, ici [0;50]
+j = 150  # taille de l'intervalle des ordonnées, ici [0;75]
+p = 8  # nombre de points dans l'intervalle choisi aléatoirement
+alpha = 40  # nombre de points interpolés
 
-    # Fonction
+# Fonction
 
-    x, y = bruit_de_perlin1D_spline(i, g, p, alpha)
-    z, t = bruit_de_perlin1D(i, p)
-    u, p = bruit_de_perlin1D_sin(i, g, p, alpha)
+x, y = liste_aleatoire_spline(i, j, p, alpha)
+z, t = liste_aleatoire(i, j, p)
+u, p = liste_aleatoire_sin(i, j, p, alpha)
 
-    # Affichage
-    plt.close("all")
-    plt.plot(z, t, '* k', label='Points aléatoires')
-    plt.plot(u, p, 'r', label='Interpolation sinusoidale')
-    plt.plot(x, y, 'b', label='Interpolation cubique')
-    plt.title('Bruit de Perlin en 1D (seed = ' + str(g) + ')')
-    plt.xlabel('x')
-    plt.ylabel('f(x)')
-    plt.legend(loc=0)
-    plt.savefig("1_Dimension/Bruit_de_Perlin_1D")
+# Affichage
 
-    ## Test 2
-
-    # Paramètre
-
-    g = randrange(10000)  # seed généré aléatoirement entr 0 et 10000
-    i = 100  # taille de l'intervalle des abcisses, ici [0;50]
-    j = 150  # taille de l'intervalle des ordonnées, ici [0;75]
-    p = 8  # nombre de points dans l'intervalle choisi aléatoirement
-    alpha = 40  # nombre de points interpolés
-
-    # Fonction
-
-    x, y = liste_aleatoire_spline(i, j, p, alpha)
-    z, t = liste_aleatoire(i, j, p)
-    u, p = liste_aleatoire_sin(i, j, p, alpha)
-
-    # Affichage
-
-    plt.close("all")
-    plt.plot(z, t, '* k', label='Points aléatoires')
-    plt.plot(u, p, 'r', label='Interpolation sinusoidale')
-    plt.plot(x, y, 'b', label='Interpolation cubique')
-    plt.title('Bruit de Perlin en 1D (seed = ' + str(g) + ')')
-    plt.xlabel('x')
-    plt.ylabel('f(x)')
-    plt.legend(loc=0)
-    plt.savefig("1_Dimension/liste_aléatoire")
+plt.close("all")
+plt.plot(z, t, '* k', label='Points aléatoires')
+plt.plot(u, p, 'r', label='Interpolation sinusoidale')
+plt.plot(x, y, 'b', label='Interpolation cubique')
+plt.title('Bruit de Perlin en 1D (seed = ' + str(g) + ')')
+plt.xlabel('x')
+plt.ylabel('f(x)')
+plt.legend(loc=0)
+plt.savefig("1_Dimension/liste_aléatoire")

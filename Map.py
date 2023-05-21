@@ -275,20 +275,9 @@ def explose(C, x, z, y):
 
 def grotte(CarteListe3D, ax):
     u = 5
-    _, Xg = liste_aleatoire_spline1(Taille, Taille, u, alpha)
-    _, Zg = liste_aleatoire_spline1(Taille, hauteur, u, alpha)
-    _, Yg = liste_aleatoire_spline1(Taille, Taille, u, alpha)
-
-    '''
-    plt.close("all")
-    plt.plot(Ag, Zg, 'y', label='Sur Z')
-    plt.plot(Ag, Xg, 'r', label='Sur X')
-    plt.plot(Ag, Yg, 'b', label='Sur Y')
-    plt.title('Grotte (seed = ' + str(graine) + ')')
-    plt.legend(loc=0)
-    plt.savefig("Affichage_de_la_map/Grotte1_sur_les_axes ")
-    plt.close()
-    '''
+    _, Xg = bruit_de_perlin1D_spline(Taille, u, alpha)
+    _, Zg = bruit_de_perlin1D_spline(hauteur, u, alpha)
+    _, Yg = bruit_de_perlin1D_spline(Taille, u, alpha)
 
     ax.scatter(Xg, Yg, Zg, s=.8)
 
@@ -390,7 +379,7 @@ def fait_une_map(graine):
     # Bruit
     start = time.time()
     print("Start Bruit Perlin")
-    M  = Bruit_de_map(graine, Taille, hauteur)
+    M  = Bruit_de_map(graine, Taille, hauteur, pixels, precsision, amplitude)
     print(f"End Bruit Perlin TimeToFinish: {time.time() - start:.2f} s")
     print('')
 
@@ -455,11 +444,14 @@ def fait_une_map(graine):
 
 ## Paramètres de la carte
 
+precsision = 10
+amplitude = 128
+pixels=500
 alpha = 400
 Hneige = 60
 Heau = 150
 nbGrotte = 10
-Taille = 500
+Taille = 250
 hauteur = 256
 graine = randrange(10000)
 
