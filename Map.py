@@ -52,7 +52,7 @@ def Patron_carte(BruitP2D):
 ## Images
 
 def sauvegarder_grille(grille: list, g, i, nom_de_fichier: str) -> None:
-    echelle = ListedColormap(['white', 'gray', 'green', 'brown', 'blue', 'yellow', 'black', 'red', 'aqua', 'gold', '0.3', '0.8','beige'], 12)
+    echelle = ListedColormap(['#d7edf8', 'gray', '#007412', 'brown', 'blue', '#eeec7e', 'black', 'red', '#00fdbd', 'gold', '0.3', 'white','#c9d279'], 12)
     plt.matshow(grille, cmap=echelle, vmin=0, vmax=12)
     plt.title(f"x={i} g={g}")  # 'x=' + str(i) + ' g=' + str(g)
     plt.xlabel('y')
@@ -274,7 +274,7 @@ def explose(C, x, z, y):
             C[x][z - 1][y - 2] = 0
 
 def grotte(CarteListe3D, ax):
-    u = 5
+    u = 7
     _, Xg = bruit_de_perlin1D_spline(Taille, u, alpha)
     _, Zg = bruit_de_perlin1D_spline(hauteur, u, alpha)
     _, Yg = bruit_de_perlin1D_spline(Taille, u, alpha)
@@ -446,12 +446,12 @@ def fait_une_map(graine):
 
 precsision = 10
 amplitude = 128
-pixels=500
-alpha = 400
+pixels = 4000
+alpha = 100
 Hneige = 60
 Heau = 150
-nbGrotte = 10
-Taille = 250
+nbGrotte = 8
+Taille = 500
 hauteur = 256
 graine = randrange(10000)
 
