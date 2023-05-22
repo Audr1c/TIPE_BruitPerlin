@@ -74,9 +74,9 @@ def gif():
 ## Minerais
 
 def diamant(C, x, z, y):
-    for j in range(1):
-        for k in range(1):
-            for i in range(1):
+    for j in range(2):
+        for k in range(2):
+            for i in range(2):
                 if C[x+i][z+k][y+j]==1 and random.random()<0.4:
                     C[x+i][z+k][y+j] = 8
 
@@ -330,7 +330,7 @@ def Percolation(C, Robinet):
         if y != taille - 1 and C[x][z][y + 1] == 0:
             Robinet.append((x, y + 1, z))
             C[x][z][y + 1] = 4
-        if z - 1 >= hauteur // 3 and C[x][z - 1][y] == 0 and z > Heau:
+        if z - 1 >= hauteur // 3 and C[x][z - 1][y] == 0 and z > Heau and OverFlow:
             Robinet.append((x, y, z - 1))
             C[x][z - 1][y] = 4
         Robinet.pop(0)  # Enlève l'élément qui a été étudié pour que la boucle finisse
@@ -448,13 +448,14 @@ precsision = 10
 amplitude = 128
 pixels = 4000
 NbPt = 10
-alpha = 100
+alpha = 50
 Hneige = 60
 Heau = 150
 nbGrotte = 8
 taille = 500
 hauteur = 256
 graine = randrange(10000)
+OverFlow=False
 
 ## Création de la carte
 

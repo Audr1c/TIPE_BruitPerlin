@@ -10,14 +10,11 @@ import matplotlib.pyplot as plt
 def plus_ou_moins():
     return (-1) ** (random.randint(0, 1))
 
-
 def random_int():
     return random.randint(0, 3)  # renvoie un entier aléatoire entre 0 et 4
 
-
 def random1(u):
     return random.random()*u * plus_ou_moins()
-
 
 ## Interpolation
 
@@ -148,7 +145,6 @@ def liste_aleatoire_sin(i, j, p, alpha):
     X.append(x[-1])
     Y.append(y[-1])
     return X, Y  # liste avec l'interpolation
-
 
 ## Test 1
 
