@@ -89,7 +89,6 @@ def Bruit_de_map(graine, taille, hauteur, pixels, precsision, amplitude):
     for i in range(taille):
         D[i] = resultat[i][0:taille]
 
-    echelle = ListedColormap(['#141872','#0970a6', '#119fe9','#eeec7e', '#5df147', '#38be2a','#336e1c','white'], 7)
     plt.imshow(D, origin='upper', cmap='gray')
     plt.xlabel('Y')
     plt.ylabel('X')
@@ -117,13 +116,14 @@ def Bruit_de_map(graine, taille, hauteur, pixels, precsision, amplitude):
                 T[i,j]=6
             elif 60>=s:
                 T[i,j]=7
+    
+    echelle = ListedColormap(['#141872','#0970a6', '#119fe9','#eeec7e', '#5df147', '#38be2a','#336e1c','white'], 7)
     plt.close("all")
     plt.imshow(T, origin='upper', cmap=echelle, vmin=0, vmax=7)
     plt.xlabel('Y')
     plt.ylabel('X')
-    plt.colorbar()
-    plt.title('Bruit de Perlin en 2D (seed = ' + str(graine) + ')')
-    plt.savefig(f"2_Dimensions/Map.jpg")
+    plt.title('Carte au Trésor (seed = ' + str(graine) + ')')
+    plt.savefig(f"2_Dimensions/Carte_au_Trésor.jpg")
 
     plt.close("all")
     ax = plt.axes(projection="3d")
