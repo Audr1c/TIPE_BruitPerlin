@@ -337,6 +337,25 @@ def Percolation(C, Robinet):
         print(f"\r Longueur de Robinet : {len(Robinet)}", end="")
     print()
 
+## Arbre
+
+def Liste_arbre():
+    L_arbre=[]
+    Bruit_arbre=Perlin(10, (taille**2)//2500, (taille**2)//2500)
+    Bruit_arbre += 0.5
+    Bruit_arbre *= 4
+    for i in range(taille//50):
+        for j in range(taille//50):
+            arbre=0
+            d=Bruit_arbre[i,j]*10
+            while arbre < d:
+                x=i*50+randrange(50)
+                y=j*50+randrange(50)
+                if (x,y) not in L_arbre:
+                    L_arbre.append((x,y))
+                    arbre+=1
+    print(len(L_arbre))
+
 ## Conversion pour Minecraft
 
 correspondanceID = {
@@ -379,7 +398,7 @@ def Fait_une_Map(graine):
     # Bruit
     start = time.time()
     print("Start Bruit Perlin")
-    M  = Bruit_de_map(graine, taille, hauteur, pixels, precsision, amplitude)
+    M  = Bruit_de_map(graine, taille, pixels, precsision, amplitude)
     print(f"End Bruit Perlin TimeToFinish: {time.time() - start:.2f} s")
     print('')
 
@@ -417,6 +436,10 @@ def Fait_une_Map(graine):
     print(f"End Eau TimeToFinish: {time.time() - start:.2f} s")
     print('')
 
+    # Arbre
+
+    Liste_arbre()
+
     # Frame
     start = time.time()
     print("Start Frame")
@@ -444,9 +467,9 @@ def Fait_une_Map(graine):
 
 ## Paramètres de la carte
 
-precsision = 10
+precsision = 5
 amplitude = 128
-pixels = 4000
+pixels = 1000
 NbPt = 10
 alpha = 50
 Hneige = 60
@@ -456,6 +479,9 @@ taille = 500
 hauteur = 256
 graine = randrange(10000)
 OverFlow=False
+
+if pixels < taille:
+    raise ValueError("TG")
 
 ## Création de la carte
 

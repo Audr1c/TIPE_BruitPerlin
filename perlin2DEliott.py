@@ -3,6 +3,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from tqdm import trange
 from matplotlib.colors import ListedColormap
+import imageio
 
 ## Fonctions utiles
 def lerp(a, b, x):
@@ -21,7 +22,7 @@ def gradient(c, x, y):
 
 ## Bruit de Perlin
 
-def Perlin(precsision, pixels):
+def Perlin(precsision, pixels, taille):
     tab = np.linspace(1, precsision, pixels, endpoint=False)
 
     # création de grille en utilisant le tableau 1d
@@ -30,7 +31,7 @@ def Perlin(precsision, pixels):
     # On crée une permutation en fonction du nb de pixels
     # On utilise la fonction seed parce que numpy chiale si on le fait pas
 
-    perm = np.arange(16 * (precsision // 10), dtype=int)
+    perm = np.arange(16 * (precsision // 5), dtype=int)
     np.random.shuffle(perm)
 
     # on fait un tableau 2d qu'on applatit
@@ -64,20 +65,74 @@ def Perlin(precsision, pixels):
 
     """
     """
+    D = np.zeros((taille, taille))
+    for i in range(taille):
+        D[i] = resultat[i][0:taille]
 
-    return resultat
+    return D
 
-def Bruit_de_map(graine, taille, hauteur, pixels, precsision, amplitude):
+def Bruit_de_map(graine, taille, pixels, precsision, amplitude):
+    frames_bruit = []
+    frames_carte = []
     resultats = []
-    for _ in trange(7):
-        temporaire = Perlin(precsision, pixels)
+    echelle = ListedColormap(['#141872','#0970a6', '#119fe9','#eeec7e', '#5df147', '#38be2a','#336e1c','white'], 7)
+    for k in trange(1,8):
+        temporaire = Perlin(precsision, pixels, taille)
         temporaire += 0.5
         temporaire *= amplitude
 
         precsision *= 2
         amplitude /= 2
-
+        
         resultats.append(temporaire)
+        
+        plt.imshow(temporaire, origin='upper', cmap='gray')
+        plt.xlabel('Y')
+        plt.ylabel('X')
+        plt.colorbar()
+        plt.title('Bruit de Perlin en 2D (seed = ' + str(graine) + ')')
+        plt.savefig(f"2_Dimensions/Bruits/Bruit_Amplitude_{amplitude}.jpg")
+
+
+        T = np.array([[0 for i in range(taille)] for j in range(taille)])
+        Temp2 = sum(resultats)
+        for i in range(taille):
+            for j in range(taille):
+                s=Temp2[i][j]
+                if 256>=s>180:
+                    T[i,j]=0
+                elif 180>=s>160:
+                    T[i,j]=1
+                elif 160>=s>150:
+                    T[i,j]=2
+                elif 150>=s>147:
+                    T[i,j]=3
+                elif 147>=s>120:
+                    T[i,j]=4
+                elif 120>=s>90:
+                    T[i,j]=5
+                elif 90>=s>60:
+                    T[i,j]=6
+                elif 60>=s:
+                    T[i,j]=7
+    
+        
+        plt.close("all")
+        plt.imshow(T, origin='upper', cmap=echelle, vmin=0, vmax=7)
+        plt.xlabel('Y')
+        plt.ylabel('X')
+        plt.title('Carte au Trésor (seed = ' + str(graine) + ')')
+        plt.savefig(f"2_Dimensions/Cartes/carte_{k}.jpg")
+        image_bruit = imageio.v2.imread(f"2_Dimensions/Bruits/Bruit_Amplitude_{amplitude}.jpg")
+        frames_bruit.append(image_bruit)
+        image_carte = imageio.v2.imread(f"2_Dimensions/Cartes/carte_{k}.jpg")
+        frames_carte.append(image_carte)
+    imageio.mimsave(f"2_Dimensions/Carte_au_Trésor.gif", frames_carte, duration=500)
+    imageio.mimsave(f"2_Dimensions/GIF_bruit.gif", frames_bruit, duration=500)
+
+
+
+
 
     resultat = sum(resultats)
     tab2 = np.linspace(0, taille, taille, endpoint=False)
@@ -85,45 +140,14 @@ def Bruit_de_map(graine, taille, hauteur, pixels, precsision, amplitude):
     # création de grille en utilisant le tableau 1d
     X, Y = np.meshgrid(tab2, tab2)
 
-    D = np.zeros((taille, taille))
-    for i in range(taille):
-        D[i] = resultat[i][0:taille]
-
-    plt.imshow(D, origin='upper', cmap='gray')
+    plt.imshow(resultat, origin='upper', cmap='gray')
     plt.xlabel('Y')
     plt.ylabel('X')
     plt.colorbar()
     plt.title('Bruit de Perlin en 2D (seed = ' + str(graine) + ')')
     plt.savefig(f"2_Dimensions/Height_Map.jpg")
 
-    T = np.array([[0 for i in range(taille)] for j in range(taille)])
-    for i in range(taille):
-        for j in range(taille):
-            s=D[i,j]
-            if 256>=s>180:
-                T[i,j]=0
-            elif 180>=s>160:
-                T[i,j]=1
-            elif 160>=s>150:
-                T[i,j]=2
-            elif 150>=s>147:
-                T[i,j]=3
-            elif 147>=s>120:
-                T[i,j]=4
-            elif 120>=s>90:
-                T[i,j]=5
-            elif 90>=s>60:
-                T[i,j]=6
-            elif 60>=s:
-                T[i,j]=7
     
-    echelle = ListedColormap(['#141872','#0970a6', '#119fe9','#eeec7e', '#5df147', '#38be2a','#336e1c','white'], 7)
-    plt.close("all")
-    plt.imshow(T, origin='upper', cmap=echelle, vmin=0, vmax=7)
-    plt.xlabel('Y')
-    plt.ylabel('X')
-    plt.title('Carte au Trésor (seed = ' + str(graine) + ')')
-    plt.savefig(f"2_Dimensions/Carte_au_Trésor.jpg")
 
     plt.close("all")
     ax = plt.axes(projection="3d")
@@ -131,8 +155,8 @@ def Bruit_de_map(graine, taille, hauteur, pixels, precsision, amplitude):
     ax.set_ylabel('Y')
     ax.set_zlabel('Z')
     ax.invert_zaxis()
-    ax.plot_surface(X, Y, D, cmap='gray')
+    ax.plot_surface(X, Y, resultat, cmap='gray')
     plt.title('Heightmap (seed = ' + str(graine) + ')')
     plt.savefig("2_Dimensions/Height_map")
 
-    return D
+    return resultat
