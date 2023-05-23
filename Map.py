@@ -52,8 +52,8 @@ def Patron_carte(BruitP2D):
 ## Images
 
 def sauvegarder_grille(grille: list, g, i, nom_de_fichier: str) -> None:
-    echelle = ListedColormap(['#d7edf8', 'gray', '#007412', 'brown', 'blue', '#e9f05d', 'black', 'red', '#00fdbd', 'gold', '0.3', 'white','#c9d279'], 12)
-    plt.matshow(grille, cmap=echelle, vmin=0, vmax=12)
+    echelle = ListedColormap(['#d7edf8', 'gray', '#007412', 'brown', 'blue', '#e9f05d', 'black', 'red', '#00fdbd', 'gold', '0.3', 'white','#c9d279','#095a03'], 13)
+    plt.matshow(grille, cmap=echelle, vmin=0, vmax=13)
     plt.title(f"x={i} g={g}")  # 'x=' + str(i) + ' g=' + str(g)
     plt.xlabel('y')
     plt.ylabel('z')
@@ -354,7 +354,13 @@ def Liste_arbre():
                 if (x,y) not in L_arbre:
                     L_arbre.append((x,y))
                     arbre+=1
-    print(len(L_arbre))
+    return L_arbre
+
+def Pantation(C,L_arbre,BdP):
+    for (x,y) in L_arbre:
+        z=int(BdP[x,y])
+        if z<Heau-3:
+                C[x][z-1][y]=13
 
 ## Conversion pour Minecraft
 
@@ -372,6 +378,7 @@ correspondanceID = {
                     10: 7,  # Bedrock
                     11: 80,  # Snow
                     12: 15,  # Iron
+                    13: 17  #Wood
                     }
 
 def CreteMapSchem(grid: list, deltaX: int, deltaY: int, deltaZ: int, graine):
@@ -438,7 +445,8 @@ def Fait_une_Map(graine):
 
     # Arbre
 
-    Liste_arbre()
+    L_arbre=Liste_arbre()
+    Pantation(Map,L_arbre,M)
 
     # Frame
     start = time.time()
