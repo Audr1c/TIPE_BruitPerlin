@@ -1,11 +1,12 @@
 ## Importations
 
 import time
+import os
 import numpy
 from numpy.random import rand
 from matplotlib.colors import ListedColormap
 import imageio
-from tqdm import trange
+from tqdm import trange, tqdm
 from perlin2DEliott import *
 from perlin1DEliott import *
 from nbtschematic import SchematicFile
@@ -49,15 +50,19 @@ def Patron_carte(BruitP2D):
 
     return CarteListe3D, sable, Liste_o
 
+def in_Patron(x, y, z):
+    return 0<=x<taille and 0<=y<taille and 0<=z<hauteur
+
 ## Images
 
 def sauvegarder_grille(grille: list, g, i, nom_de_fichier: str) -> None:
-    echelle = ListedColormap(['#d7edf8', 'gray', '#007412', 'brown', 'blue', 'yellow', 'black', 'red', '#00fdbd', 'gold', '0.3', 'white','#c9d279','#095a03'], 13)
-    plt.matshow(grille, cmap=echelle, vmin=0, vmax=13)
+    echelle = ListedColormap(['#d7edf8', 'gray', '#007412', 'brown', 'blue', 'yellow', 'black', 'red', '#00fdbd', 'gold', '0.3', 'white','#c9d279','#095a03','#642100'], 14)
+    plt.matshow(grille, cmap=echelle, vmin=0, vmax=14)
     plt.title(f"x={i} g={g}")  # 'x=' + str(i) + ' g=' + str(g)
     plt.xlabel('y')
     plt.ylabel('z')
     plt.savefig(nom_de_fichier)
+    plt.close()
 
 def frames(CarteListe3D):
     for i in trange(taille):
@@ -67,9 +72,14 @@ def frames(CarteListe3D):
 def gif():
     frames = []
     for i in trange(taille):
-        image = imageio.v2.imread(f"Affichage_de_la_map/Frame/TIPE{i}.jpg")
+        file_name = f"Affichage_de_la_map/Frame/TIPE{i}.jpg"
+        if os.path.exists(file_name):
+            image = imageio.v2.imread(file_name)
+            os.remove(file_name)
+        else:
+            raise Exception(f"File Not found {file_name}")
         frames.append(image)
-    imageio.mimsave(f"Affichage_de_la_map/GIF.gif", frames, duration=7)
+    imageio.mimsave(f"Affichage_de_la_map/GIF.gif", frames, duration=1)
 
 ## Minerais
 
@@ -341,29 +351,74 @@ def Percolation(C, Robinet):
 
 def Liste_arbre():
     L_arbre=[]
-    Bruit_arbre=Perlin(10, (taille**2)//2500, (taille**2)//2500)
+    Bruit_arbre=Perlin(10, taille//20, taille//20)
     Bruit_arbre += 0.5
     Bruit_arbre *= 4
-    for i in range(taille//50):
-        for j in range(taille//50):
+    for i in range(taille//20):
+        for j in range(taille//20):
             arbre=0
-            d=Bruit_arbre[i,j]*10
+            d=Bruit_arbre[i,j]*8
             while arbre < d:
-                x=i*50+randrange(50)
-                y=j*50+randrange(50)
+                x=i*20+randrange(20)
+                y=j*20+randrange(20)
                 if (x,y) not in L_arbre:
                     L_arbre.append((x,y))
                     arbre+=1
+    orig_map=plt.cm.get_cmap('gray')
+    reversed_map = orig_map.reversed()
+    plt.close()
+    plt.imshow(Bruit_arbre, origin='upper', cmap=reversed_map)
+    plt.xlabel('Y')
+    plt.ylabel('X')
+    plt.colorbar()
+    plt.title('Bruit des arbres en 2D (seed = ' + str(graine) + ')')
+    plt.savefig(f"2_Dimensions/Bruits_arbre.jpg")
+    plt.close()
     return L_arbre
 
-def Pantation(C,L_arbre,BdP):
-    for (x,y) in L_arbre:
+def Plantation(C, L_arbre, BdP, Cat):
+    for (x,y) in tqdm(L_arbre):
         z=int(BdP[x,y])
         if z<Heau-3:
-                C[x][z-1][y]=13
+                Ecosia(C, x, y, BdP, Cat)
 
-def Ecosia(tkt):
-    return tkt
+    echelle = ListedColormap(['#141872','#0970a6', '#119fe9','#eeec7e', '#5df147', '#38be2a','#336e1c','#004704','white'], 8)
+    plt.close("all")
+    plt.imshow(Cat, origin='upper', cmap=echelle, vmin=0, vmax=8)
+    plt.xlabel('Y')
+    plt.ylabel('X')
+    plt.title('Carte au Trésor (seed = ' + str(graine) + ')')
+    plt.savefig(f"2_Dimensions/Carte_au_Trésor.jpg")
+
+def Ecosia(C, x, y, BdP, Cat):
+    z=int(BdP[x,y])
+    coin_1=[(2, 2), (-2, 2), (2, -2), (-2, -2)]
+    coin_2=[(1, 1), (-1, 1), (1, -1), (-1, -1)]
+    
+    # Tronc 
+    hauteur_arb = randrange(4,8) # [4,7]
+    for _ in range(hauteur_arb):
+        z-=1
+        C[x][z][y]=14
+    Cat[x][y]=7
+    # Feuilles bas
+    for k in range(1,3):
+        for i in range(-2, 3):
+            for j in range(-2, 3):
+                if (random.random()<2/3 or not (i,j) in coin_1) and in_Patron(x+i, y+j, z+k) and (i,j)!=(0,0):
+                        C[x+i][z+k][y+j]=13
+                        Cat[x+i][y+j]=7
+
+
+    # Feuilles hauts
+    for i in range(-1, 2):
+        for j in range(-1, 2):
+            if (random.random()<1/4 or not (i,j) in coin_2) and in_Patron(x+i, y+j, z-1) and (i,j)!=(0,0):
+                    C[x+i][z][y+j]=13
+    for i in range(-1, 2):
+        for j in range(-1, 2):
+            if (i,j) not in coin_2 and in_Patron(x+i, y+j, z-1):
+                    C[x+i][z-1][y+j]=13
 
 ## Conversion pour Minecraft
 
@@ -381,7 +436,8 @@ correspondanceID = {
                     10: 7,  # Bedrock
                     11: 80,  # Snow
                     12: 15,  # Iron
-                    13: 17  #Wood
+                    13 : 18,  # Leaves
+                    14 : 17  # Wood
                     }
 
 def CreteMapSchem(grid: list, deltaX: int, deltaY: int, deltaZ: int, graine):
@@ -408,14 +464,14 @@ def Fait_une_Map(graine):
     # Bruit
     start = time.time()
     print("Start Bruit Perlin")
-    M  = Bruit_de_map(graine, taille, pixels, precsision, amplitude)
+    BdP, Cat = Bruit_de_map(graine, taille, pixels, precsision, amplitude)
     print(f"End Bruit Perlin TimeToFinish: {time.time() - start:.2f} s")
     print('')
 
     # Patron
     start = time.time()
     print("Start Patron")
-    Map, Liste_sable, Liste_o = Patron_carte(M)
+    Map, Liste_sable, Liste_o = Patron_carte(BdP)
     print(f"End Patron TimeToFinish: {time.time() - start:.2f} s")
     print('')
 
@@ -448,8 +504,13 @@ def Fait_une_Map(graine):
 
     # Arbre
 
+    start = time.time()
+    print("Start Arbre") 
     L_arbre=Liste_arbre()
-    Pantation(Map,L_arbre,M)
+    Plantation(Map,L_arbre,BdP,Cat)
+
+    print(f"End Arbre TimeToFinish: {time.time() - start:.2f} s")
+    print('')
 
     # Frame
     start = time.time()
@@ -480,12 +541,12 @@ def Fait_une_Map(graine):
 
 precsision = 5
 amplitude = 128
-pixels = 1000
+pixels = 2000
 NbPt = 10
 alpha = 50
 Hneige = 60
 Heau = 150
-nbGrotte = 8
+nbGrotte = 12
 taille = 500
 hauteur = 256
 graine = randrange(10000)

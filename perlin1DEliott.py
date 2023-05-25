@@ -152,13 +152,16 @@ def liste_aleatoire_sin(i, j, p, alpha):
 
 g = randrange(10000)  # seed généré aléatoirement entr 0 et 10000
 i = 100  # taille de l'intervalle des abcisses, ici [0;50]
-p = 25  # nombre de points dans l'intervalle choisi aléatoirement
+p = 18  # nombre de points dans l'intervalle choisi aléatoirement
 alpha = 30  # nombre de points interpolés
 
 # Fonction
 
+random.seed(g)
 x, y = bruit_de_perlin1D_spline(i, p, alpha)
+random.seed(g)
 z, t = bruit_de_perlin1D(i, p)
+random.seed(g)
 u, p = bruit_de_perlin1D_sin(i, p, alpha)
 
 # Affichage
@@ -184,8 +187,11 @@ alpha = 40  # nombre de points interpolés
 
 # Fonction
 
+random.seed(g)
 x, y = liste_aleatoire_spline(i, j, p, alpha)
+random.seed(g)
 z, t = liste_aleatoire(i, j, p)
+random.seed(g)
 u, p = liste_aleatoire_sin(i, j, p, alpha)
 
 # Affichage

@@ -75,12 +75,12 @@ def Bruit_de_map(graine, taille, pixels, precsision, amplitude):
     frames_bruit = []
     frames_carte = []
     resultats = []
-    echelle = ListedColormap(['#141872','#0970a6', '#119fe9','#eeec7e', '#5df147', '#38be2a','#336e1c','white'], 7)
+    echelle = ListedColormap(['#141872','#0970a6', '#119fe9','#eeec7e', '#5df147', '#38be2a','#336e1c','#004704','white'], 8)
     orig_map=plt.cm.get_cmap('gray')
     reversed_map = orig_map.reversed()
-    for k in trange(1,9):
+    for Num_Bruit in trange(1,9):
         temporaire = Perlin(precsision, pixels, taille)
-        if k==1:
+        if Num_Bruit==1:
             temporaire += 1
 
         temporaire *= amplitude
@@ -92,47 +92,47 @@ def Bruit_de_map(graine, taille, pixels, precsision, amplitude):
         plt.ylabel('X')
         plt.colorbar()
         plt.title('Bruit de Perlin en 2D (seed = ' + str(graine) + ')')
-        plt.savefig(f"2_Dimensions/Bruits/Bruit_Amplitude_{amplitude}.jpg")
+        plt.savefig(f"2_Dimensions/Bruits/Bruit_{Num_Bruit}_Amplitudes.jpg")
 
 
-        T = np.array([[0 for i in range(taille)] for j in range(taille)])
+        Cat = np.array([[0 for i in range(taille)] for j in range(taille)])
         Temp2 = sum(resultats)
         for i in range(taille):
             for j in range(taille):
                 s=Temp2[i][j]
                 if 256>=s>180:
-                    T[i,j]=0
-                elif 180>=s>160:
-                    T[i,j]=1
-                elif 160>=s>150:
-                    T[i,j]=2
+                    Cat[i,j]=0
+                elif 180>=s>165:
+                    Cat[i,j]=1
+                elif 165>=s>150:
+                    Cat[i,j]=2
                 elif 150>=s>147:
-                    T[i,j]=3
+                    Cat[i,j]=3
                 elif 147>=s>120:
-                    T[i,j]=4
+                    Cat[i,j]=4
                 elif 120>=s>90:
-                    T[i,j]=5
+                    Cat[i,j]=5
                 elif 90>=s>60:
-                    T[i,j]=6
+                    Cat[i,j]=6
                 elif 60>=s:
-                    T[i,j]=7
+                    Cat[i,j]=8
     
         
         plt.close("all")
-        plt.imshow(T, origin='upper', cmap=echelle, vmin=0, vmax=7)
+        plt.imshow(Cat, origin='upper', cmap=echelle, vmin=0, vmax=7)
         plt.xlabel('Y')
         plt.ylabel('X')
         plt.title('Carte au Trésor (seed = ' + str(graine) + ')')
-        plt.savefig(f"2_Dimensions/Cartes/carte_{k}.jpg")
-        image_bruit = imageio.v2.imread(f"2_Dimensions/Bruits/Bruit_Amplitude_{amplitude}.jpg")
+        plt.savefig(f"2_Dimensions/Cartes/carte_{Num_Bruit}.jpg")
+        image_bruit = imageio.v2.imread(f"2_Dimensions/Bruits/Bruit_{Num_Bruit}_Amplitudes.jpg")
         frames_bruit.append(image_bruit)
-        image_carte = imageio.v2.imread(f"2_Dimensions/Cartes/carte_{k}.jpg")
+        image_carte = imageio.v2.imread(f"2_Dimensions/Cartes/carte_{Num_Bruit}.jpg")
         frames_carte.append(image_carte)
 
         precsision *= 2
         amplitude //= 2
 
-    imageio.mimsave(f"2_Dimensions/Carte_au_Trésor.gif", frames_carte, duration=500)
+    imageio.mimsave(f"2_Dimensions/Evolution_Carte.gif", frames_carte, duration=500)
     imageio.mimsave(f"2_Dimensions/Tout_les_bruits.gif", frames_bruit, duration=500)
 
 
@@ -164,4 +164,4 @@ def Bruit_de_map(graine, taille, pixels, precsision, amplitude):
     plt.title('Heightmap (seed = ' + str(graine) + ')')
     plt.savefig("2_Dimensions/Height_map")
 
-    return resultat
+    return resultat,Cat
