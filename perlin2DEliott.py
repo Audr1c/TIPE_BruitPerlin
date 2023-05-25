@@ -1,8 +1,11 @@
+## Importation
 import numpy as np
 import matplotlib.pyplot as plt
 from tqdm import trange
+from matplotlib.colors import ListedColormap
 
 
+## Fonctions utiles
 def lerp(a, b, x):
     "interpolation linéaire (produit scalaire)"
     return a + x * (b - a)
@@ -20,16 +23,10 @@ def gradient(c, x, y):
     return co_gradient[:, :, 0] * x + co_gradient[:, :, 1] * y
 
 
-def f(x, y, M):
-    return M[x, y]
+## Bruit de Perlin
 
-
-def r(x, y):
-    return x * 2 + y ** 2
-
-
-def perlin(precsision, taille):
-    tab = np.linspace(1, precsision, taille, endpoint=False)
+def Perlin(precsision, pixels, nb_lissage_bresilien):
+    tab = np.linspace(1, precsision, pixels, endpoint=False)
 
     # création de grille en utilisant le tableau 1d
     x, y = np.meshgrid(tab, tab)
@@ -37,7 +34,7 @@ def perlin(precsision, taille):
     # On crée une permutation en fonction du nb de pixels
     # On utilise la fonction seed parce que numpy chiale si on le fait pas
 
-    perm = np.arange(16 * (precsision // 10), dtype=int)
+    perm = np.arange(16 * (precsision // 3), dtype=int)
     np.random.shuffle(perm)
 
     # on fait un tableau 2d qu'on applatit
@@ -50,7 +47,9 @@ def perlin(precsision, taille):
     # normes des vecteurs
     xg, yg = x - xi, y - yi
     # on lisse les normes (algo 2d perlin tu coco)
-    xf, yf = lissage(xg), lissage(yg)
+    xf, yf = (lissage(xg)), (lissage(yg))
+    for _ in range(nb_lissage_bresilien - 1):
+        xf, yf = lissage(xf), lissage(yf)
 
     # C'est le moment où on chiale
     # On chope les coords vecteur dans les 4 coins de la grille
@@ -75,47 +74,79 @@ def perlin(precsision, taille):
     return resultat
 
 
-def perlinfzej(graine, taille, hauteur):
-    precsision = 10
-    amplitude = 128
-    resultats = []
-    for _ in trange(7):
-        temporaire = perlin(precsision, 3000)
-        temporaire += 0.5
-        temporaire *= amplitude
-
-        precsision *= 2
-        amplitude /= 2
-
-        resultats.append(temporaire)
-
-    resultat = sum(resultats)
-    tab2 = np.linspace(0, taille, taille, endpoint=False)
-
-    # création de grille en utilisant le tableau 1d
-    X, Y = np.meshgrid(tab2, tab2)
-
+def convertTo(tableau, taille, graine, octave):
     D = np.zeros((taille, taille))
     for i in range(taille):
-        D[i] = resultat[i][0:taille]
-    autre = D / taille
-    autre *= 7
+        D[i] = tableau[i][0:taille]
 
+    echelle = ListedColormap(['#141872', '#0970a6', '#119fe9', '#eeec7e', '#5df147', '#38be2a', '#336e1c', 'white'], 7)
     plt.imshow(D, origin='upper', cmap='gray')
     plt.xlabel('Y')
     plt.ylabel('X')
     plt.colorbar()
     plt.title('Bruit de Perlin en 2D (seed = ' + str(graine) + ')')
-    plt.savefig(f"2_Dimensions/Height_Map.jpg")
-    T = np.array([[D[i, j] for i in range(taille)] for j in range(taille)])
+    plt.savefig(f"2_Dimensions/Height_Map_oct{octave}.jpg")
+
+    T = np.array([[0 for i in range(taille)] for j in range(taille)])
+    for i in range(taille):
+        for j in range(taille):
+            s = D[i, j]
+            if 256 >= s > 180:
+                T[i, j] = 0
+            elif 180 >= s > 160:
+                T[i, j] = 1
+            elif 160 >= s > 150:
+                T[i, j] = 2
+            elif 150 >= s > 147:
+                T[i, j] = 3
+            elif 147 >= s > 120:
+                T[i, j] = 4
+            elif 120 >= s > 90:
+                T[i, j] = 5
+            elif 90 >= s > 60:
+                T[i, j] = 6
+            elif 60 >= s:
+                T[i, j] = 7
+    plt.close("all")
+    plt.imshow(T, origin='upper', cmap=echelle, vmin=0, vmax=7)
+    plt.xlabel('Y')
+    plt.ylabel('X')
+    plt.colorbar()
+    plt.title('Bruit de Perlin en 2D (seed = ' + str(graine) + ')')
+    plt.savefig(f"2_Dimensions/Map_oct{octave}.jpg")
+
+    return D
+
+
+def Bruit_de_map(graine, taille, hauteur, pixels, precsision, amplitude, nb_lissage_bresilien):
+    resultats = []
+    for octave in trange(7):
+        temporaire = Perlin(precsision, pixels, nb_lissage_bresilien)
+        temporaire += 0.5
+        temporaire *= amplitude
+
+        #pixels = int((pixels - taille) // 1.1 + taille)
+        precsision *= 2
+        amplitude /= 2
+
+        resultats.append(temporaire[0:taille, 0:taille].copy())
+        convertTo(temporaire, taille, graine, octave)
+
+
+    D = convertTo(sum(resultats), taille, graine, "finished")
+    tab2 = np.linspace(0, taille, taille, endpoint=False)
+
+    # création de grille en utilisant le tableau 1d
+    X, Y = np.meshgrid(tab2, tab2)
+
     plt.close("all")
     ax = plt.axes(projection="3d")
     ax.set_xlabel('X')
     ax.set_ylabel('Y')
     ax.set_zlabel('Z')
     ax.invert_zaxis()
-    ax.plot_surface(X, Y, T, cmap='gray')
+    ax.plot_surface(X, Y, D, cmap='gray')
     plt.title('Heightmap (seed = ' + str(graine) + ')')
     plt.savefig("2_Dimensions/Height_map")
 
-    return D, autre
+    return D
