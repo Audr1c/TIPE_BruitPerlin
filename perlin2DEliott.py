@@ -76,17 +76,18 @@ def Bruit_de_map(graine, taille, pixels, precsision, amplitude):
     frames_carte = []
     resultats = []
     echelle = ListedColormap(['#141872','#0970a6', '#119fe9','#eeec7e', '#5df147', '#38be2a','#336e1c','white'], 7)
-    for k in trange(1,8):
+    orig_map=plt.cm.get_cmap('gray')
+    reversed_map = orig_map.reversed()
+    for k in trange(1,9):
         temporaire = Perlin(precsision, pixels, taille)
-        temporaire += 0.5
-        temporaire *= amplitude
+        if k==1:
+            temporaire += 1
 
-        precsision *= 2
-        amplitude /= 2
+        temporaire *= amplitude
         
         resultats.append(temporaire)
         
-        plt.imshow(temporaire, origin='upper', cmap='gray')
+        plt.imshow(temporaire, origin='upper', cmap=reversed_map)
         plt.xlabel('Y')
         plt.ylabel('X')
         plt.colorbar()
@@ -127,8 +128,12 @@ def Bruit_de_map(graine, taille, pixels, precsision, amplitude):
         frames_bruit.append(image_bruit)
         image_carte = imageio.v2.imread(f"2_Dimensions/Cartes/carte_{k}.jpg")
         frames_carte.append(image_carte)
+
+        precsision *= 2
+        amplitude //= 2
+
     imageio.mimsave(f"2_Dimensions/Carte_au_Trésor.gif", frames_carte, duration=500)
-    imageio.mimsave(f"2_Dimensions/GIF_bruit.gif", frames_bruit, duration=500)
+    imageio.mimsave(f"2_Dimensions/Tout_les_bruits.gif", frames_bruit, duration=500)
 
 
 
@@ -140,12 +145,12 @@ def Bruit_de_map(graine, taille, pixels, precsision, amplitude):
     # création de grille en utilisant le tableau 1d
     X, Y = np.meshgrid(tab2, tab2)
 
-    plt.imshow(resultat, origin='upper', cmap='gray')
+    plt.imshow(resultat, origin='upper', cmap=reversed_map)
     plt.xlabel('Y')
     plt.ylabel('X')
     plt.colorbar()
     plt.title('Bruit de Perlin en 2D (seed = ' + str(graine) + ')')
-    plt.savefig(f"2_Dimensions/Height_Map.jpg")
+    plt.savefig(f"2_Dimensions/Bruit_map.jpg")
 
     
 

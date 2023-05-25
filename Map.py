@@ -109,11 +109,11 @@ def gold(C, x, z, y):
                     C[x+i][z+k][y+j] = 9
 
 def minerais(CarteListe3D, ax):
-    h = ((taille**2)/2500)
+    h = ((taille**2)//2500)
 
     # charbon
     print("charbon")
-    k = int(15*h)
+    k = 15*h
     _, Yc = liste_aleatoire(k, taille - 4, k)
     _, Xc = liste_aleatoire(k, taille - 4, k)
     _, Z = liste_aleatoire(k, hauteur // 2 - 4, k)
@@ -123,7 +123,7 @@ def minerais(CarteListe3D, ax):
 
     # redstone
     print("redstone")
-    k = int(11*h)
+    k = 11*h
     _, Yr = liste_aleatoire(k, taille - 4, k)
     _, Xr = liste_aleatoire(k, taille - 4, k)
     _, Z = liste_aleatoire(k, hauteur // 4 - 4, k)
@@ -133,7 +133,7 @@ def minerais(CarteListe3D, ax):
 
     # fer
     print("fer")
-    k = int(11*h)
+    k = 11*h
     _, Yi = liste_aleatoire(k, taille - 3, k)
     _, Xi = liste_aleatoire(k, taille - 3, k)
     _, Z = liste_aleatoire(k, hauteur // 3 - 3, k)
@@ -143,7 +143,7 @@ def minerais(CarteListe3D, ax):
 
     # or
     print("or")
-    k = int(8*h)
+    k = 8*h
     _, Yo = liste_aleatoire(k, taille - 2, k)
     _, Xo = liste_aleatoire(k, taille - 2, k)
     _, Z = liste_aleatoire(k, hauteur // 2 - 2, k)
@@ -153,7 +153,7 @@ def minerais(CarteListe3D, ax):
 
     # diamant
     print("diamant")
-    k = int(5*h)
+    k = 5*h
     _, Yd = liste_aleatoire(k, taille - 2, k)
     _, Xd = liste_aleatoire(k, taille - 2, k)
     _, Z = liste_aleatoire(k, hauteur // 5 - 2, k)
