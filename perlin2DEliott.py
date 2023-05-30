@@ -1,4 +1,5 @@
 ## Importation
+
 import numpy as np
 import matplotlib.pyplot as plt
 from tqdm import trange
@@ -6,6 +7,7 @@ from matplotlib.colors import ListedColormap
 import imageio
 
 ## Fonctions utiles
+
 def lerp(a, b, x):
     "interpolation linéaire (produit scalaire)"
     return a + x * (b - a)

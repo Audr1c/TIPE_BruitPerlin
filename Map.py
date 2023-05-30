@@ -3,7 +3,6 @@
 import time
 import os
 import numpy
-from numpy.random import rand
 from matplotlib.colors import ListedColormap
 import imageio
 from tqdm import trange, tqdm
@@ -16,7 +15,7 @@ from nbtschematic import SchematicFile
 def Patron_carte(BruitP2D):
     Liste_o = []
     sable = []
-    CarteListe3D = [[[1 for y in range(taille)] for z in range(hauteur)] for x in trange(taille)]
+    CarteListe3D = [[[1 for y in range(taille)] for z in range(hauteur)] for x in range(taille)]
 
     for x in trange(taille):
         for y in range(taille):
@@ -28,6 +27,8 @@ def Patron_carte(BruitP2D):
                     Liste_o.append((x, y, z))
                 z += 1
             if z < Hneige:
+                CarteListe3D[x][z-1][y] = 15
+            if z < Hneige - 10:
                 CarteListe3D[x][z][y] = 11
             elif z < Heau - 4:
                 CarteListe3D[x][z][y] = 2
@@ -56,8 +57,8 @@ def in_Patron(x, y, z):
 ## Images
 
 def sauvegarder_grille(grille: list, g, i, nom_de_fichier: str) -> None:
-    echelle = ListedColormap(['#d7edf8', 'gray', '#007412', 'brown', 'blue', 'yellow', 'black', 'red', '#00fdbd', 'gold', '0.3', 'white','#c9d279','#095a03','#642100'], 14)
-    plt.matshow(grille, cmap=echelle, vmin=0, vmax=14)
+    echelle = ListedColormap(['#d7edf8', 'gray', '#007412', 'brown', 'blue', 'yellow', 'black', 'red', '#00fdbd', 'gold', '0.3', 'white','#c9d279','#095a03','#642100','0.4'], 15)
+    plt.matshow(grille, cmap=echelle, vmin=0, vmax=15)
     plt.title(f"x={i} g={g}")  # 'x=' + str(i) + ' g=' + str(g)
     plt.xlabel('y')
     plt.ylabel('z')
@@ -79,7 +80,7 @@ def gif():
         else:
             raise Exception(f"File Not found {file_name}")
         frames.append(image)
-    imageio.mimsave(f"Affichage_de_la_map/GIF.gif", frames, duration=1)
+    imageio.mimsave(f"Affichage_de_la_map/GIF.gif", frames, duration=20)
 
 ## Minerais
 
@@ -119,11 +120,11 @@ def gold(C, x, z, y):
                     C[x+i][z+k][y+j] = 9
 
 def minerais(CarteListe3D, ax):
-    h = ((taille**2)//2500)
+    h = ((taille**2)//400)
 
     # charbon
     print("charbon")
-    k = 15*h
+    k = 7*h
     _, Yc = liste_aleatoire(k, taille - 4, k)
     _, Xc = liste_aleatoire(k, taille - 4, k)
     _, Z = liste_aleatoire(k, hauteur // 2 - 4, k)
@@ -133,7 +134,7 @@ def minerais(CarteListe3D, ax):
 
     # redstone
     print("redstone")
-    k = 11*h
+    k = 5*h
     _, Yr = liste_aleatoire(k, taille - 4, k)
     _, Xr = liste_aleatoire(k, taille - 4, k)
     _, Z = liste_aleatoire(k, hauteur // 4 - 4, k)
@@ -143,7 +144,7 @@ def minerais(CarteListe3D, ax):
 
     # fer
     print("fer")
-    k = 11*h
+    k = 6*h
     _, Yi = liste_aleatoire(k, taille - 3, k)
     _, Xi = liste_aleatoire(k, taille - 3, k)
     _, Z = liste_aleatoire(k, hauteur // 3 - 3, k)
@@ -153,7 +154,7 @@ def minerais(CarteListe3D, ax):
 
     # or
     print("or")
-    k = 8*h
+    k = 3*h
     _, Yo = liste_aleatoire(k, taille - 2, k)
     _, Xo = liste_aleatoire(k, taille - 2, k)
     _, Z = liste_aleatoire(k, hauteur // 2 - 2, k)
@@ -163,7 +164,7 @@ def minerais(CarteListe3D, ax):
 
     # diamant
     print("diamant")
-    k = 5*h
+    k = 2*h
     _, Yd = liste_aleatoire(k, taille - 2, k)
     _, Xd = liste_aleatoire(k, taille - 2, k)
     _, Z = liste_aleatoire(k, hauteur // 5 - 2, k)
@@ -171,11 +172,11 @@ def minerais(CarteListe3D, ax):
     for i in trange(k):
         diamant(CarteListe3D, int(Xd[i]), int(Zd[i]), int(Yd[i]))
 
-    ax.scatter(Xr, Yr, Zr, c='red', s=0.7)
-    ax.scatter(Xi, Yi, Zi, c='beige', s=0.7)
-    ax.scatter(Xo, Yo, Zo, c='gold', s=0.7)
-    ax.scatter(Xc, Yc, Zc, c='black', s=0.7)
-    ax.scatter(Xd, Yd, Zd, c='aqua', s=0.7)
+    #ax.scatter(Xr, Yr, Zr, c='red', s=0.7)
+    #ax.scatter(Xi, Yi, Zi, c='beige', s=0.7)
+    #ax.scatter(Xo, Yo, Zo, c='gold', s=0.7)
+    #ax.scatter(Xc, Yc, Zc, c='black', s=0.7)
+    #ax.scatter(Xd, Yd, Zd, c='aqua', s=0.7)
 
 ## Grottes
 
@@ -292,7 +293,7 @@ def Grotte(CarteListe3D, ax):
     ax.scatter(Xg, Yg, Zg, s=.8)
 
     for i in range((NbPt - 1) * alpha + 1):
-        Explose(CarteListe3D, int(Xg[i]), int(Zg[i]), int(Yg[i]))
+        Explose(CarteListe3D, int(Xg[i]), int(Zg[i]+150), int(Yg[i]))
 
 def Grotte_3D(ax):
 
@@ -321,7 +322,7 @@ def Troue(C, Liste_sable):
 def Percolation(C, Robinet):
     for (x, y, z) in Robinet:
         C[x][z][y] = 4  # Le change en eau
-    while len(Robinet) != 0:    # Percolation tant que tous les voisins ne sont pas remplis
+    while Robinet:    # Percolation tant que tous les voisins ne sont pas remplis
         (x, y, z) = Robinet[0]  # Prends le premier
 
         # Regarde les voisins, si ils sont vides, on met de l'eau et on les ajoutes à Robinet pour ragarder les voisins des voisins
@@ -340,7 +341,7 @@ def Percolation(C, Robinet):
         if y != taille - 1 and C[x][z][y + 1] == 0:
             Robinet.append((x, y + 1, z))
             C[x][z][y + 1] = 4
-        if z - 1 >= hauteur // 3 and C[x][z - 1][y] == 0 and z > Heau and OverFlow:
+        if C[x][z - 1][y] == 0 and z > Heau and OverFlow:
             Robinet.append((x, y, z - 1))
             C[x][z - 1][y] = 4
         Robinet.pop(0)  # Enlève l'élément qui a été étudié pour que la boucle finisse
@@ -354,17 +355,19 @@ def Liste_arbre():
     Bruit_arbre=Perlin(10, taille//20, taille//20)
     Bruit_arbre += 0.5
     Bruit_arbre *= 4
-    for i in range(taille//20):
+    for i in trange(taille//20):
         for j in range(taille//20):
+            L_arbre_chuck=[]
             arbre=0
             d=Bruit_arbre[i,j]*8
             while arbre < d:
                 x=i*20+randrange(20)
                 y=j*20+randrange(20)
                 if (x,y) not in L_arbre:
-                    L_arbre.append((x,y))
+                    L_arbre_chuck.append((x,y))
                     arbre+=1
-    orig_map=plt.cm.get_cmap('gray')
+            L_arbre+=L_arbre_chuck
+    orig_map=plt.colormaps['gray']
     reversed_map = orig_map.reversed()
     plt.close()
     plt.imshow(Bruit_arbre, origin='upper', cmap=reversed_map)
@@ -434,10 +437,11 @@ correspondanceID = {
                     8 : 56,  # Diamond
                     9 : 14,  # Gold
                     10: 7,  # Bedrock
-                    11: 80,  # Snow
+                    11: 80,  # Snow block
                     12: 15,  # Iron
                     13 : 18,  # Leaves
-                    14 : 17  # Wood
+                    14 : 17,  # Wood
+                    15 : 78  # Snow
                     }
 
 def CreteMapSchem(grid: list, deltaX: int, deltaY: int, deltaZ: int, graine):
@@ -539,17 +543,21 @@ def Fait_une_Map(graine):
 
 ## Paramètres de la carte
 
-precsision = 5
-amplitude = 128
-pixels = 2000
-NbPt = 10
-alpha = 50
+graine = randrange(10000)
+taille = 100
+hauteur = 256
+
 Hneige = 60
 Heau = 150
+
+precsision = 5
+amplitude = 128
+pixels = 300
+
+NbPt = 10
+alpha = 100
 nbGrotte = 12
-taille = 500
-hauteur = 256
-graine = randrange(10000)
+
 OverFlow=False
 
 if pixels < taille:
