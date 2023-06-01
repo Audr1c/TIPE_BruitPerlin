@@ -124,7 +124,7 @@ def minerais(CarteListe3D, ax):
 
     # charbon
     print("charbon")
-    NbMn = 7*NdC
+    NbMn = 11*NdC
     _, Yc = liste_aleatoire(NbMn)
     _, Xc = liste_aleatoire(NbMn)
     _, Zc = liste_aleatoire(NbMn)
@@ -138,7 +138,7 @@ def minerais(CarteListe3D, ax):
 
     # redstone
     print("redstone")
-    NbMn = 5*NdC
+    NbMn = 4*NdC
     _, Yr = liste_aleatoire(NbMn)
     _, Xr = liste_aleatoire(NbMn)
     _, Zr = liste_aleatoire(NbMn)
@@ -153,7 +153,7 @@ def minerais(CarteListe3D, ax):
 
     # fer
     print("fer")
-    NbMn = 6*NdC
+    NbMn = 8*NdC
     _, Yi = liste_aleatoire(NbMn)
     _, Xi = liste_aleatoire(NbMn)
     _, Zi = liste_aleatoire(NbMn)
@@ -168,7 +168,7 @@ def minerais(CarteListe3D, ax):
 
     # or
     print("or")
-    NbMn = 3*NdC
+    NbMn = 4*NdC
     _, Yo = liste_aleatoire(NbMn)
     _, Xo = liste_aleatoire(NbMn)
     _, Zo = liste_aleatoire(NbMn)
@@ -383,7 +383,7 @@ def Liste_arbre():
         for j in range(taille//Chunks):
             L_arbre_chuck=[]
             arbre=0
-            d=Bruit_arbre[i,j]*7
+            d=Bruit_arbre[i,j]*4
             while arbre < d:
                 x=i*Chunks+randrange(Chunks)
                 y=j*Chunks+randrange(Chunks)
@@ -543,14 +543,14 @@ def Fait_une_Map(graine):
     # Frame
     start = time.time()
     print("Start Frame")
-    frames(Map)
+    #frames(Map)
     print(f"End Frame TimeToFinish: {time.time() - start:.2f} s")
     print('')
 
     # GIF
     start = time.time()
     print("Start Gif")
-    gif()
+    #gif()
     print(f"End Gif TimeToFinish: {time.time() - start:.2f} s")
     print('')
 
@@ -581,7 +581,7 @@ pixels = 3000
 
 NbPt = 10
 alpha = 100
-nbGrotte = 12
+nbGrotte = 20
 
 OverFlow=False
 
