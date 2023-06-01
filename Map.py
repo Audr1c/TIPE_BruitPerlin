@@ -120,56 +120,80 @@ def gold(C, x, z, y):
                     C[x+i][z+k][y+j] = 9
 
 def minerais(CarteListe3D, ax):
-    h = ((taille**2)//400)
+    NdC = ((taille**2)//(Chunks**2))
 
     # charbon
     print("charbon")
-    k = 7*h
-    _, Yc = liste_aleatoire(k, taille - 4, k)
-    _, Xc = liste_aleatoire(k, taille - 4, k)
-    _, Z = liste_aleatoire(k, hauteur // 2 - 4, k)
-    Zc = [i + hauteur // 2 for i in Z]
-    for i in trange(k):
+    NbMn = 7*NdC
+    _, Yc = liste_aleatoire(NbMn)
+    _, Xc = liste_aleatoire(NbMn)
+    _, Zc = liste_aleatoire(NbMn)
+    Zc *= hauteur-4
+    Yc *= taille
+    Yc -= 4
+    Xc *= taille
+    Xc -= 4
+    for i in trange(NbMn):
         charbon(CarteListe3D, int(Xc[i]), int(Zc[i]), int(Yc[i]))
 
     # redstone
     print("redstone")
-    k = 5*h
-    _, Yr = liste_aleatoire(k, taille - 4, k)
-    _, Xr = liste_aleatoire(k, taille - 4, k)
-    _, Z = liste_aleatoire(k, hauteur // 4 - 4, k)
-    Zr = [i + 3*(hauteur // 4) for i in Z]
-    for i in trange(k):
+    NbMn = 5*NdC
+    _, Yr = liste_aleatoire(NbMn)
+    _, Xr = liste_aleatoire(NbMn)
+    _, Zr = liste_aleatoire(NbMn)
+    Zr *= hauteur//5
+    Zr += 4*(hauteur//5)-4
+    Yr *= taille
+    Yr -= 4
+    Xr *= taille
+    Xr -= 4
+    for i in trange(NbMn):
         redstone(CarteListe3D, int(Xr[i]), int(Zr[i]), int(Yr[i]))
 
     # fer
     print("fer")
-    k = 6*h
-    _, Yi = liste_aleatoire(k, taille - 3, k)
-    _, Xi = liste_aleatoire(k, taille - 3, k)
-    _, Z = liste_aleatoire(k, hauteur // 3 - 3, k)
-    Zi = [i + 2*(hauteur // 3) for i in Z]
-    for i in trange(k):
+    NbMn = 6*NdC
+    _, Yi = liste_aleatoire(NbMn)
+    _, Xi = liste_aleatoire(NbMn)
+    _, Zi = liste_aleatoire(NbMn)
+    Zi *= hauteur//2
+    Zi += (hauteur//2)-4
+    Yi *= taille
+    Yi-= 4
+    Xi *= taille
+    Xi -= 4
+    for i in trange(NbMn):
         iron(CarteListe3D, int(Xi[i]), int(Zi[i]), int(Yi[i]))
 
     # or
     print("or")
-    k = 3*h
-    _, Yo = liste_aleatoire(k, taille - 2, k)
-    _, Xo = liste_aleatoire(k, taille - 2, k)
-    _, Z = liste_aleatoire(k, hauteur // 2 - 2, k)
-    Zo = [i + hauteur // 2 for i in Z]
-    for i in trange(k):
+    NbMn = 3*NdC
+    _, Yo = liste_aleatoire(NbMn)
+    _, Xo = liste_aleatoire(NbMn)
+    _, Zo = liste_aleatoire(NbMn)
+    Zo *= hauteur//4
+    Zo += 3*(hauteur//4)-4
+    Yo *= taille
+    Yo-= 4
+    Xo *= taille
+    Xo -= 4
+    for i in trange(NbMn):
         gold(CarteListe3D, int(Xo[i]), int(Zo[i]), int(Yo[i]))
 
     # diamant
     print("diamant")
-    k = 2*h
-    _, Yd = liste_aleatoire(k, taille - 2, k)
-    _, Xd = liste_aleatoire(k, taille - 2, k)
-    _, Z = liste_aleatoire(k, hauteur // 5 - 2, k)
-    Zd = [i + 4 * (hauteur // 5) for i in Z]
-    for i in trange(k):
+    NbMn = 2*NdC
+    _, Yd = liste_aleatoire(NbMn)
+    _, Xd = liste_aleatoire(NbMn)
+    _, Zd = liste_aleatoire(NbMn)
+    Zd *= hauteur//5
+    Zd += 4*(hauteur//5)-4
+    Yd *= taille
+    Yd-= 4
+    Xd *= taille
+    Xd -= 4
+    for i in trange(NbMn):
         diamant(CarteListe3D, int(Xd[i]), int(Zd[i]), int(Yd[i]))
 
     #ax.scatter(Xr, Yr, Zr, c='red', s=0.7)
@@ -352,17 +376,17 @@ def Percolation(C, Robinet):
 
 def Liste_arbre():
     L_arbre=[]
-    Bruit_arbre=Perlin(10, taille//20, taille//20)
+    Bruit_arbre=Perlin(10, taille//Chunks, taille//Chunks)
     Bruit_arbre += 0.5
     Bruit_arbre *= 4
-    for i in trange(taille//20):
-        for j in range(taille//20):
+    for i in trange(taille//Chunks):
+        for j in range(taille//Chunks):
             L_arbre_chuck=[]
             arbre=0
-            d=Bruit_arbre[i,j]*8
+            d=Bruit_arbre[i,j]*7
             while arbre < d:
-                x=i*20+randrange(20)
-                y=j*20+randrange(20)
+                x=i*Chunks+randrange(Chunks)
+                y=j*Chunks+randrange(Chunks)
                 if (x,y) not in L_arbre:
                     L_arbre_chuck.append((x,y))
                     arbre+=1
@@ -544,15 +568,16 @@ def Fait_une_Map(graine):
 ## Paramètres de la carte
 
 graine = randrange(10000)
-taille = 100
+taille = 512
 hauteur = 256
 
 Hneige = 60
 Heau = 150
+Chunks=16
 
 precsision = 5
 amplitude = 128
-pixels = 300
+pixels = 3000
 
 NbPt = 10
 alpha = 100

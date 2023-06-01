@@ -79,7 +79,7 @@ def Perlin3D(precsision):
 
 def Bruit_Nether(precsision, amplitude):
     resultat=[]
-    for Num_Bruit in trange(1,4):
+    for Num_Bruit in trange(1,5):
         temporaire = Perlin3D(precsision)
 
         temporaire *= amplitude
@@ -139,29 +139,46 @@ def Lava(Map):
     Robinet=[]
     for x in range(taille):
         for y in range(taille):
-            if Map[x,y,Hlave]==0:
-                Map[x,y,Hlave]=3
-                Robinet.append((x,y,Hlave))
-    Percolation(Map,Robinet)
+            for z in range(Hlave):
+                if Map[x,y,z]==0:
+                    Map[x,y,z]=3
+    for x in range(taille):
+        for y in range(taille):
+            Map[x,y,0]=0
+            Map[x,y,hauteur-1]=0
+    for x in range(taille):
+        for z in range(hauteur):
+            Map[x,0,z]=0
+            Map[x,taille-1,z]=0
+            Map[0,x,z]=0
+            Map[taille-1,x,z]=0
+
+
 
 def quartz(C, x, z, y):
     for j in range(3):
         for k in range(3):
             for i in range(3):
-                if C[x+i,y+k,z+j]==1 and random.random()<0.6:
+                if C[x+i,y+k,z+j]==-1 and random.random()<0.6:
                     C[x+i,y+k,z+j] = 6
 
 def minerais(CarteListe3D):
-    h = ((taille**2)//400)
+    NdC = ((taille**2)//(Chunks**2))
 
     # charbon
-    print("charbon")
-    k = 15*h
-    _, Yc = liste_aleatoire(k, taille - 4, k)
-    _, Xc = liste_aleatoire(k, taille - 4, k)
-    _, Zc = liste_aleatoire(k, hauteur - 4, k)
-    for i in trange(k):
-        quartz(CarteListe3D, int(Xc[i]), int(Zc[i]), int(Yc[i]))
+    print("quartz")
+    NbMn = 17*NdC
+    NbMn = 7*NdC
+    _, Yc = liste_aleatoire(NbMn)
+    _, Xc = liste_aleatoire(NbMn)
+    _, Zc = liste_aleatoire(NbMn)
+    Zc *= hauteur-4
+    Yc *= taille
+    Yc -= 4
+    Xc *= taille
+    Xc -= 4
+    for i in trange(NbMn):
+        quartz(CarteListe3D, Xc[i]//1, Zc[i]//1, Yc[i]//1)
 
 
 
@@ -185,7 +202,7 @@ def CreteMapSchem3D(grid: list, deltaX: int, deltaY: int, deltaZ: int, graine):
 def nether(g):
     print(g)
     np.random.seed(g)
-    r=Bruit_Nether(3, 128)
+    r=Bruit_Nether(3, 32)
     r//=256
     minerais(r)
     Lava(r)
@@ -193,7 +210,8 @@ def nether(g):
 
 Hlave=30
 taille=400
-hauteur=200
+hauteur=128
+Chunks=16
 g=randrange(10000)
 
 nether(g)

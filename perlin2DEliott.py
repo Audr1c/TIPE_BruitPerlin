@@ -1,5 +1,6 @@
 ## Importation
 
+from math import sqrt
 import numpy as np
 import matplotlib.pyplot as plt
 from tqdm import trange
@@ -18,7 +19,8 @@ def lissage(f):
 
 def gradient(c, x, y):
     "On chope les coords des vecteurs de gradient"
-    vecteurs = np.array([[0, 1], [0, -1], [1, 0], [-1, 0], [1 / 2, 1 / 2], [-1 / 2, 1 / 2], [1 / 2, -1 / 2], [-1 / 2, -1 / 2]])
+    sq2 = sqrt(2)
+    vecteurs = np.array([[0, 1], [0, -1], [1, 0], [-1, 0], [1 / sq2, 1 / sq2], [-1 / sq2, 1 / sq2], [1 / sq2, -1 / sq2], [-1 / sq2, -1 / sq2]])
     co_gradient = vecteurs[c % 8]
     return co_gradient[:, :, 0] * x + co_gradient[:, :, 1] * y
 
