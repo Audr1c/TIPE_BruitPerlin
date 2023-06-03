@@ -21,9 +21,9 @@ def Gif_et_frame(resultat):
     for Num_Bruit in trange(taille):
         
         plt.close("all")
-        plt.imshow(resultat[Num_Bruit], origin='upper', cmap='gray', vmin=-32, vmax=32)
+        plt.imshow(resultat[Num_Bruit].T, origin='upper', cmap='gray', vmin=-32, vmax=32)
         plt.xlabel('Y')
-        plt.ylabel('X')
+        plt.ylabel('Z')
         plt.colorbar()
         plt.title(f'Bruit de Perlin en 3D (Tranche n°{Num_Bruit})')
         plt.savefig(f"Nether_et_BdP_3D/Tranche/Bruit_{Num_Bruit}.jpg")
@@ -176,9 +176,9 @@ def Explose(C, x, z, y):
 
 def Grotte(CarteListe3D, ax):
 
-    _, Xg = Bruit_de_Grotte(NbPt, fr, 2*amplitude_G, NdBG)
-    _, Zg = Bruit_de_Grotte(NbPt, fr, amplitude_G, NdBG)
-    _, Yg = Bruit_de_Grotte(NbPt, fr, 2*amplitude_G, NdBG)
+    _, Xg = Bruit_de_Grotte_sin(NbPt, fr, 2*amplitude_G, NdBG)
+    _, Zg = Bruit_de_Grotte_sin(NbPt, fr, amplitude_G, NdBG)
+    _, Yg = Bruit_de_Grotte_sin(NbPt, fr, 2*amplitude_G, NdBG)
     Xg += randrange(taille-2*amplitude_G)
     Yg += randrange(taille-2*amplitude_G)
 

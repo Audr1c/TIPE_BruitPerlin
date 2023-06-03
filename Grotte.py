@@ -31,7 +31,7 @@ def spline_cube(da, db, k, x, y, Y, alpha):
     a = x[k]
     b = x[k+1]
 
-    c = y ** 4 - 4 * b * a ** 3 + 6 * b ** 2 * a ** 2 - 4 * b ** 3 * a + b ** 4
+    c = a ** 4 - 4 * b * a ** 3 + 6 * b ** 2 * a ** 2 - 4 * b ** 3 * a + b ** 4
 
     c1l1 = (2 * b - 2 * a) / c
 
@@ -75,7 +75,7 @@ def spline_cube(da, db, k, x, y, Y, alpha):
     t = 0  # initialisation
     for i in range(alpha):
         o=k*alpha+i
-        #Y[o] = Q * (a + t) ** 3 + S * (t + a) ** 2 + D * (t + a) + F  # ajout d'ordonné
+        Y[o] = Q * (a + t) ** 3 + S * (t + a) ** 2 + D * (t + a) + F  # ajout d'ordonné
         t += r  # passage au point suivant
 
 ## Crach Test
@@ -116,21 +116,20 @@ def bruit_de_perlin1D_sin(i, p, alpha):
 ## Liste aléatoire
 
 def liste_aleatoire(NbPt):
-    x = np.array(range(10))
+    x = np.array(range(NbPt))
     y = np.array([random.random() for _ in range(NbPt)])
     return x, y
 
 def liste_aleatoire_spline(p, fr):
     x, y = liste_aleatoire(p)  # liste du bruit
-    print(x)
     X = np.linspace(0,10,(p-1)*fr+1)  # création de nouvelle liste d'abcisses
     Y = np.linspace(0,10,(p-1)*fr+1)  # création de nouvelle liste d'ordonnés
-    d1 = plus_ou_moins()*random.random()*5*(X[1]-X[0])
-    d2 = plus_ou_moins()*random.random()*5*(X[1]-X[0])
+    d1 = plus_ou_moins()*random.random()*(x[1]-x[0])
+    d2 = plus_ou_moins()*random.random()*(X[1]-X[0])
     for k in range(p - 1):  # interpolation entre trois points de la liste
         spline_cube(d1, d2, k, x, y, Y, fr)
         d1=d2
-        d2 = plus_ou_moins() * random_int()
+        d2 =plus_ou_moins()*random.random()*(x[1]-x[0])
     Y[-1]=y[-1]
     return X, Y  # liste avec l'interpolation
 
@@ -145,10 +144,22 @@ def liste_aleatoire_sin(p, fr):
 
 ## Fonction final
 
-def Bruit_de_Grotte(NbPt, fr, amplitude, NbBr):
+def Bruit_de_Grotte_sin(NbPt, fr, amplitude, NbBr):
     Y=[]
     for i in range(NbBr):
         x,y=liste_aleatoire_sin(NbPt, fr)
+        y *=amplitude
+        NbPt*=2
+        NbPt-=1
+        amplitude//=2
+        fr//=2
+        Y.append(y)
+    return x,sum(Y)
+
+def Bruit_de_Grotte_spline(NbPt, fr, amplitude, NbBr):
+    Y=[]
+    for i in range(NbBr):
+        x,y=liste_aleatoire_spline(NbPt, fr)
         y *=amplitude
         NbPt*=2
         NbPt-=1
@@ -169,11 +180,46 @@ plt.legend(loc=0)
 plt.savefig("Grotte_et_BdP_1D/Bruit_de_Perlin_1D")'''
 ## Test 1
 
+## Test 2
+
 # Paramètre
 
 g = randrange(10000)  # seed généré aléatoirement entr 0 et 10000
 i = 100  # taille de l'intervalle des abcisses, ici [0;50]
-p = 18  # nombre de points dans l'intervalle choisi aléatoirement
+j = 150  # taille de l'intervalle des ordonnées, ici [0;75]
+p = 8  # nombre de points dans l'intervalle choisi aléatoirement
+alpha = 40  # nombre de points interpolés
+
+# Fonction
+
+random.seed(g)
+# x, y = liste_aleatoire_spline(p, alpha)
+# x,y= Bruit_de_Grotte_spline(4,128,64,8)
+random.seed(g)
+z, t = liste_aleatoire(p)
+h= np.linspace(0,10,p)
+random.seed(g)
+# u, p = Bruit_de_Grotte_sin(4,128,64,8)
+# u, p = liste_aleatoire_sin(p, alpha)
+# Affichage
+
+plt.close("all")
+# plt.plot(u, p, 'r', label='Interpolation sinusoidale')
+# plt.plot(x, y, 'b', label='Interpolation cubique')
+# plt.plot(h, t, '* k', label='Points aléatoires')
+plt.title('Bruit de Perlin en 1D (seed = ' + str(g) + ')')
+plt.xlabel('x')
+plt.ylabel('f(x)')
+# plt.legend(loc=0)
+plt.savefig("Grotte_et_BdP_1D/liste_aléatoire")
+
+
+
+# Paramètre
+
+g = randrange(10000)  # seed généré aléatoirement entr 0 et 10000
+i = 100  # taille de l'intervalle des abcisses, ici [0;50]
+p = 4  # nombre de points dans l'intervalle choisi aléatoirement
 alpha = 30  # nombre de points interpolés
 
 # Fonction
@@ -195,34 +241,3 @@ plt.xlabel('x')
 plt.ylabel('f(x)')
 plt.legend(loc=0)
 plt.savefig("Grotte_et_BdP_1D/Bruit_de_Perlin_1D")
-
-## Test 2
-
-# Paramètre
-
-g = randrange(10000)  # seed généré aléatoirement entr 0 et 10000
-i = 100  # taille de l'intervalle des abcisses, ici [0;50]
-j = 150  # taille de l'intervalle des ordonnées, ici [0;75]
-p = 8  # nombre de points dans l'intervalle choisi aléatoirement
-alpha = 40  # nombre de points interpolés
-
-# Fonction
-
-random.seed(g)
-x, y = liste_aleatoire_spline(p, alpha)
-random.seed(g)
-#z, t = liste_aleatoire(i, j, p)
-random.seed(g)
-u, p = Bruit_de_Grotte(4,128,64,8)
-
-# Affichage
-
-plt.close("all")
-#plt.plot(z, t, '* k', label='Points aléatoires')
-plt.plot(u, p, 'r', label='Interpolation sinusoidale')
-plt.plot(x, y, 'b', label='Interpolation cubique')
-plt.title('Bruit de Perlin en 1D (seed = ' + str(g) + ')')
-plt.xlabel('x')
-plt.ylabel('f(x)')
-plt.legend(loc=0)
-plt.savefig("Grotte_et_BdP_1D/liste_aléatoire")

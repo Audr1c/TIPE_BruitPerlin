@@ -228,7 +228,7 @@ def minerais(CarteListe3D, ax):
         diamant(CarteListe3D, int(Xd[i]), int(Zd[i]), int(Yd[i]))
 
     ax.scatter(Xr, Yr, Zr, c='red', s=0.7)
-    ax.scatter(Xi, Yi, Zi, c='gray', s=0.5)
+    ax.scatter(Xi, Yi, Zi, c='gray', s=0.7)
     ax.scatter(Xo, Yo, Zo, c='gold', s=0.8)
     ax.scatter(Xc, Yc, Zc, c='black', s=0.4)
     ax.scatter(Xd, Yd, Zd, c='aqua', s=0.8)
@@ -349,9 +349,9 @@ def Explose(C, x, z, y):
 
 def Grotte(CarteListe3D, ax):
 
-    _, Xg = Bruit_de_Grotte(NbPt, fr, amplitude_G, NdBG)
-    _, Zg = Bruit_de_Grotte(NbPt, fr, amplitude_G, NdBG)
-    _, Yg = Bruit_de_Grotte(NbPt, fr, amplitude_G, NdBG)
+    _, Xg = Bruit_de_Grotte_sin(NbPt, fr, amplitude_G, NdBG)
+    _, Zg = Bruit_de_Grotte_sin(NbPt, fr, amplitude_G, NdBG)
+    _, Yg = Bruit_de_Grotte_sin(NbPt, fr, amplitude_G, NdBG)
     Xg += randrange(taille-2*amplitude_G)
     Yg += randrange(taille-2*amplitude_G)
     Zg += 30
