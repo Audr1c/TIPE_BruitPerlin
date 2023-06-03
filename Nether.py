@@ -136,9 +136,9 @@ def minerais(CarteListe3D, ax):
     NdC = ((taille**2)//(Chunks**2))
     print("quartz")
     NbMn = 17*NdC
-    _, Yq = liste_aleatoire(NbMn)
-    _, Xq = liste_aleatoire(NbMn)
-    _, Zq = liste_aleatoire(NbMn)
+    _, Yq = Perlin_1D(NbMn)
+    _, Xq = Perlin_1D(NbMn)
+    _, Zq = Perlin_1D(NbMn)
     Zq *= hauteur-4
     Yq *= taille
     Yq -= 4
@@ -176,9 +176,9 @@ def Explose(C, x, z, y):
 
 def Grotte(CarteListe3D, ax):
 
-    _, Xg = Bruit_de_Grotte_sin(NbPt, fr, 2*amplitude_G, NdBG)
-    _, Zg = Bruit_de_Grotte_sin(NbPt, fr, amplitude_G, NdBG)
-    _, Yg = Bruit_de_Grotte_sin(NbPt, fr, 2*amplitude_G, NdBG)
+    _, Xg = Bruit_de_Grotte_sin(NbPt, fr, 2*amplitude_G, NdBG, save)
+    _, Zg = Bruit_de_Grotte_sin(NbPt, fr, amplitude_G, NdBG, save)
+    _, Yg = Bruit_de_Grotte_sin(NbPt, fr, 2*amplitude_G, NdBG, save)
     Xg += randrange(taille-2*amplitude_G)
     Yg += randrange(taille-2*amplitude_G)
 
@@ -235,6 +235,8 @@ def CreteMapSchem3D(grid: list, deltaX: int, deltaY: int, deltaZ: int, graine):
 ## Fonction finale
 
 def Nether(g):
+    print('')
+    print('Start Nether')
 
     # Timer et parametrage du random
     startAll = time.time()
@@ -299,7 +301,7 @@ def Nether(g):
     print('')
 
     finTime = time.time() - startAll
-    print(f"Program Finished in {finTime:.2f} s")
+    print(f"End Nether : {finTime:.2f} s")
     print('')
 
 ## Paramètres

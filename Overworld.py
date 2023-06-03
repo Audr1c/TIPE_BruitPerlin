@@ -138,9 +138,9 @@ def minerais(CarteListe3D, ax):
     # charbon
     print("charbon")
     NbMn = 11*NdC
-    _, Yc = liste_aleatoire(NbMn)
-    _, Xc = liste_aleatoire(NbMn)
-    _, Zc = liste_aleatoire(NbMn)
+    _, Yc = Perlin_1D(NbMn)
+    _, Xc = Perlin_1D(NbMn)
+    _, Zc = Perlin_1D(NbMn)
     Zc *= hauteur-4
     Yc *= taille
     Yc -= 4
@@ -161,9 +161,9 @@ def minerais(CarteListe3D, ax):
     # redstone
     print("redstone")
     NbMn = 4*NdC
-    _, Yr = liste_aleatoire(NbMn)
-    _, Xr = liste_aleatoire(NbMn)
-    _, Zr = liste_aleatoire(NbMn)
+    _, Yr = Perlin_1D(NbMn)
+    _, Xr = Perlin_1D(NbMn)
+    _, Zr = Perlin_1D(NbMn)
     Zr *= hauteur//5
     Zr += 4*(hauteur//5)-4
     Yr *= taille
@@ -176,9 +176,9 @@ def minerais(CarteListe3D, ax):
     # fer
     print("fer")
     NbMn = 8*NdC
-    _, Yi = liste_aleatoire(NbMn)
-    _, Xi = liste_aleatoire(NbMn)
-    _, Zi = liste_aleatoire(NbMn)
+    _, Yi = Perlin_1D(NbMn)
+    _, Xi = Perlin_1D(NbMn)
+    _, Zi = Perlin_1D(NbMn)
     Zi *= hauteur//2
     Zi += (hauteur//2)-4
     Yi *= taille
@@ -200,9 +200,9 @@ def minerais(CarteListe3D, ax):
     # or
     print("or")
     NbMn = 4*NdC
-    _, Yo = liste_aleatoire(NbMn)
-    _, Xo = liste_aleatoire(NbMn)
-    _, Zo = liste_aleatoire(NbMn)
+    _, Yo = Perlin_1D(NbMn)
+    _, Xo = Perlin_1D(NbMn)
+    _, Zo = Perlin_1D(NbMn)
     Zo *= hauteur//4
     Zo += 3*(hauteur//4)-4
     Yo *= taille
@@ -215,9 +215,9 @@ def minerais(CarteListe3D, ax):
     # diamant
     print("diamant")
     NbMn = 2*NdC
-    _, Yd = liste_aleatoire(NbMn)
-    _, Xd = liste_aleatoire(NbMn)
-    _, Zd = liste_aleatoire(NbMn)
+    _, Yd = Perlin_1D(NbMn)
+    _, Xd = Perlin_1D(NbMn)
+    _, Zd = Perlin_1D(NbMn)
     Zd *= hauteur//5
     Zd += 4*(hauteur//5)-4
     Yd *= taille
@@ -349,12 +349,12 @@ def Explose(C, x, z, y):
 
 def Grotte(CarteListe3D, ax):
 
-    _, Xg = Bruit_de_Grotte_sin(NbPt, fr, amplitude_G, NdBG)
-    _, Zg = Bruit_de_Grotte_sin(NbPt, fr, amplitude_G, NdBG)
-    _, Yg = Bruit_de_Grotte_sin(NbPt, fr, amplitude_G, NdBG)
-    Xg += randrange(taille-2*amplitude_G)
-    Yg += randrange(taille-2*amplitude_G)
-    Zg += 30
+    _, Xg = Bruit_de_Grotte_sin(NbPt, fr, amplitude_G, NdBG, save)
+    _, Zg = Bruit_de_Grotte_sin(NbPt, fr, amplitude_G, NdBG, save)
+    _, Yg = Bruit_de_Grotte_sin(NbPt, fr, amplitude_G, NdBG, save)
+    Xg = [Xg[i]+randrange(taille-2*amplitude_G) for i in range(len(Xg))]
+    Yg = [Yg[i]+randrange(taille-2*amplitude_G) for i in range(len(Yg))]
+    Zg = [Zg[i]+30 for i in range(len(Xg))]
 
     ax.scatter(Xg, Yg, Zg, s=.8)
 
@@ -369,7 +369,7 @@ def Grotte_3D(ax):
     ax.invert_zaxis()
 
     ax.set_title('Grotte 3D')
-    plt.savefig("Overworld/Grotte")
+    ax.savefig("Overworld/Grotte")
 
 ## Eau
 
@@ -417,7 +417,7 @@ def Percolation(C, Robinet):
 
 def Liste_arbre():
     L_arbre=[]
-    Bruit_arbre=Perlin(10, taille//Chunks, taille//Chunks)
+    Bruit_arbre=Perlin_2D(10, taille//Chunks, taille//Chunks)
     Bruit_arbre += 0.5
     Bruit_arbre *= 4
     for i in trange(taille//Chunks):
@@ -520,7 +520,9 @@ def CreteMapSchem(grid: list, deltaX: int, deltaY: int, deltaZ: int, graine):
 ## Fonction final
 
 def Fait_une_Map(graine):
-    
+    print('')
+    print('Start Overworld')
+
     # Timer et parametrage du random
     startAll = time.time()
     random.seed(graine)
@@ -533,7 +535,7 @@ def Fait_une_Map(graine):
     # Bruit
     start = time.time()
     print("Start Bruit Perlin")
-    BdP, Cat = Bruit_de_map(graine, taille, pixels, precsision, amplitude)
+    BdP, Cat = Bruit_Overworld(graine, taille, pixels, precsision, amplitude)
     print(f"End Bruit Perlin : {time.time() - start:.2f} s")
     print('')
 
@@ -605,7 +607,7 @@ def Fait_une_Map(graine):
     print('')
 
     finTime = time.time() - startAll
-    print(f"Program Finished in {finTime:.2f} s")
+    print(f"End Overworld : {finTime:.2f} s")
     print('')
 
 ## Paramètres de la carte
@@ -629,6 +631,7 @@ fr = 128
 amplitude_G=128
 NdBG=6
 nbGrotte = 20
+save = False
 
 ## Création de la carte
 

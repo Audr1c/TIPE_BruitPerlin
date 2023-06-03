@@ -26,7 +26,7 @@ def gradient(c, x, y):
 
 ## Bruit de Perlin
 
-def Perlin(precsision, pixels, taille):
+def Perlin_2D(precsision, pixels, taille):
     tab = np.linspace(1, precsision, pixels, endpoint=False)
 
     # création de grille en utilisant le tableau 1d
@@ -73,7 +73,7 @@ def Perlin(precsision, pixels, taille):
 
     return D
 
-def Bruit_de_map(graine, taille, pixels, precsision, amplitude):
+def Bruit_Overworld(graine, taille, pixels, precsision, amplitude):
     frames_bruit = []
     frames_carte = []
 
@@ -82,7 +82,7 @@ def Bruit_de_map(graine, taille, pixels, precsision, amplitude):
     orig_map=plt.cm.get_cmap('gray')
     reversed_map = orig_map.reversed()
     for Num_Bruit in trange(1,9):
-        temporaire = Perlin(precsision, pixels, taille)
+        temporaire = Perlin_2D(precsision, pixels, taille)
         if Num_Bruit==1:
             temporaire += 1
 
