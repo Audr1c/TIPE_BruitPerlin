@@ -1,4 +1,5 @@
-## Importations
+# Importations
+
 
 import time
 import os
@@ -9,430 +10,370 @@ from HeightMap import *
 from Grotte import *
 from nbtschematic import SchematicFile
 
-## Carte
 
-def Patron_carte(BruitP2D):
+# Carte
+
+
+def Patron_carte(BdP):
+    # Création du tableau servant de support (rempli avec de la pierre) et des listes utiles
     Liste_o = []
     sable = []
-    CarteListe3D = [[[1 for y in range(taille)] for z in range(hauteur)] for x in range(taille)]
-
+    Overworld = [[[1 for y in range(taille)]
+                  for z in range(hauteur)] for x in range(taille)]
+    # Parcours tout le tableau
     for x in trange(taille):
         for y in range(taille):
-            Hsurface = int(BruitP2D[x, y])
+            Hsurface = int(BdP[x, y])
             z = 0
+            # Pose de l'air jusqu'à atteindre la hauteur définit par le bruit
             while z < Hsurface:
-                CarteListe3D[x][z][y] = 0
+                Overworld[x][z][y] = 0
+                # Regarde si le block posé est de l'eau ou non
                 if z >= Heau:
                     Liste_o.append((x, y, z))
                 z += 1
-            if z < Hneige:
-                CarteListe3D[x][z-1][y] = 15
-            if z < Hneige - 10:
-                CarteListe3D[x][z][y] = 11
-            elif z < Heau - 4:
-                CarteListe3D[x][z][y] = 2
-            else:
-                CarteListe3D[x][z][y] = 5
+            # Regarde quel type de block poser une fois la hauteur atteinte
+            if z < Hneige:  # Dalle de neige
+                Overworld[x][z-1][y] = 15
+            if z < Hneige - 10:  # Block de neige
+                Overworld[x][z][y] = 11
+            elif z < Heau - 4:  # Block d'herbe
+                Overworld[x][z][y] = 2
+            else:  # Block de sable
+                Overworld[x][z][y] = 5
+                # Regarde si le bloc de sable est sous l'eau
                 if z >= Heau:
                     sable.append((x, y, z))
             z += 1
+            # Place des blocks en dessous (3 block)
             a = 3
             for i in range(a):
-                if z + i >= Heau - 4:
-                    CarteListe3D[x][z + i][y] = 5
-                else:
-                    CarteListe3D[x][z + i][y] = 3
+                if z + i >= Heau - 4:  # Block de sable
+                    Overworld[x][z + i][y] = 5
+                else:  # Block de terre
+                    Overworld[x][z + i][y] = 3
+            # Place la bedrock
             if random.random() < 1 / 3:
-                CarteListe3D[x][hauteur - 3][y] = 10
+                Overworld[x][hauteur - 3][y] = 10
             if random.random() < 1 / 2:
-                CarteListe3D[x][hauteur - 2][y] = 10
-            CarteListe3D[x][hauteur - 1][y] = 10
+                Overworld[x][hauteur - 2][y] = 10
+            Overworld[x][hauteur - 1][y] = 10
 
-    return CarteListe3D, sable, Liste_o
+    return Overworld, sable, Liste_o
+
 
 def in_Patron(x, y, z):
-    return 0<=x<taille and 0<=y<taille and 0<=z<hauteur
+    # Regarde si les coordonnées du block est dans le tableau ou non
+    return 0 <= x < taille and 0 <= y < taille and 0 <= z < hauteur
 
-## Images
 
-def sauvegarder_grille(grille: list, i, nom_de_fichier: str) -> None:
-    echelle = ListedColormap(['#d7edf8', 'gray', '#007412', 'brown', 'blue', 'yellow', 'black', 'red', '#00fdbd', 'gold', '0.3', 'white','#c9d279','#095a03','#642100','0.4'], 15)
-    plt.matshow(grille, cmap=echelle, vmin=0, vmax=15)
+# Images
+
+
+def sauvegarder_grille(Overworld, i, nom_du_fichier) -> None:
+    # Echelle de couleur pour les différents types de block
+    echelle = ListedColormap(['#d7edf8', 'gray', '#007412', 'brown', 'blue', 'yellow', 'black',
+                             'red', '#00fdbd', 'gold', '0.3', 'white', '#c9d279', '#095a03', '#642100', '0.4'], 15)
+    # Affiche, met un titre, sauvegarde
+    plt.matshow(Overworld[i], cmap=echelle, vmin=0, vmax=15)
     plt.title(f"Frame n°{i}")
     plt.xlabel('y')
     plt.ylabel('z')
-    plt.savefig(nom_de_fichier)
+    plt.savefig(nom_du_fichier)
     plt.close()
 
-def frames(CarteListe3D):
+
+def frames(Overworld):
+    # Enregistre toutes les frames
     for i in trange(taille):
-        sauvegarder_grille(CarteListe3D[i], i, f"Overworld/Frame/TIPE{i}.jpg")
+        sauvegarder_grille(Overworld, i, f"Overworld/Frame/TIPE{i}.jpg")
         plt.close()
+
 
 def gif():
     frames = []
+    # Parcours toutes les frames
     for i in trange(taille):
         file_name = f"Overworld/Frame/TIPE{i}.jpg"
+        # Regarde si la frame existe
         if os.path.exists(file_name):
+            # La supprime des fichier pour alléger la mémoire
             image = imageio.v2.imread(file_name)
             os.remove(file_name)
         else:
             raise Exception(f"File Not found {file_name}")
+        # L'ajoute à la liste pour le Gif
         frames.append(image)
+    # Fait le Gif
     imageio.mimsave(f"Overworld/GIF_Map.gif", frames, duration=20)
 
-## Minerais
 
-def diamant(C, x, z, y):
+# Minerais
+
+
+def diamant(Overworld, x, z, y):
+    # Listes des blocks qui seront réellement remplacés
+    Xd1 = []
+    Yd1 = []
+    Zd1 = []
+    # Parcours un block de 2*2*2 autour de x, y, z
     for j in range(2):
         for k in range(2):
             for i in range(2):
-                if C[x+i][z+k][y+j]==1 and random.random()<0.4:
-                    C[x+i][z+k][y+j] = 8
+                # Regarde si le block à remplacer est bien de la pierre et le remplace avec une proba de 0.4
+                if Overworld[x+i][z+k][y+j] == 1 and random.random() < 0.4:
+                    Overworld[x+i][z+k][y+j] = 8
+                    # L'ajoute aux listes des blocks posés
+                    Xd1.append(x)
+                    Yd1.append(y)
+                    Zd1.append(z)
+    return Xd1, Yd1, Zd1
 
-def charbon(C, x, z, y):
-    Xc1=[]
-    Yc1=[]
-    Zc1=[]
+
+def charbon(Overworld, x, z, y):
+    # Listes des blocks qui seront réellement remplacés
+    Xc1 = []
+    Yc1 = []
+    Zc1 = []
+    # Parcours un block de 3*3*3 autour de x, y, z
     for j in range(3):
         for k in range(3):
             for i in range(3):
-                if C[x+i][z+k][y+j]==1 and random.random()<0.6:
-                    C[x+i][z+k][y+j] = 6
+                # Regarde si le block à remplacer est bien de la pierre et le remplace avec une proba de 0.6
+                if Overworld[x+i][z+k][y+j] == 1 and random.random() < 0.6:
+                    Overworld[x+i][z+k][y+j] = 6
+                    # L'ajoute aux listes des blocks posés
                     Xc1.append(x)
                     Yc1.append(y)
                     Zc1.append(z)
     return Xc1, Yc1, Zc1
 
-def redstone(C, x, z, y):
+
+def redstone(Overworld, x, z, y):
+    # Listes des blocks qui seront réellement remplacés
+    Xr1 = []
+    Yr1 = []
+    Zr1 = []
+    # Parcours un block de 3*3*3 autour de x, y, z
     for j in range(3):
         for k in range(3):
             for i in range(3):
-                if C[x+i][z+k][y+j]==1 and random.random()<0.6:
-                    C[x+i][z+k][y+j] = 7
+                # Regarde si le block à remplacer est bien de la pierre et le remplace avec une proba de 0.5
+                if Overworld[x+i][z+k][y+j] == 1 and random.random() < 0.5:
+                    Overworld[x+i][z+k][y+j] = 7
+                    # L'ajoute aux listes des blocks posés
+                    Xr1.append(x)
+                    Yr1.append(y)
+                    Zr1.append(z)
+    return Xr1, Yr1, Zr1
 
-def iron(C, x, z, y):
-    Xc1=[]
-    Yc1=[]
-    Zc1=[]
+
+def iron(Overworld, x, z, y):
+    # Listes des blocks qui seront réellement remplacés
+    Xi1 = []
+    Yi1 = []
+    Zi1 = []
+    # Parcours un block de 2*2*2 autour de x, y, z
     for j in range(2):
         for k in range(2):
             for i in range(2):
-                if C[x+i][z+k][y+j]==1 and random.random()<0.6:
-                    C[x+i][z+k][y+j] = 12
-                    Xc1.append(x)
-                    Yc1.append(y)
-                    Zc1.append(z)
-    return Xc1, Yc1, Zc1
+                # Regarde si le block à remplacer est bien de la pierre et le remplace avec une proba de 0.6
+                if Overworld[x+i][z+k][y+j] == 1 and random.random() < 0.6:
+                    Overworld[x+i][z+k][y+j] = 12
+                    # L'ajoute aux listes des blocks posés
+                    Xi1.append(x)
+                    Yi1.append(y)
+                    Zi1.append(z)
+    return Xi1, Yi1, Zi1
 
-def gold(C, x, z, y):
-    for j in range(1):
-        for k in range(1):
-            for i in range(1):
-                if C[x+i][z+k][y+j]==1 and random.random()<0.5:
-                    C[x+i][z+k][y+j] = 9
 
-def minerais(CarteListe3D, ax):
+def gold(Overworld, x, z, y):
+    # Listes des blocks qui seront réellement remplacés
+    Xo1 = []
+    Yo1 = []
+    Zo1 = []
+    # Parcours un block de 2*2*2 autour de x, y, z
+    for j in range(2):
+        for k in range(2):
+            for i in range(2):
+                # Regarde si le block à remplacer est bien de la pierre et le remplace avec une proba de 0.5
+                if Overworld[x+i][z+k][y+j] == 1 and random.random() < 0.5:
+                    Overworld[x+i][z+k][y+j] = 9
+                    # L'ajoute aux listes des blocks posés
+                    Xo1.append(x)
+                    Yo1.append(y)
+                    Zo1.append(z)
+    return Xo1, Yo1, Zo1
+
+
+def minerais(Overworld, ax):
+    # Regarde le nombre de chunks définir le nombre de minerai à placer
     NdC = ((taille**2)//(Chunks**2))
+    # Parametres des minerais
+    mine = {0: (charbon, 11, hauteur-4, "black", .3),
+            1: (iron, 8, hauteur//2, "gray", .5),
+            2: (redstone, 4, hauteur//5, "red", .4),
+            3: (gold, 4, hauteur//4, "gold", .7),
+            4: (diamant, 2, hauteur//6, "aqua", .8)}
+    # Parcours le dictionnaire
+    for i in trange(5):
+        nom, densite, position, color, bille = mine[i]
+        NbMn = densite*NdC  # Nombre de minerai dans la map
+        # Prend des listes aléatoires dans [0,1] pour les 3 coordonnées des filons
+        _, Y = Perlin_1D(NbMn)
+        _, X = Perlin_1D(NbMn)
+        _, Z = Perlin_1D(NbMn)
+        # Ajuste pour avoir les bons intervaux
+        Z *= -position
+        Z += hauteur-4
+        Y *= taille
+        Y -= 4
+        X *= taille
+        X -= 4
+        # Listes des blocks réellement placés
+        X1 = []
+        Y1 = []
+        Z1 = []
+        # Parcours les listes des minerais et pose les minerais
+        for i in range(NbMn):
+            x, y, z = nom(Overworld, int(X[i]), int(Z[i]), int(Y[i]))
+            # Ajoute les blocks réellement posés
+            X1 += x
+            Y1 += y
+            Z1 += z
+        X = X1
+        Y = Y1
+        Z = Z1
 
-    # charbon
-    print("charbon")
-    NbMn = 11*NdC
-    _, Yc = Perlin_1D(NbMn)
-    _, Xc = Perlin_1D(NbMn)
-    _, Zc = Perlin_1D(NbMn)
-    Zc *= hauteur-4
-    Yc *= taille
-    Yc -= 4
-    Xc *= taille
-    Xc -= 4
-    X = []
-    Y = []
-    Z = []
-    for i in trange(NbMn):
-        x, y, z = charbon(CarteListe3D, int(Xc[i]), int(Zc[i]), int(Yc[i]))
-        X +=x
-        Y +=y
-        Z +=z
-    Xc = X
-    Yc = Y 
-    Zc = Z
+        ax.scatter(X, Y, Z, c=color, s=bille)
 
-    # redstone
-    print("redstone")
-    NbMn = 4*NdC
-    _, Yr = Perlin_1D(NbMn)
-    _, Xr = Perlin_1D(NbMn)
-    _, Zr = Perlin_1D(NbMn)
-    Zr *= hauteur//5
-    Zr += 4*(hauteur//5)-4
-    Yr *= taille
-    Yr -= 4
-    Xr *= taille
-    Xr -= 4
-    for i in trange(NbMn):
-        redstone(CarteListe3D, int(Xr[i]), int(Zr[i]), int(Yr[i]))
-
-    # fer
-    print("fer")
-    NbMn = 8*NdC
-    _, Yi = Perlin_1D(NbMn)
-    _, Xi = Perlin_1D(NbMn)
-    _, Zi = Perlin_1D(NbMn)
-    Zi *= hauteur//2
-    Zi += (hauteur//2)-4
-    Yi *= taille
-    Yi-= 4
-    Xi *= taille
-    Xi -= 4
-
-    X = []
-    Y = []
-    Z = []
-    for i in trange(NbMn):
-        x, y, z = iron(CarteListe3D, int(Xi[i]), int(Zi[i]), int(Yi[i]))
-        X +=x
-        Y +=y
-        Z +=z
-    Xi = X
-    Yi = Y 
-    Zi = Z
-    # or
-    print("or")
-    NbMn = 4*NdC
-    _, Yo = Perlin_1D(NbMn)
-    _, Xo = Perlin_1D(NbMn)
-    _, Zo = Perlin_1D(NbMn)
-    Zo *= hauteur//4
-    Zo += 3*(hauteur//4)-4
-    Yo *= taille
-    Yo-= 4
-    Xo *= taille
-    Xo -= 4
-    for i in trange(NbMn):
-        gold(CarteListe3D, int(Xo[i]), int(Zo[i]), int(Yo[i]))
-
-    # diamant
-    print("diamant")
-    NbMn = 2*NdC
-    _, Yd = Perlin_1D(NbMn)
-    _, Xd = Perlin_1D(NbMn)
-    _, Zd = Perlin_1D(NbMn)
-    Zd *= hauteur//5
-    Zd += 4*(hauteur//5)-4
-    Yd *= taille
-    Yd-= 4
-    Xd *= taille
-    Xd -= 4
-    for i in trange(NbMn):
-        diamant(CarteListe3D, int(Xd[i]), int(Zd[i]), int(Yd[i]))
-
-    ax.scatter(Xr, Yr, Zr, c='red', s=0.7)
-    ax.scatter(Xi, Yi, Zi, c='gray', s=0.7)
-    ax.scatter(Xo, Yo, Zo, c='gold', s=0.8)
-    ax.scatter(Xc, Yc, Zc, c='black', s=0.4)
-    ax.scatter(Xd, Yd, Zd, c='aqua', s=0.8)
-
+    # Axes
     ax.set_xlabel('X')
     ax.set_ylabel('Y')
     ax.set_zlabel('Z')
     ax.invert_zaxis()
-
+    # Titre et sauvegarde
     ax.set_title('Minerai 3D')
     plt.savefig("Overworld/Minerai")
 
-## Grottes
 
-def Explose(C, x, z, y):
+# Grottes
 
-    # regarde si le bloc n'est pas trop près des bords
 
-    if z < 1 or z > hauteur - 2 or y < 1 or y > taille - 2 or x < 1 or x > taille - 2:
+def Explose(Overworld, x, z, y):
+    # Liste des arrêtes
+    L = {(2, -2), (-2, 2), (2, 2), (-2, -2)}
+    # Parcours un cube de 5*5*5
+    for j in range(-2, 3):
+        for k in range(-2, 3):
+            for i in range(-2, 3):
+                # Si le block n'est pas sur une arrête, on l'explose
+                if in_Patron(x+i, y+k, z+j) and not (i, j) in L and not (i, k) in L and not (j, k) in L:
+                    Overworld[x+i][z+j][y+k] = 0
 
-        return None
 
-    # fait l'explosion
-
-    else:  # explose un cube de 3*3 autour du cube
-
-        C[x][z][y] = 0
-        C[x][z + 1][y] = 0
-        C[x][z - 1][y] = 0
-        C[x][z + 1][y + 1] = 0
-        C[x][z][y + 1] = 0
-        C[x][z - 1][y + 1] = 0
-        C[x][z + 1][y - 1] = 0
-        C[x][z][y - 1] = 0
-        C[x][z - 1][y - 1] = 0
-
-        C[x + 1][z][y] = 0
-        C[x + 1][z + 1][y] = 0
-        C[x + 1][z - 1][y] = 0
-        C[x + 1][z + 1][y + 1] = 0
-        C[x + 1][z][y + 1] = 0
-        C[x + 1][z - 1][y + 1] = 0
-        C[x + 1][z + 1][y - 1] = 0
-        C[x + 1][z][y - 1] = 0
-        C[x + 1][z - 1][y - 1] = 0
-
-        C[x - 1][z][y] = 0
-        C[x - 1][z + 1][y] = 0
-        C[x - 1][z - 1][y] = 0
-        C[x - 1][z + 1][y + 1] = 0
-        C[x - 1][z][y + 1] = 0
-        C[x - 1][z - 1][y + 1] = 0
-        C[x - 1][z + 1][y - 1] = 0
-        C[x - 1][z][y - 1] = 0
-        C[x - 1][z - 1][y - 1] = 0
-
-        if z != 1 and z != hauteur - 2 and y != 1 and y != taille - 2 and x != 1 and x != taille - 2:  # explose un bloc de 5*5 sans les arretes si le bloc n'est pas trop près des bords
-
-            C[x + 2][z][y] = 0
-            C[x + 2][z + 1][y] = 0
-            C[x + 2][z - 1][y] = 0
-            C[x + 2][z + 1][y + 1] = 0
-            C[x + 2][z][y + 1] = 0
-            C[x + 2][z - 1][y + 1] = 0
-            C[x + 2][z + 1][y - 1] = 0
-            C[x + 2][z][y - 1] = 0
-            C[x + 2][z - 1][y - 1] = 0
-
-            C[x - 2][z][y] = 0
-            C[x - 2][z + 1][y] = 0
-            C[x - 2][z - 1][y] = 0
-            C[x - 2][z + 1][y + 1] = 0
-            C[x - 2][z][y + 1] = 0
-            C[x - 2][z - 1][y + 1] = 0
-            C[x - 2][z + 1][y - 1] = 0
-            C[x - 2][z][y - 1] = 0
-            C[x - 2][z - 1][y - 1] = 0
-
-            C[x + 1][z + 2][y + 1] = 0
-            C[x - 1][z + 2][y + 1] = 0
-            C[x][z + 2][y + 1] = 0
-            C[x + 1][z + 2][y] = 0
-            C[x - 1][z + 2][y] = 0
-            C[x][z + 2][y] = 0
-            C[x + 1][z + 2][y - 1] = 0
-            C[x - 1][z + 2][y - 1] = 0
-            C[x][z + 2][y - 1] = 0
-
-            C[x + 1][z - 2][y + 1] = 0
-            C[x - 1][z - 2][y + 1] = 0
-            C[x][z - 2][y + 1] = 0
-            C[x + 1][z - 2][y] = 0
-            C[x - 1][z - 2][y] = 0
-            C[x][z - 2][y] = 0
-            C[x + 1][z - 2][y - 1] = 0
-            C[x - 1][z - 2][y - 1] = 0
-            C[x][z - 2][y - 1] = 0
-
-            C[x + 1][z + 1][y + 2] = 0
-            C[x - 1][z + 1][y + 2] = 0
-            C[x][z + 1][y + 2] = 0
-            C[x + 1][z][y + 2] = 0
-            C[x - 1][z][y + 2] = 0
-            C[x][z][y + 2] = 0
-            C[x + 1][z - 1][y + 2] = 0
-            C[x - 1][z - 1][y + 2] = 0
-            C[x][z - 1][y + 2] = 0
-
-            C[x + 1][z + 1][y - 2] = 0
-            C[x - 1][z + 1][y - 2] = 0
-            C[x][z + 1][y - 2] = 0
-            C[x + 1][z][y - 2] = 0
-            C[x - 1][z][y - 2] = 0
-            C[x][z][y - 2] = 0
-            C[x + 1][z - 1][y - 2] = 0
-            C[x - 1][z - 1][y - 2] = 0
-            C[x][z - 1][y - 2] = 0
-
-def Grotte(CarteListe3D, ax):
-
+def Grotte(Overworld, ax):
+    # Bruit 1D sur chacun des axes dans un cube amplitude_G*amplitude_G*amplitude_G
     _, Xg = Bruit_de_Grotte_sin(NbPt, fr, amplitude_G, NdBG, save)
     _, Zg = Bruit_de_Grotte_sin(NbPt, fr, amplitude_G, NdBG, save)
     _, Yg = Bruit_de_Grotte_sin(NbPt, fr, amplitude_G, NdBG, save)
-    Xg = [Xg[i]+randrange(taille-2*amplitude_G) for i in range(len(Xg))]
-    Yg = [Yg[i]+randrange(taille-2*amplitude_G) for i in range(len(Yg))]
-    Zg = [Zg[i]+30 for i in range(len(Xg))]
-
+    # Deplace aléatoirement les grottes pour qu'elles ne soient pas toutes dans amplitude_G*amplitude_G*amplitude_G
+    Xg += randrange(taille-amplitude_G)
+    Yg += randrange(taille-amplitude_G)
+    Zg += 30
+    # Affichage
     ax.scatter(Xg, Yg, Zg, s=.8)
-
+    # Explose sur toute la grotte
     for i in range((NbPt - 1) * fr + 1):
-        Explose(CarteListe3D, int(Xg[i]), int(Zg[i]+150), int(Yg[i]))
+        Explose(Overworld, int(Xg[i]), int(Zg[i]), int(Yg[i]))
+
 
 def Grotte_3D(ax):
-
+    # Axes
     ax.set_xlabel('X')
     ax.set_ylabel('Y')
     ax.set_zlabel('Z')
     ax.invert_zaxis()
-
+    # Titre et sauvergarde
     ax.set_title('Grotte 3D')
-    ax.savefig("Overworld/Grotte")
+    plt.savefig("Overworld/Grotte")
 
-## Eau
 
-def Eau(CarteListe3D, Liste_o): # Transforme tous les blocs de Liste_o en eau
-    for e in tqdm(Liste_o):
-            x, y, z = e
-            CarteListe3D[x][z][y] = 4
+# Eau
 
-def Troue(C, Liste_sable):
+
+def Eau(Overworld, Liste_o):
+    # Parcours Liste_o et transforme tous les blocs en eau
+    for (x, y, z) in tqdm(Liste_o):
+        Overworld[x][z][y] = 4
+
+
+def Troue(Overworld, Liste_sable):
     Robinet = []
     for (x, y, z) in Liste_sable:   # Parcours tous les blocs de sable qui sont juste en dessous de l'eau
-        if C[x][z][y] == 0: # Regarde si le bloc a été explosé
-            Robinet.append((x, y, z))    # Si oui, ont l'ajoute à Robinet pour qu'il soit remplacé par de l'eau dans la suite
+        if Overworld[x][z][y] == 0:  # Regarde si le bloc a été explosé
+            # Si oui, ont l'ajoute à Robinet pour qu'il soit remplacé par de l'eau dans la suite
+            Robinet.append((x, y, z))
     return Robinet
 
-def Percolation(C, Robinet):
+
+def Percolation(Overworld, Robinet):
     for (x, y, z) in Robinet:
-        C[x][z][y] = 4  # Le change en eau
+        Overworld[x][z][y] = 4  # Le change en eau
     while Robinet:    # Percolation tant que tous les voisins ne sont pas remplis
-        (x, y, z) = Robinet[0]  # Prends le premier
+        (x, y, z) = Robinet[0]  # Prend le premier
 
         # Regarde les voisins, si ils sont vides, on met de l'eau et on les ajoutes à Robinet pour ragarder les voisins des voisins
-        if z != hauteur - 1 and C[x][z + 1][y] == 0:
+        if z != hauteur - 1 and Overworld[x][z + 1][y] == 0:
             Robinet.append((x, y, z + 1))
-            C[x][z + 1][y] = 4
-        if x != 0 and C[x - 1][z][y] == 0:
+            Overworld[x][z + 1][y] = 4
+        if x != 0 and Overworld[x - 1][z][y] == 0:
             Robinet.append((x - 1, y, z))
-            C[x - 1][z][y] = 4
-        if x != taille - 1 and C[x + 1][z][y] == 0:
+            Overworld[x - 1][z][y] = 4
+        if x != taille - 1 and Overworld[x + 1][z][y] == 0:
             Robinet.append((x + 1, y, z))
-            C[x + 1][z][y] = 4
-        if y != 0 and C[x][z][y - 1] == 0:
+            Overworld[x + 1][z][y] = 4
+        if y != 0 and Overworld[x][z][y - 1] == 0:
             Robinet.append((x, y - 1, z))
-            C[x][z][y - 1] = 4
-        if y != taille - 1 and C[x][z][y + 1] == 0:
+            Overworld[x][z][y - 1] = 4
+        if y != taille - 1 and Overworld[x][z][y + 1] == 0:
             Robinet.append((x, y + 1, z))
-            C[x][z][y + 1] = 4
-        if C[x][z - 1][y] == 0 and z > Heau and OverFlow:
+            Overworld[x][z][y + 1] = 4
+        if Overworld[x][z - 1][y] == 0 and z > Heau and OverFlow:
             Robinet.append((x, y, z - 1))
-            C[x][z - 1][y] = 4
-        Robinet.pop(0)  # Enlève l'élément qui a été étudié pour que la boucle finisse
+            Overworld[x][z - 1][y] = 4
+        # Enlève l'élément qui a été étudié pour que la boucle finisse
+        Robinet.pop(0)
         print(f"\r Longueur de Robinet : {len(Robinet)}", end="")
+    print('')
 
-## Arbre
+
+# Arbre
+
 
 def Liste_arbre():
-    L_arbre=[]
-    Bruit_arbre=Perlin_2D(10, taille//Chunks, taille//Chunks)
+    # Défini la liste des arbres à placer et le bruit utilisé pour la densité d'arbre
+    L_arbre = []
+    Bruit_arbre = Perlin_2D(10, taille//Chunks, taille//Chunks)
     Bruit_arbre += 0.5
     Bruit_arbre *= 4
+    # Parcours les chunks
     for i in trange(taille//Chunks):
         for j in range(taille//Chunks):
-            L_arbre_chuck=[]
-            arbre=0
-            d=Bruit_arbre[i,j]*4
+            L_arbre_chuck = []  # Liste des arbres par chunk
+            arbre = 0  # Initialisation du compteur des arbres posés
+            d = Bruit_arbre[i, j]*4  # Nombres d'arbres à poser
             while arbre < d:
-                x=i*Chunks+randrange(Chunks)
-                y=j*Chunks+randrange(Chunks)
-                if (x,y) not in L_arbre:
-                    L_arbre_chuck.append((x,y))
-                    arbre+=1
-            L_arbre+=L_arbre_chuck
-    orig_map=plt.colormaps['gray']
+                # Coordonnées aléatoires dans la chunk
+                x = i*Chunks+randrange(Chunks)
+                y = j*Chunks+randrange(Chunks)
+                # Regarde si un arbre est déjà placé
+                if (x, y) not in L_arbre:
+                    L_arbre_chuck.append((x, y))
+                    arbre += 1
+            L_arbre += L_arbre_chuck
+    # Affichage du bruit
+    orig_map = plt.colormaps['gray']
     reversed_map = orig_map.reversed()
     plt.close()
     plt.imshow(Bruit_arbre, origin='upper', cmap=reversed_map)
@@ -444,13 +385,20 @@ def Liste_arbre():
     plt.close()
     return L_arbre
 
-def Plantation(C, L_arbre, BdP, Cat):
-    for (x,y) in tqdm(L_arbre):
-        z=int(BdP[x,y])
-        if z<Heau-3:
-                Ecosia(C, x, y, BdP, Cat)
 
-    echelle = ListedColormap(['#141872','#0970a6', '#119fe9','#eeec7e', '#5df147', '#38be2a','#336e1c','#004704','white'], 8)
+def Amazonie(Overworld, L_arbre, BdP, Cat):
+    # Parcours L_arbre
+    k = 0
+    for (x, y) in tqdm(L_arbre):
+        k += 1
+        z = int(BdP[x, y])
+        # Regarde s'il y a de la terre pour placer l'arbre
+        if z < Heau-3:
+            # Plante un arbre
+            Ecosia(Overworld, x, y, BdP, Cat, k)
+    # Affiche CaT avec les arbres
+    echelle = ListedColormap(['#141872', '#0970a6', '#119fe9', '#eeec7e',
+                             '#5df147', '#38be2a', '#336e1c', '#004704', 'white'], 8)
     plt.close("all")
     plt.imshow(Cat, origin='upper', cmap=echelle, vmin=0, vmax=8)
     plt.xlabel('Y')
@@ -458,68 +406,79 @@ def Plantation(C, L_arbre, BdP, Cat):
     plt.title('Carte au Trésor')
     plt.savefig(f"Overworld/Carte_au_Trésor.jpg")
 
-def Ecosia(C, x, y, BdP, Cat):
-    z=int(BdP[x,y])
-    coin_1=[(2, 2), (-2, 2), (2, -2), (-2, -2)]
-    coin_2=[(1, 1), (-1, 1), (1, -1), (-1, -1)]
-    
-    # Tronc 
-    hauteur_arb = randrange(4,8) # [4,7]
-    for _ in range(hauteur_arb):
-        z-=1
-        C[x][z][y]=14
-    Cat[x][y]=7
+
+def Ecosia(Overworld, x, y, BdP, Cat, k):
+    # Hauteur et listes des coins
+    z = int(BdP[x, y])
+    coin_1 = [(2, 2), (-2, 2), (2, -2), (-2, -2)]
+    coin_2 = [(1, 1), (-1, 1), (1, -1), (-1, -1)]
+    b = 0.1*(k % 10 == 0)
+
+    # Tronc
+    hauteur_arb = randrange(4, 8)  # Hauteur du tronc
+    for _ in range(hauteur_arb):  # Place le tronc
+        z -= 1
+        Overworld[x][z][y] = 14 + b
+    Cat[x][y] = 7  # Place les feuilles sur CaT
+
     # Feuilles bas
-    for k in range(1,3):
+    for k in range(1, 3):  # Parcours les deux grands anneaux du bas
         for i in range(-2, 3):
             for j in range(-2, 3):
-                if (random.random()<2/3 or not (i,j) in coin_1) and in_Patron(x+i, y+j, z+k) and (i,j)!=(0,0):
-                        C[x+i][z+k][y+j]=13
-                        Cat[x+i][y+j]=7
-
+                # Si la feuille est dans un coin, proba de 2/3 d'apparaitre
+                if (random.random() < 2/3 or not (i, j) in coin_1) and in_Patron(x+i, y+j, z+k) and (i, j) != (0, 0):
+                    Overworld[x+i][z+k][y+j] = 13 + b  # Feuille dans L'Overworld
+                    Cat[x+i][y+j] = 7  # Feuille sur la CaT
 
     # Feuilles hauts
-    for i in range(-1, 2):
+    for i in range(-1, 2):  # Parcours le petit anneau du bas
         for j in range(-1, 2):
-            if (random.random()<1/4 or not (i,j) in coin_2) and in_Patron(x+i, y+j, z-1) and (i,j)!=(0,0):
-                    C[x+i][z][y+j]=13
-    for i in range(-1, 2):
+            # Si la feuille est dans un coin, proba de 1/4 d'apparaitre
+            if (random.random() < 1/4 or not (i, j) in coin_2) and in_Patron(x+i, y+j, z-1) and (i, j) != (0, 0):
+                Overworld[x+i][z][y+j] = 13 + b
+    for i in range(-1, 2):  # Parcours le petit anneau du haut
         for j in range(-1, 2):
-            if (i,j) not in coin_2 and in_Patron(x+i, y+j, z-1):
-                    C[x+i][z-1][y+j]=13
+            # Si la feuille est dans un coin, elle n'apparait pas
+            if (i, j) not in coin_2 and in_Patron(x+i, y+j, z-1):
+                Overworld[x+i][z-1][y+j] = 13 + b
 
-## Conversion pour Minecraft
+
+# Conversion pour Minecraft
+
 
 correspondanceID = {
-                    0 : 0,  # Air
-                    1 : 1,  # Stone
-                    2 : 2,  # Grass
-                    3 : 3,  # Dirt
-                    4 : 9,  # Water
-                    5 : 12,  # Sand
-                    6 : 16,  # Coal
-                    7 : 73,  # Redstone
-                    8 : 56,  # Diamond
-                    9 : 14,  # Gold
-                    10: 7,  # Bedrock
-                    11: 80,  # Snow block
-                    12: 15,  # Iron
-                    13 : 18,  # Leaves
-                    14 : 17,  # Wood
-                    15 : 78  # Snow
-                    }
+    0: 0,  # Air
+    1: 1,  # Stone
+    2: 2,  # Grass
+    3: 3,  # Dirt
+    4: 9,  # Water
+    5: 12,  # Sand
+    6: 16,  # Coal
+    7: 73,  # Redstone
+    8: 56,  # Diamond
+    9: 14,  # Gold
+    10: 7,  # Bedrock
+    11: 80,  # Snow block
+    12: 15,  # Iron
+    13: 18, 13.1: 18.2,  # Leaves
+    14: 17, 14.1: 17.2,  # Wood
+    15: 78  # Snow
+}
 
-def CreteMapSchem(grid: list, deltaX: int, deltaY: int, deltaZ: int, graine):
-    sf = SchematicFile(shape=(deltaZ, deltaY, deltaX))  # z = hauteur faux mais pas grave
-    for x in trange(deltaX):
-        for y in range(deltaY):
-            for z in range(deltaZ):
-                sf.blocks[z, y, x] = correspondanceID[grid[x][-z - 1][y]]  # carte renversé
+
+def CreteMapSchem(Overworld):
+    sf = SchematicFile(shape=(hauteur, taille, taille))
+    for x in trange(taille):
+        for y in range(taille):
+            for z in range(hauteur):
+                sf.blocks[z, y, x] = correspondanceID[Overworld[x][-z - 1][y]]
     sf.save(f'Overworld/Map_Overworld.schematic')
 
-## Fonction final
 
-def Fait_une_Map(graine):
+# Fonction final
+
+
+def Make_an_Overworld(graine):
     print('')
     print('Start Overworld')
 
@@ -535,14 +494,14 @@ def Fait_une_Map(graine):
     # Bruit
     start = time.time()
     print("Start Bruit Perlin")
-    BdP, Cat = Bruit_Overworld(graine, taille, pixels, precsision, amplitude)
+    BdP, Cat = Bruit_Overworld(taille, pixels, precsision, amplitude)
     print(f"End Bruit Perlin : {time.time() - start:.2f} s")
     print('')
 
     # Patron
     start = time.time()
     print("Start Patron")
-    Map, Liste_sable, Liste_o = Patron_carte(BdP)
+    Overworld, Liste_sable, Liste_o = Patron_carte(BdP)
     print(f"End Patron : {time.time() - start:.2f} s")
     print('')
 
@@ -551,7 +510,7 @@ def Fait_une_Map(graine):
     print("Start Minerai")
     plt.close("all")
     ax = plt.axes(projection="3d")
-    minerais(Map, ax)
+    minerais(Overworld, ax)
     print(f"End Minerai : {time.time() - start:.2f} s")
     print('')
 
@@ -561,7 +520,7 @@ def Fait_une_Map(graine):
     print("Start Grotte")
     ax = plt.axes(projection="3d")
     for _ in trange(nbGrotte):
-        Grotte(Map, ax)
+        Grotte(Overworld, ax)
     Grotte_3D(ax)
     print(f"End Grotte : {time.time() - start:.2f} s")
     print('')
@@ -569,18 +528,18 @@ def Fait_une_Map(graine):
     # Eau
     start = time.time()
     print("Start Eau")
-    Eau(Map, Liste_o)
-    Robinet = Troue(Map, Liste_sable)
-    Percolation(Map, Robinet)
+    Eau(Overworld, Liste_o)
+    Robinet = Troue(Overworld, Liste_sable)
+    Percolation(Overworld, Robinet)
     print(f"End Eau : {time.time() - start:.2f} s")
     print('')
 
     # Arbre
 
     start = time.time()
-    print("Start Arbre") 
-    L_arbre=Liste_arbre()
-    Plantation(Map,L_arbre,BdP,Cat)
+    print("Start Arbre")
+    L_arbre = Liste_arbre()
+    Amazonie(Overworld, L_arbre, BdP, Cat)
 
     print(f"End Arbre : {time.time() - start:.2f} s")
     print('')
@@ -588,7 +547,7 @@ def Fait_une_Map(graine):
     # Frame
     start = time.time()
     print("Start Frame")
-    frames(Map)
+    frames(Overworld)
     print(f"End Frame : {time.time() - start:.2f} s")
     print('')
 
@@ -602,7 +561,7 @@ def Fait_une_Map(graine):
     # Schematic
     start = time.time()
     print("Start Schematic")
-    CreteMapSchem(Map, taille, taille, hauteur, graine)
+    CreteMapSchem(Overworld)
     print(f"End Schematic : {time.time() - start:.2f} s")
     print('')
 
@@ -610,17 +569,19 @@ def Fait_une_Map(graine):
     print(f"End Overworld : {finTime:.2f} s")
     print('')
 
-## Paramètres de la carte
+
+# Paramètres de la carte
+
 
 # Seed et Dimensions
 graine = randrange(10000)
 taille = 512
 hauteur = 256
-# Neige, Eau, Arbre, Minerai 
+# Neige, Eau, Arbre, Minerai
 Hneige = 60
 Heau = 150
-Chunks=16
-OverFlow=False
+Chunks = 16
+OverFlow = True
 # HeightMap
 precsision = 5
 amplitude = 128
@@ -628,11 +589,13 @@ pixels = 3000
 # Grotte
 NbPt = 4
 fr = 128
-amplitude_G=128
-NdBG=6
+amplitude_G = 128
+NdBG = 6
 nbGrotte = 20
 save = False
 
-## Création de la carte
 
-Fait_une_Map(graine)
+# Création de l'Overworld
+
+
+Make_an_Overworld(graine)

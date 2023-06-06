@@ -73,7 +73,7 @@ def Perlin_2D(precsision, pixels, taille):
 
     return D
 
-def Bruit_Overworld(graine, taille, pixels, precsision, amplitude):
+def Bruit_Overworld(taille, pixels, precsision, amplitude):
     frames_bruit = []
     frames_carte = []
 
