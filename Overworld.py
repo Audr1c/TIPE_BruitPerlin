@@ -460,8 +460,8 @@ correspondanceID = {
     10: 7,  # Bedrock
     11: 80,  # Snow block
     12: 15,  # Iron
-    13: 18, 13.1: 18.2,  # Leaves
-    14: 17, 14.1: 17.2,  # Wood
+    13: 18, 13.1: 18,  # Leaves
+    14: 17, 14.1: 17,  # Wood
     15: 78  # Snow
 }
 
@@ -471,7 +471,13 @@ def CreteMapSchem(Overworld):
     for x in trange(taille):
         for y in range(taille):
             for z in range(hauteur):
-                sf.blocks[z, y, x] = correspondanceID[Overworld[x][-z - 1][y]]
+                val  = correspondanceID[Overworld[x][-z - 1][y]]
+                sf.blocks[z, y, x] = val
+
+                if val in (18, 17):
+                    if val//1 != val:
+                        pass
+                        # sf.all_tags
     sf.save(f'Overworld/Map_Overworld.schematic')
 
 
