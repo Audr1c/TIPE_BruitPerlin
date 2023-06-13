@@ -27,7 +27,15 @@ def gradient(c, x, y):
 ## Bruit de Perlin
 
 def Perlin_2D(precsision, pixels, taille):
-    tab = np.linspace(1, precsision, pixels, endpoint=False)
+    version = True
+    if version:
+        new_precsision = 1 + (precsision - 1) * taille / pixels
+        tab = np.linspace(1, new_precsision, taille + 10, endpoint=False)
+        perm = np.arange((16 * new_precsision // 5), dtype=int)
+    else:
+        tab = np.linspace(1, precsision, pixels, endpoint=False)
+        perm = np.arange(16 * (precsision // 5), dtype=int)
+
 
     # création de grille en utilisant le tableau 1d
     x, y = np.meshgrid(tab,tab)
@@ -35,7 +43,7 @@ def Perlin_2D(precsision, pixels, taille):
     # On crée une permutation en fonction du nb de pixels
     # On utilise la fonction seed parce que numpy chiale si on le fait pas
 
-    perm = np.arange(16 * (precsision // 5), dtype=int)
+
     np.random.shuffle(perm)
 
     # on fait un tableau 2d qu'on applatit
