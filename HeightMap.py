@@ -27,15 +27,10 @@ def gradient(c, x, y):
 ## Bruit de Perlin
 
 def Perlin_2D(precsision, pixels, taille):
-    version = True
-    if version:
-        new_precsision = 1 + (precsision - 1) * taille / pixels
-        tab = np.linspace(1, new_precsision, taille + 10, endpoint=False)
-        perm = np.arange((16 * new_precsision // 5), dtype=int)
-    else:
-        tab = np.linspace(1, precsision, pixels, endpoint=False)
-        perm = np.arange(16 * (precsision // 5), dtype=int)
-
+    
+    new_precsision = 1 + (precsision - 1) * taille / pixels
+    tab = np.linspace(1, new_precsision, taille, endpoint=False)
+    perm = np.arange((16 * new_precsision // 5), dtype=int)
 
     # création de grille en utilisant le tableau 1d
     x, y = np.meshgrid(tab,tab)
@@ -75,11 +70,7 @@ def Perlin_2D(precsision, pixels, taille):
     plt.close("all")
     resultat = lerp(x1, x2, yf)
 
-    D = np.zeros((taille, taille))
-    for i in range(taille):
-        D[i] = resultat[i][0:taille]
-
-    return D
+    return resultat
 
 def Bruit_Overworld(taille, pixels, precsision, amplitude):
     frames_bruit = []
@@ -151,7 +142,7 @@ def Bruit_Overworld(taille, pixels, precsision, amplitude):
 
 
     resultat = sum(resultats)
-    tab2 = np.linspace(0, taille, taille, endpoint=False)
+    tab2 = np.linspace(0, taille, taille, endpoint=True)
 
     # création de grille en utilisant le tableau 1d
     X, Y = np.meshgrid(tab2, tab2)
@@ -171,7 +162,7 @@ def Bruit_Overworld(taille, pixels, precsision, amplitude):
     ax.set_ylabel('Y')
     ax.set_zlabel('Z')
     ax.invert_zaxis()
-    ax.plot_surface(X, Y, resultat, cmap='gray')
+    ax.plot_surface(X, Y, resultat.T, cmap=reversed_map)
     plt.title('Heightmap')
     plt.savefig("HeightMap_et_BdP_2D/Height_map")
 

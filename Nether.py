@@ -241,8 +241,8 @@ def Lava(Nether):
 correspondanceID = {
     0: 0,  # Air
     -1: 87,  # Stone
-    3: 11,
-    6: 153
+    3: 11,  # Lava
+    6: 153  # Quartz
 }
 
 

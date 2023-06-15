@@ -3,6 +3,7 @@
 
 import time
 import os
+from math import sqrt
 from matplotlib.colors import ListedColormap
 import imageio
 from tqdm import trange, tqdm
@@ -73,9 +74,9 @@ def in_Patron(x, y, z):
 def sauvegarder_grille(Overworld, i, nom_du_fichier) -> None:
     # Echelle de couleur pour les différents types de block
     echelle = ListedColormap(['#d7edf8', 'gray', '#007412', 'brown', 'blue', 'yellow', 'black',
-                             'red', '#00fdbd', 'gold', '0.3', 'white', '#c9d279', '#095a03', '#642100', '0.4'], 15)
+                             'red', '#00fdbd', 'gold', '0.3', 'white', '#c9d279', '#095a03', '#642100', '0.4', '#ff4d00','#300a6a'], 17)
     # Affiche, met un titre, sauvegarde
-    plt.matshow(Overworld[i], cmap=echelle, vmin=0, vmax=15)
+    plt.matshow(Overworld[i], cmap=echelle, vmin=0, vmax=17)
     plt.title(f"Frame n°{i}")
     plt.xlabel('y')
     plt.ylabel('z')
@@ -209,15 +210,8 @@ def gold(Overworld, x, z, y):
 def minerais(Overworld, ax):
     # Regarde le nombre de chunks définir le nombre de minerai à placer
     NdC = ((taille**2)//(Chunks**2))
-    # Parametres des minerais
-    mine = {0: (charbon, 11, hauteur-4, "black", .3),
-            1: (iron, 8, hauteur//2, "gray", .5),
-            2: (redstone, 4, hauteur//5, "red", .4),
-            3: (gold, 4, hauteur//4, "gold", .7),
-            4: (diamant, 2, hauteur//6, "aqua", .8)}
     # Parcours le dictionnaire
-    for i in trange(5):
-        nom, densite, position, color, bille = mine[i]
+    for (nom, densite, position, color, bille) in tqdm(mine):
         NbMn = densite*NdC  # Nombre de minerai dans la map
         # Prend des listes aléatoires dans [0,1] pour les 3 coordonnées des filons
         _, Y = Perlin_1D(NbMn)
@@ -261,21 +255,19 @@ def minerais(Overworld, ax):
 
 
 def Explose(Overworld, x, z, y):
-    # Liste des arrêtes
-    L = {(2, -2), (-2, 2), (2, 2), (-2, -2)}
-    # Parcours un cube de 5*5*5
-    for j in range(-2, 3):
-        for k in range(-2, 3):
-            for i in range(-2, 3):
+    t = 2 + (z > 190) + (z > 220)
+    for j in range(-t, t+1):
+        for k in range(-t, t+1):
+            for i in range(-t, t+1):
                 # Si le block n'est pas sur une arrête, on l'explose
-                if in_Patron(x+i, y+k, z+j) and not (i, j) in L and not (i, k) in L and not (j, k) in L:
-                    Overworld[x+i][z+j][y+k] = 0
+                if in_Patron(x+i, y+k, z+j) and sqrt(i**2 + j**2 + k**2) < sqrt(2)*t:
+                    Overworld[x+i][z+j][y+k] = 16*(z+j>Hlave)
 
 
 def Grotte(Overworld, ax):
     # Bruit 1D sur chacun des axes dans un cube amplitude_G*amplitude_G*amplitude_G
     _, Xg = Bruit_de_Grotte_sin(NbPt, fr, amplitude_G, NdBG, save)
-    _, Zg = Bruit_de_Grotte_sin(NbPt, fr, amplitude_G, NdBG, save)
+    _, Zg = Bruit_de_Grotte_sin(NbPt, fr, hauteur//2, NdBG, save)
     _, Yg = Bruit_de_Grotte_sin(NbPt, fr, amplitude_G, NdBG, save)
     # Deplace aléatoirement les grottes pour qu'elles ne soient pas toutes dans amplitude_G*amplitude_G*amplitude_G
     Xg += randrange(taille-amplitude_G)
@@ -339,9 +331,13 @@ def Percolation(Overworld, Robinet):
         if y != taille - 1 and Overworld[x][z][y + 1] == 0:
             Robinet.append((x, y + 1, z))
             Overworld[x][z][y + 1] = 4
+        # Overflow
         if Overworld[x][z - 1][y] == 0 and z > Heau and OverFlow:
             Robinet.append((x, y, z - 1))
             Overworld[x][z - 1][y] = 4
+        # Obsidienne
+        if z != hauteur - 1 and Overworld[x][z + 1][y] == 16:
+            Overworld[x][z + 1][y] = 17
         # Enlève l'élément qui a été étudié pour que la boucle finisse
         Robinet.pop(0)
         print(f"\r Longueur de Robinet : {len(Robinet)}", end="")
@@ -361,16 +357,15 @@ def Liste_arbre():
     for i in trange(taille//Chunks):
         for j in range(taille//Chunks):
             L_arbre_chuck = []  # Liste des arbres par chunk
-            arbre = 0  # Initialisation du compteur des arbres posés
-            d = Bruit_arbre[i, j]*4  # Nombres d'arbres à poser
-            while arbre < d:
+            arbre = int(Bruit_arbre[i, j]*4 + 1)  # Nombres d'arbres à poser
+            while arbre:
                 # Coordonnées aléatoires dans la chunk
                 x = i*Chunks+randrange(Chunks)
                 y = j*Chunks+randrange(Chunks)
                 # Regarde si un arbre est déjà placé
                 if (x, y) not in L_arbre:
                     L_arbre_chuck.append((x, y))
-                    arbre += 1
+                    arbre -= 1
             L_arbre += L_arbre_chuck
     # Affichage du bruit
     orig_map = plt.colormaps['gray']
@@ -427,7 +422,8 @@ def Ecosia(Overworld, x, y, BdP, Cat, k):
             for j in range(-2, 3):
                 # Si la feuille est dans un coin, proba de 2/3 d'apparaitre
                 if (random.random() < 2/3 or not (i, j) in coin_1) and in_Patron(x+i, y+j, z+k) and (i, j) != (0, 0):
-                    Overworld[x+i][z+k][y+j] = 13 + b  # Feuille dans L'Overworld
+                    Overworld[x+i][z+k][y+j] = 13 + \
+                        b  # Feuille dans L'Overworld
                     Cat[x+i][y+j] = 7  # Feuille sur la CaT
 
     # Feuilles hauts
@@ -462,7 +458,9 @@ correspondanceID = {
     12: 15,  # Iron
     13: 18, 13.1: 18,  # Leaves
     14: 17, 14.1: 17,  # Wood
-    15: 78  # Snow
+    15: 78,  # Snow
+    16: 11,  # Lava
+    17: 49  # Obsidienne
 }
 
 
@@ -471,8 +469,8 @@ def CreteMapSchem(Overworld):
     for x in trange(taille):
         for y in range(taille):
             for z in range(hauteur):
-                val  = correspondanceID[Overworld[x][-z - 1][y]]
-                sf.blocks[z, y, x] = val
+                val = correspondanceID[Overworld[x][-z - 1][y]]
+                sf.blocks[z, x, y] = val
 
                 if val in (18, 17):
                     if val//1 != val:
@@ -536,7 +534,7 @@ def Make_an_Overworld(graine):
     print("Start Eau")
     Eau(Overworld, Liste_o)
     Robinet = Troue(Overworld, Liste_sable)
-    Percolation(Overworld, Robinet)
+    # Percolation(Overworld, Robinet)
     print(f"End Eau : {time.time() - start:.2f} s")
     print('')
 
@@ -544,8 +542,8 @@ def Make_an_Overworld(graine):
 
     start = time.time()
     print("Start Arbre")
-    L_arbre = Liste_arbre()
-    Amazonie(Overworld, L_arbre, BdP, Cat)
+    # L_arbre = Liste_arbre()
+    # Amazonie(Overworld, L_arbre, BdP, Cat)
 
     print(f"End Arbre : {time.time() - start:.2f} s")
     print('')
@@ -553,14 +551,14 @@ def Make_an_Overworld(graine):
     # Frame
     start = time.time()
     print("Start Frame")
-    frames(Overworld)
+    # frames(Overworld)
     print(f"End Frame : {time.time() - start:.2f} s")
     print('')
 
     # GIF
     start = time.time()
     print("Start Gif")
-    gif()
+    # gif()
     print(f"End Gif : {time.time() - start:.2f} s")
     print('')
 
@@ -581,21 +579,27 @@ def Make_an_Overworld(graine):
 
 # Seed et Dimensions
 graine = randrange(10000)
-taille = 512
+taille = 1024
 hauteur = 256
-# Neige, Eau, Arbre, Minerai
+# Neige, Lave, Eau, Arbre, Minerai
 Hneige = 60
+Hlave = 230
 Heau = 150
-Chunks = 16
 OverFlow = True
+Chunks = 16
+mine = [(charbon, 11,  hauteur-4, "black", .3),
+        (iron,     8, hauteur//2,  "gray", .5),
+        (redstone, 4, hauteur//5,   "red", .4),
+        (gold,     4, hauteur//4,  "gold", .7),
+        (diamant,  2, hauteur//6,  "aqua", .8)]
 # HeightMap
 precsision = 5
 amplitude = 128
 pixels = 3000
 # Grotte
-NbPt = 4
-fr = 128
-amplitude_G = 128
+NbPt = 6
+fr = 256
+amplitude_G = 256
 NdBG = 6
 nbGrotte = 20
 save = False
@@ -604,4 +608,4 @@ save = False
 # Création de l'Overworld
 
 
-Make_an_Overworld(graine)
+Make_an_Overworld(398)

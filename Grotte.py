@@ -130,7 +130,7 @@ def Comparatif_Crash_Test(Inter, NbPt, fr):
     plt.close("all")
     plt.plot(u, p, 'r', label='Interpolation sinusoidale')
     plt.plot(x, y, 'b', label='Interpolation cubique')
-    # plt.plot(z, t, '* k', label='Points aléatoires')
+    plt.plot(z, t, '* k', label='Points aléatoires')
     plt.title('Crash Test avec 2 interpolations')
     plt.xlabel('x')
     plt.ylabel('f(x)')
@@ -210,21 +210,20 @@ def Bruit_de_Grotte_sin(NbPt, fr, amplitude, NbBr, save):
         # Change les parametres pour le prochain bruit
         NbPt *= 2
         NbPt -= 1
-        amplitude //= 2
         fr //= 2
         Y.append(y)
         if save:
-            plt.close()
-            plt.plot(x, y, 'r')
+            plt.plot(x, y, label = f'amplitude = {amplitude}')
+            plt.legend(loc = 0)
             plt.title(f'Bruit de Perlin en 1D d amplitude {amplitude}')
             plt.xlabel('x')
             plt.ylabel('f(x)')
-            plt.savefig(
-                f"Grotte_et_BdP_1D/Courbes/Courbe_amplitude_{amplitude}")
+        amplitude //= 2
+    plt.savefig(f"Grotte_et_BdP_1D/Courbe_amplitude")
     Y = sum(Y)  # Fait la somme de tout les bruits
     if save:
         plt.close()
-        plt.plot(x, Y, 'r')
+        plt.plot(x, Y, 'b')
         plt.title(f'Bruit de Perlin en 1D')
         plt.xlabel('x')
         plt.ylabel('f(x)')
@@ -252,9 +251,11 @@ def Bruit_de_Grotte_spline(NbPt, fr, amplitude, NbBr):
 
 g = randrange(10000)  # seed généré aléatoirement entr 0 et 10000
 random.seed(g)
-NbPt = 20  # nombre de points dans l'intervalle choisi aléatoirement
+NbPt = 6  # nombre de points dans l'intervalle choisi aléatoirement
 Inter = 100  # taille de l'intervalle des abcisses, ici [0;50]
 fr = 64  # nombre de points interpolés
 save = True
+
 Bruit_de_Grotte_sin(NbPt, fr, 128, 6, save)
-Comparatif_Crash_Test(Inter, 200, 10)
+Comparatif_Crash_Test(Inter, 20, 10)
+Comparatif_Perin_1D(NbPt, 200)
