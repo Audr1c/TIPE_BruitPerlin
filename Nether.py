@@ -116,7 +116,7 @@ def Perlin3D(precsision):
 
 def Bruit_Nether(precsision, amplitude):
     resultat = []
-    for Num_Bruit in trange(1, 5):
+    for Num_Bruit in trange(1, 6):
         temporaire = Perlin3D(precsision)
 
         temporaire *= amplitude

@@ -167,3 +167,23 @@ def Bruit_Overworld(taille, pixels, precsision, amplitude):
     plt.savefig("HeightMap_et_BdP_2D/Height_map")
 
     return resultat,Cat
+
+
+def Bruit_Arbres(pixels, precsision):
+
+    amplitude = 8
+    resultats = []
+    for _ in trange(1,4):
+        temporaire = Perlin_2D(precsision, pixels, pixels)
+        temporaire += .5
+
+        temporaire *= amplitude
+        
+        resultats.append(temporaire)
+
+        precsision *= 2
+        amplitude //= 2
+
+    resultat = sum(resultats)
+
+    return resultat
