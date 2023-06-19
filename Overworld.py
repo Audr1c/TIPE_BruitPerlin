@@ -249,7 +249,7 @@ def Percolation(Overworld, Robinet):
 
         # Voisins Verticaux
         # Au-dessus
-        if in_Patron(x, y, z - 1) and z > Heau and OverFlow:
+        if in_Patron(x, y, z - 1) and Overworld[x][z - 1][y] == 0 and z > Heau and OverFlow:
             Robinet.append((x, y, z - 1))
             Overworld[x][z - 1][y] = 4
 
@@ -261,7 +261,7 @@ def Percolation(Overworld, Robinet):
                 Robinet.append((x, y, z + 1))
                 Overworld[x][z + 1][y] = 4  # gravité (eau)
 
-        print(f"\r Longueur de Robinet : {len(Robinet)}, end=")
+        print(f"\r Longueur de Robinet : {len(Robinet)}", end="")
     print('')
 
 
@@ -271,7 +271,7 @@ def Percolation(Overworld, Robinet):
 def Liste_arbre():
     # Défini la liste des arbres à placer et le bruit utilisé pour la densité d'arbre
     L_arbre = []
-    Bruit_arbre = Bruit_Arbres(10, taille//Chunks)
+    Bruit_arbre = Bruit_Arbres(taille//Chunks, 10)
     # Parcours les chunks
     for i in trange(taille//Chunks):
         for j in range(taille//Chunks):
