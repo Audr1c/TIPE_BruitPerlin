@@ -200,7 +200,7 @@ def Comparatif_Perin_1D(NbPt, fr):
 # Fonction final
 
 
-def Bruit_de_Grotte_sin(NbPt, fr, amplitude, NbBr, save):
+def Bruit_de_Grotte_sin(NbPt, fr, amplitude, NbBr):
     Y = []
     # Fait plusieurs bruits
     for _ in range(NbBr):
@@ -212,22 +212,8 @@ def Bruit_de_Grotte_sin(NbPt, fr, amplitude, NbBr, save):
         NbPt -= 1
         fr //= 2
         Y.append(y)
-        if save:
-            plt.plot(x, y, label = f'amplitude = {amplitude}')
-            plt.legend(loc = 0)
-            plt.title(f'Bruit de Perlin en 1D d amplitude {amplitude}')
-            plt.xlabel('x')
-            plt.ylabel('f(x)')
         amplitude //= 2
-    plt.savefig(f"Grotte_et_BdP_1D/Courbe_amplitude")
     Y = sum(Y)  # Fait la somme de tout les bruits
-    if save:
-        plt.close()
-        plt.plot(x, Y, 'b')
-        plt.title(f'Bruit de Perlin en 1D')
-        plt.xlabel('x')
-        plt.ylabel('f(x)')
-        plt.savefig(f"Grotte_et_BdP_1D/Bruit_1D")
     return x, Y
 
 
@@ -256,6 +242,6 @@ Inter = 100  # taille de l'intervalle des abcisses, ici [0;50]
 fr = 64  # nombre de points interpolés
 save = True
 
-Bruit_de_Grotte_sin(NbPt, fr, 128, 6, save)
+Bruit_de_Grotte_sin(NbPt, fr, 128, 6)
 Comparatif_Crash_Test(Inter, 20, 10)
 Comparatif_Perin_1D(NbPt, 200)

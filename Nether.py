@@ -23,10 +23,10 @@ def in_Nether(x, y, z):
 def Gif_et_frame(Nether):
     frames = []
     for Num_Bruit in trange(taille):
-
+        echelle = ListedColormap(['red', 'white'])
         plt.close("all")
         plt.imshow(Nether[Num_Bruit].T, origin='upper',
-                   cmap='gray', vmin=-32, vmax=32)
+                   cmap=echelle)
         plt.xlabel('Y')
         plt.ylabel('Z')
         plt.colorbar()
@@ -116,7 +116,7 @@ def Perlin3D(precsision):
 
 def Bruit_Nether(precsision, amplitude):
     resultat = []
-    for Num_Bruit in trange(1, 6):
+    for _ in trange(1, 6):
         temporaire = Perlin3D(precsision)
 
         temporaire *= amplitude
@@ -193,9 +193,9 @@ def Explose(Nether, x, z, y):
 
 def Grotte(Nether, ax):
 
-    _, Xg = Bruit_de_Grotte_sin(NbPt, fr, 2*amplitude_G, NdBG, save)
-    _, Zg = Bruit_de_Grotte_sin(NbPt, fr, amplitude_G, NdBG, save)
-    _, Yg = Bruit_de_Grotte_sin(NbPt, fr, 2*amplitude_G, NdBG, save)
+    _, Xg = Bruit_de_Grotte_sin(NbPt, fr, 2*amplitude_G, NdBG)
+    _, Zg = Bruit_de_Grotte_sin(NbPt, fr, amplitude_G, NdBG)
+    _, Yg = Bruit_de_Grotte_sin(NbPt, fr, 2*amplitude_G, NdBG)
     Xg += randrange(taille-2*amplitude_G)
     Yg += randrange(taille-2*amplitude_G)
 
@@ -280,8 +280,8 @@ def Make_a_Nether(g):
     # Frames et GIF
     start = time.time()
     print("Start Frame et GIF")
-    Gif_et_frame(Nether)
     Nether //= 256
+    Gif_et_frame(Nether)
     print(f"End Frame et GIF : {time.time() - start:.2f} s")
     print('')
 

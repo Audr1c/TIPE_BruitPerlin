@@ -191,9 +191,9 @@ def Explose(Overworld, x, z, y):
 
 def Grotte(Overworld, ax):
     # Bruit 1D sur chacun des axes dans un cube amplitude_G*amplitude_G*amplitude_G
-    _, Xg = Bruit_de_Grotte_sin(NbPt, fr, amplitude_G, NdBG, save)
-    _, Zg = Bruit_de_Grotte_sin(NbPt, fr, hauteur//2, NdBG, save)
-    _, Yg = Bruit_de_Grotte_sin(NbPt, fr, amplitude_G, NdBG, save)
+    _, Xg = Bruit_de_Grotte_sin(NbPt, fr, amplitude_G, NdBG)
+    _, Zg = Bruit_de_Grotte_sin(NbPt, fr, hauteur//2, NdBG)
+    _, Yg = Bruit_de_Grotte_sin(NbPt, fr, amplitude_G, NdBG)
     # Deplace aléatoirement les grottes pour qu'elles ne soient pas toutes dans amplitude_G*amplitude_G*amplitude_G
     Xg += randrange(taille-amplitude_G)
     Yg += randrange(taille-amplitude_G)
@@ -271,7 +271,7 @@ def Percolation(Overworld, Robinet):
 def Liste_arbre():
     # Défini la liste des arbres à placer et le bruit utilisé pour la densité d'arbre
     L_arbre = []
-    Bruit_arbre = Bruit_Arbres(taille//Chunks, 10)
+    Bruit_arbre = Bruit_Arbres(taille//Chunks, 5)
     # Parcours les chunks
     for i in trange(taille//Chunks):
         for j in range(taille//Chunks):
@@ -307,7 +307,7 @@ def Amazonie(Overworld, L_arbre, BdP, Cat):
         k += 1
         z = int(BdP[x, y])
         # Regarde s'il y a de la terre pour placer l'arbre
-        if z < Heau-3:
+        if Overworld[x][z][y] == 2:
             # Plante un arbre
             Ecosia(Overworld, x, y, BdP, Cat, k)
     # Affiche CaT avec les arbres
@@ -323,7 +323,7 @@ def Amazonie(Overworld, L_arbre, BdP, Cat):
 
 def Ecosia(Overworld, x, y, BdP, Cat, k):
     # Hauteur et listes des coins
-    z = int(BdP[x, y])
+    z = int(BdP[x, y])-1
     coin_1 = [(2, 2), (-2, 2), (2, -2), (-2, -2)]
     coin_2 = [(1, 1), (-1, 1), (1, -1), (-1, -1)]
     b = 0.1*(k % 10 == 0)
@@ -463,7 +463,6 @@ def Make_an_Overworld(graine):
     print("Start Arbre")
     L_arbre = Liste_arbre()
     Amazonie(Overworld, L_arbre, BdP, Cat)
-
     print(f"End Arbre : {time.time() - start:.2f} s")
     print('')
 
@@ -504,13 +503,14 @@ hauteur = 256
 Hneige = 60
 Hlave = 230
 Heau = 150
-OverFlow = True
+OverFlow = False
 Chunks = 16
-mine = [(3,  6, 20,  hauteur-4, .6, "black", .001),
-        (2, 12,  8, hauteur//2, .6,  "gray", .5),
-        (3,  7,  4, hauteur//5, .5,   "red", .4),
-        (2,  9,  4, hauteur//4, .5,  "gold", .7),
-        (2,  8,  2, hauteur//6, .4,  "aqua", .8)]
+#      (coté, Id, NbFilon, couche, prob, color, bille)
+mine = [(4,  6, 20,  hauteur-4, .6, "black", .001), # Charbon
+        (3, 12,  8, hauteur//2, .5,  "gray",   .5), # Fer
+        (3,  7,  4, hauteur//5, .6,   "red",   .4), # Redstone
+        (2,  9,  4, hauteur//4, .5,  "gold",   .7), # Or
+        (2,  8,  2, hauteur//6, .4,  "aqua",   .8)] # Diamant
 # HeightMap
 precsision = 5
 amplitude = 128
@@ -521,7 +521,6 @@ fr = 256
 amplitude_G = 256
 NdBG = 6
 nbGrotte = 15
-save = False
 
 
 # Création de l'Overworld

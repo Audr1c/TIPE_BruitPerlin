@@ -11,7 +11,7 @@ import imageio
 
 
 def lerp(a, b, x):
-    # interpolation linéaire (produit scalaire)
+    # interpolation linéaire
     return a + x * (b - a)
 
 
@@ -32,48 +32,41 @@ def gradient(c, x, y):
 
 
 def Perlin_2D(precsision, pixels, taille):
-
     new_precsision = 1 + (precsision - 1) * taille / pixels
-    tab = np.linspace(1, new_precsision, taille, endpoint=False)
+
+
+    np.random.seed(398)
     perm = np.arange((16 * new_precsision // 5), dtype=int)
-
-    # création de grille en utilisant le tableau 1d
-    x, y = np.meshgrid(tab, tab)
-
-    # On crée une permutation en fonction du nb de pixels
-    # On utilise la fonction seed parce que numpy chiale si on le fait pas
-
     np.random.shuffle(perm)
-
-    # on fait un tableau 2d qu'on applatit
-    # pour faire des produits scalaires correctement
-    # (les tableaux numpy sont chiants)
     perm = np.stack([perm, perm]).flatten()
+
+
+    tab = np.linspace(1, new_precsision, taille, endpoint=False)
+    x, y = np.meshgrid(tab, tab)
     # Coordonnées de la grille
-    xi, yi = x.astype(int), y.astype(int)
-
+    x_int, y_int = x.astype(int), y.astype(int)
     # normes des vecteurs
-    xg, yg = x - xi, y - yi
-    # on lisse les normes (algo 2d perlin tu coco)
-    xf, yf = lissage(xg), lissage(yg)
+    x_dec, y_dec = x - x_int, y - y_int
 
-    # C'est le moment où on chiale
     # On chope les coords vecteur dans les 4 coins de la grille
     # (haut gauche/droite, bas gauche/droite)
 
-    n00 = gradient(perm[perm[xi] + yi], xg, yg)
-    n01 = gradient(perm[perm[xi] + yi + 1], xg, yg - 1)
-    n11 = gradient(perm[perm[xi + 1] + yi + 1], xg - 1, yg - 1)
-    n10 = gradient(perm[perm[xi + 1] + yi], xg - 1, yg)
-
-    # On interpole linéairement pour faire une moyenne
-    # C'est ce qui fait que la transition de couleurs des pixels est clean
-    x1 = lerp(n00, n10, xf)
-    x2 = lerp(n01, n11, xf)
-
-    plt.close("all")
-    resultat = lerp(x1, x2, yf)
-
+    n00 = gradient(perm[perm[x_int] + y_int], x_dec, y_dec)
+    n10 = gradient(perm[perm[x_int + 1] + y_int], x_dec - 1, y_dec)
+    n01 = gradient(perm[perm[x_int] + y_int + 1], x_dec, y_dec - 1)
+    n11 = gradient(perm[perm[x_int + 1] + y_int + 1], x_dec - 1, y_dec - 1)
+    
+    
+    # on lisse les normes (algo 2d perlin tu coco)
+    x_lis, y_lis = lissage(x_dec), lissage(y_dec)
+    x1 = lerp(n00, n10, x_dec)
+    x2 = lerp(n01, n11, x_dec)
+    
+    resultat = lerp(x1, x2, y_dec)
+    plt.imshow(resultat, origin='upper', cmap='gray')
+    plt.xlabel('X')
+    plt.ylabel('Y')
+    plt.show()
     return resultat
 
 
@@ -174,9 +167,9 @@ def Bruit_Overworld(taille, pixels, precsision, amplitude):
 
 def Bruit_Arbres(pixels, precsision):
 
-    amplitude = 8
+    amplitude = 12
     resultats = []
-    for _ in trange(1, 4):
+    for _ in range(1, 4):
         temporaire = Perlin_2D(precsision, pixels, pixels)
         temporaire += .5
 
@@ -190,3 +183,5 @@ def Bruit_Arbres(pixels, precsision):
     resultat = sum(resultats)
 
     return resultat
+
+Perlin_2D(5, 20, 20)
