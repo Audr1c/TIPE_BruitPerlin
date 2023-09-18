@@ -1,4 +1,4 @@
-## Importation
+# Importation
 
 
 import os
@@ -13,7 +13,7 @@ from nbtschematic import SchematicFile
 from Grotte import *
 
 
-## Fonction utile
+# Fonction utile
 
 
 def in_Nether(x, y, z):
@@ -26,7 +26,7 @@ def Gif_et_frame(Nether):
         echelle = ListedColormap(['red', 'white'])
         plt.close("all")
         plt.imshow(Nether[Num_Bruit].T, origin='upper',
-                   cmap=echelle)
+                   cmap=echelle, vmin=-1, vmax=0)
         plt.xlabel('Y')
         plt.ylabel('Z')
         plt.colorbar()
@@ -61,7 +61,7 @@ def gradient3D(c, x, y, z):
     return co_gradient[:, :, :, 0] * x + co_gradient[:, :, :, 1] * y + co_gradient[:, :, :, 2] * z
 
 
-## Bruit 3D
+# Bruit 3D
 
 
 def Perlin3D(precsision):
@@ -128,7 +128,16 @@ def Bruit_Nether(precsision, amplitude):
     return resultat
 
 
-## Minerai
+def Intensité(Nether):
+    for x in trange(taille):
+        for y in range(taille):
+            for z in range(hauteur):
+                epaisseur = 20
+                Nether[x, y, z] -= ((1 / 20)*(epaisseur - x)*(0 < epaisseur - x) + (x - taille + epaisseur)*(taille < x + epaisseur) + (epaisseur - y)*(0 < epaisseur - y) + (
+                    y - taille + epaisseur)*(taille < y + epaisseur) + (epaisseur - z)*(0 < epaisseur - z) + (z - hauteur + epaisseur)*(hauteur < z + epaisseur))**2
+
+
+# Minerai
 
 
 def quartz(Nether, x, z, y):
@@ -180,7 +189,7 @@ def minerais(Nether, ax):
     plt.close()
 
 
-## Grottes et murs
+# Grottes et murs
 
 
 def Explose(Nether, x, z, y):
@@ -224,7 +233,7 @@ def Mur(Nether):
             Nether[taille-1, x, z] = -1
 
 
-## Lave
+# Lave
 
 
 def Lava(Nether):
@@ -235,12 +244,12 @@ def Lava(Nether):
                     Nether[x, y, z] = 3
 
 
-## Convertion Minecraft
+# Convertion Minecraft
 
 
 correspondanceID = {
     0: 0,  # Air
-    -1: 87,  # Stone
+    -1: 87,  # Netherrackt
     3: 11,  # Lava
     6: 153  # Quartz
 }
@@ -252,10 +261,10 @@ def CreteMapSchem3D(grid: list, deltaX: int, deltaY: int, deltaZ: int, graine):
         for y in range(deltaY):
             for z in range(deltaZ):
                 # carte renversé
-                sf.blocks[z, y, x] = correspondanceID[grid[x][y][z]]
+                sf.blocks[z, y, x] = correspondanceID[grid[x, y, z]]
     sf.save(f'Nether_et_BdP_3D/Map_Nether.schematic')
 
-## Fonction finale
+# Fonction finale
 
 
 def Make_a_Nether(g):
@@ -280,7 +289,8 @@ def Make_a_Nether(g):
     # Frames et GIF
     start = time.time()
     print("Start Frame et GIF")
-    Nether //= 256
+    Intensité(Nether)
+    Nether //= 2048
     Gif_et_frame(Nether)
     print(f"End Frame et GIF : {time.time() - start:.2f} s")
     print('')
@@ -329,7 +339,7 @@ def Make_a_Nether(g):
     print('')
 
 
-## Paramètres
+# Paramètres
 
 
 # Dimensions et seed
@@ -346,7 +356,7 @@ NdBG = 6
 nbGrotte = 10
 
 
-## Création du Nether
+# Création du Nether
 
 
 Make_a_Nether(g)

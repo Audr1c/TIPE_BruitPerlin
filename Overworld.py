@@ -497,7 +497,7 @@ def Make_an_Overworld(graine):
 
 # Seed et Dimensions
 graine = randrange(10000)
-taille = 1024
+taille = 512
 hauteur = 256
 # Neige, Lave, Eau, Arbre, Minerai
 Hneige = 60

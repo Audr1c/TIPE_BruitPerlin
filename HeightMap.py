@@ -63,10 +63,6 @@ def Perlin_2D(precsision, pixels, taille):
     x2 = lerp(n01, n11, x_dec)
     
     resultat = lerp(x1, x2, y_dec)
-    plt.imshow(resultat, origin='upper', cmap='gray')
-    plt.xlabel('X')
-    plt.ylabel('Y')
-    plt.show()
     return resultat
 
 
@@ -183,5 +179,3 @@ def Bruit_Arbres(pixels, precsision):
     resultat = sum(resultats)
 
     return resultat
-
-Perlin_2D(5, 20, 20)
