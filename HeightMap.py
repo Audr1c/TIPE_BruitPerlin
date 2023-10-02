@@ -1,6 +1,6 @@
 # Importation
 
-from math import sqrt
+from math import sqrt, sin, cos, pi
 import numpy as np
 import matplotlib.pyplot as plt
 from tqdm import trange
@@ -10,32 +10,27 @@ import imageio
 # Fonctions utiles
 
 
-def lerp(a, b, x):
+def lineaire(a, b, x):
     # interpolation linéaire
     return a + x * (b - a)
 
 
-def lissage(f):
+def lissage(t):
     # Lisse le bordel (à changer pour obtenir autre chose qu'un labyrinthe)
-    return 6 * f ** 5 - 15 * f ** 4 + 10 * f ** 3
+    return 6 * t ** 5 - 15 * t ** 4 + 10 * t ** 3
 
 
-def gradient(c, x, y):
-    # On chope les coords des vecteurs de gradient
-    sq2 = sqrt(2)
-    vecteurs = np.array([[0, 1], [0, -1], [1, 0], [-1, 0], [1 / sq2, 1 / sq2],
-                        [-1 / sq2, 1 / sq2], [1 / sq2, -1 / sq2], [-1 / sq2, -1 / sq2]])
-    co_gradient = vecteurs[c % 8]
+def gradient(c, x, y, nb_vecteur):
+    vecteurs = np.array([[sin((k*2*pi)/nb_vecteur), cos((k*2*pi)/nb_vecteur)] for k in range(nb_vecteur)])
+    co_gradient = vecteurs[c % nb_vecteur]
     return co_gradient[:, :, 0] * x + co_gradient[:, :, 1] * y
 
 # Bruit de Perlin
 
 
-def Perlin_2D(precsision, pixels, taille):
+def Perlin_2D(precsision, pixels, taille, nb_vecteur):
     new_precsision = 1 + (precsision - 1) * taille / pixels
 
-
-    np.random.seed(398)
     perm = np.arange((16 * new_precsision // 5), dtype=int)
     np.random.shuffle(perm)
     perm = np.stack([perm, perm]).flatten()
@@ -51,22 +46,20 @@ def Perlin_2D(precsision, pixels, taille):
     # On chope les coords vecteur dans les 4 coins de la grille
     # (haut gauche/droite, bas gauche/droite)
 
-    n00 = gradient(perm[perm[x_int] + y_int], x_dec, y_dec)
-    n10 = gradient(perm[perm[x_int + 1] + y_int], x_dec - 1, y_dec)
-    n01 = gradient(perm[perm[x_int] + y_int + 1], x_dec, y_dec - 1)
-    n11 = gradient(perm[perm[x_int + 1] + y_int + 1], x_dec - 1, y_dec - 1)
+    n00 = gradient(perm[perm[x_int] + y_int],         x_dec,     y_dec,     nb_vecteur)
+    n10 = gradient(perm[perm[x_int + 1] + y_int],     x_dec - 1, y_dec,     nb_vecteur)
+    n01 = gradient(perm[perm[x_int] + y_int + 1],     x_dec,     y_dec - 1, nb_vecteur)
+    n11 = gradient(perm[perm[x_int + 1] + y_int + 1], x_dec - 1, y_dec - 1, nb_vecteur)
     
-    
-    # on lisse les normes (algo 2d perlin tu coco)
     x_lis, y_lis = lissage(x_dec), lissage(y_dec)
-    x1 = lerp(n00, n10, x_dec)
-    x2 = lerp(n01, n11, x_dec)
+    x1 = lineaire(n00, n10, x_lis)
+    x2 = lineaire(n01, n11, x_lis)
     
-    resultat = lerp(x1, x2, y_dec)
+    resultat = lineaire(x1, x2, y_lis)
     return resultat
 
 
-def Bruit_Overworld(taille, pixels, precsision, amplitude):
+def Bruit_Overworld(taille, pixels, precsision, amplitude, nb_vecteur):
     frames_bruit = []
     frames_carte = []
 
@@ -76,7 +69,7 @@ def Bruit_Overworld(taille, pixels, precsision, amplitude):
     orig_map = plt.cm.get_cmap('gray')
     reversed_map = orig_map.reversed()
     for Num_Bruit in trange(1, 9):
-        temporaire = Perlin_2D(precsision, pixels, taille)
+        temporaire = Perlin_2D(precsision, pixels, taille, nb_vecteur)
         if Num_Bruit == 1:
             temporaire += 1
 
@@ -163,10 +156,10 @@ def Bruit_Overworld(taille, pixels, precsision, amplitude):
 
 def Bruit_Arbres(pixels, precsision):
 
-    amplitude = 12
+    amplitude = 8
     resultats = []
     for _ in range(1, 4):
-        temporaire = Perlin_2D(precsision, pixels, pixels)
+        temporaire = Perlin_2D(precsision, pixels, pixels, 8)
         temporaire += .5
 
         temporaire *= amplitude

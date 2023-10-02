@@ -34,7 +34,7 @@ def Gif_et_frame(Nether):
         plt.savefig(f"Nether_et_BdP_3D/Tranche/Bruit_{Num_Bruit}.jpg")
         file_name = f"Nether_et_BdP_3D/Tranche/Bruit_{Num_Bruit}.jpg"
 
-        if os.path.exists(file_name):
+        if os.path.ex_intsts(file_name):
             image_bruit = imageio.v2.imread(file_name)
             os.remove(file_name)
         else:
@@ -43,14 +43,12 @@ def Gif_et_frame(Nether):
     imageio.mimsave(f"Nether_et_BdP_3D/Bruit_3D.gif", frames, duration=100)
 
 
-def lerp(a, b, x):
-    # interpolation linéaire (produit scalaire)
+def lineaire(a, b, x):
     return a + x * (b - a)
 
 
-def lissage(f):
-    # Lisse le bordel (à changer pour obtenir autre chose qu'un labyrinthe)
-    return 6 * f ** 5 - 15 * f ** 4 + 10 * f ** 3
+def lissage(t):
+    return 6 * t ** 5 - 15 * t ** 4 + 10 * t ** 3
 
 
 def gradient3D(c, x, y, z):
@@ -81,36 +79,32 @@ def Perlin3D(precsision):
     # (les tableaux numpy sont chiants)
     perm = np.stack([perm, perm, perm]).flatten()
     # Coordonnées de la grille
-    xi, yi, zi = x.astype(int), y.astype(int), z.astype(int)
+    x_int, y_int, z_int = x.astype(int), y.astype(int), z.astype(int)
 
     # normes des vecteurs
-    xg, yg, zg = x - xi, y - yi, z - zi
+    x_dec, y_dec, z_dec = x - x_int, y - y_int, z - z_int
     # on lisse les normes (algo 2d perlin tu coco)
-    xf, yf, zf = lissage(xg), lissage(yg), lissage(zg)
+    x_lis, y_lis, z_lis = lissage(x_dec), lissage(y_dec), lissage(z_dec)
 
-    # C'est le moment où on chiale
-    # On chope les coords vecteur dans les 4 coins de la grille
-    # (haut gauche/droite, bas gauche/droite)
-
-    g000 = gradient3D(perm[perm[perm[xi] + yi] + zi], xg, yg, zg)
-    g001 = gradient3D(perm[perm[perm[xi] + yi] + zi+1], xg, yg, zg-1)
-    g010 = gradient3D(perm[perm[perm[xi] + yi+1] + zi], xg, yg-1, zg)
-    g011 = gradient3D(perm[perm[perm[xi] + yi+1] + zi+1], xg, yg-1, zg-1)
-    g100 = gradient3D(perm[perm[perm[xi+1] + yi] + zi], xg-1, yg, zg)
-    g101 = gradient3D(perm[perm[perm[xi+1] + yi] + zi+1], xg-1, yg, zg-1)
-    g110 = gradient3D(perm[perm[perm[xi+1] + yi+1] + zi], xg-1, yg-1, zg)
-    g111 = gradient3D(perm[perm[perm[xi+1] + yi+1] + zi+1], xg-1, yg-1, zg-1)
+    g000 = gradient3D(perm[perm[perm[x_int]   + y_int]   + z_int],   x_dec,   y_dec,   z_dec)
+    g001 = gradient3D(perm[perm[perm[x_int]   + y_int]   + z_int+1], x_dec,   y_dec,   z_dec-1)
+    g010 = gradient3D(perm[perm[perm[x_int]   + y_int+1] + z_int],   x_dec,   y_dec-1, z_dec)
+    g011 = gradient3D(perm[perm[perm[x_int]   + y_int+1] + z_int+1], x_dec,   y_dec-1, z_dec-1)
+    g100 = gradient3D(perm[perm[perm[x_int+1] + y_int]   + z_int],   x_dec-1, y_dec,   z_dec)
+    g101 = gradient3D(perm[perm[perm[x_int+1] + y_int]   + z_int+1], x_dec-1, y_dec,   z_dec-1)
+    g110 = gradient3D(perm[perm[perm[x_int+1] + y_int+1] + z_int],   x_dec-1, y_dec-1, z_dec)
+    g111 = gradient3D(perm[perm[perm[x_int+1] + y_int+1] + z_int+1], x_dec-1, y_dec-1, z_dec-1)
     # On interpole linéairement pour faire une moyenne
     # C'est ce qui fait que la transition de couleurs des taille est clean
-    x00 = lerp(g000, g100, xf)
-    x10 = lerp(g010, g110, xf)
-    x01 = lerp(g001, g101, xf)
-    x11 = lerp(g011, g111, xf)
+    x00 = lineaire(g000, g100, x_lis)
+    x10 = lineaire(g010, g110, x_lis)
+    x01 = lineaire(g001, g101, x_lis)
+    x11 = lineaire(g011, g111, x_lis)
 
-    xy0 = lerp(x00, x10, yf)
-    xy1 = lerp(x01, x11, yf)
+    xy0 = lineaire(x00, x10, y_lis)
+    xy1 = lineaire(x01, x11, y_lis)
 
-    resultat = lerp(xy0, xy1, zf)
+    resultat = lineaire(xy0, xy1, z_lis)
     return resultat
 
 
@@ -202,13 +196,13 @@ def Explose(Nether, x, z, y):
 
 def Grotte(Nether, ax):
 
-    _, Xg = Bruit_de_Grotte_sin(NbPt, fr, 2*amplitude_G, NdBG)
-    _, Zg = Bruit_de_Grotte_sin(NbPt, fr, amplitude_G, NdBG)
-    _, Yg = Bruit_de_Grotte_sin(NbPt, fr, 2*amplitude_G, NdBG)
-    Xg += randrange(taille-2*amplitude_G)
-    Yg += randrange(taille-2*amplitude_G)
+    _, X = Bruit_de_Grotte_sin(nb_pt_grotte, fr, 2*ampl_grotte, nb_br_grotte)
+    _, Z = Bruit_de_Grotte_sin(nb_pt_grotte, fr, ampl_grotte, nb_br_grotte)
+    _, Y = Bruit_de_Grotte_sin(nb_pt_grotte, fr, 2*ampl_grotte, nb_br_grotte)
+    X += randrange(taille-2*ampl_grotte)
+    Y += randrange(taille-2*ampl_grotte)
 
-    ax.scatter(Xg, Yg, Zg, s=.8)
+    ax.scatter(X, Y, Z, s=.8)
     ax.set_xlabel('X')
     ax.set_ylabel('Y')
     ax.set_zlabel('Z')
@@ -216,8 +210,8 @@ def Grotte(Nether, ax):
     ax.set_title('Grotte 3D')
     plt.savefig("Nether_et_BdP_3D/Grotte")
 
-    for i in range((NbPt - 1) * fr + 1):
-        Explose(Nether, int(Xg[i]), int(Zg[i]+150), int(Yg[i]))
+    for i in range((nb_pt_grotte - 1) * fr + 1):
+        Explose(Nether, int(X[i]), int(Z[i]+150), int(Y[i]))
 
 
 def Mur(Nether):
@@ -308,7 +302,7 @@ def Make_a_Nether(g):
     start = time.time()
     print("Start Grotte")
     ax = plt.axes(projection="3d")
-    for _ in range(nbGrotte):
+    for _ in range(nb_grotte):
         Grotte(Nether, ax)
     print(f"End Grotte : {time.time() - start:.2f} s")
     print('')
@@ -349,11 +343,11 @@ hauteur = 128
 Chunks = 16
 g = randrange(10000)
 # Grotte
-NbPt = 4
+nb_pt_grotte = 4
 fr = 128
-amplitude_G = 64
-NdBG = 6
-nbGrotte = 10
+ampl_grotte = 64
+nb_br_grotte = 6
+nb_grotte = 10
 
 
 # Création du Nether
