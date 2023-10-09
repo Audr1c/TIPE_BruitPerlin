@@ -39,7 +39,7 @@ def Patron_carte(BdP):
     # Création du tableau servant de support (rempli avec de la pierre) et des listes utiles
     Liste_o = []
     sable = []
-    Overworld = [[[Block.Block.Stone for y in range(taille)]
+    Overworld = [[[Block.Stone for y in range(taille)]
                   for z in range(hauteur)] for x in range(taille)]
     # Parcours tout le tableau
     for x in trange(taille):
@@ -439,7 +439,7 @@ def Make_an_Overworld(graine):
 
 # Seed et Dimensions
 graine = randrange(10000)
-taille = 128
+taille = 1024
 hauteur = 256
 # Neige, Lave, Eau, Arbre
 Hneige = 60
@@ -451,7 +451,7 @@ Chunks = 16
 mine = [(4,  Block.Coal,     20,  hauteur-4, .6, "black", .001),  # Charbon
         (3,  Block.Iron,      8, hauteur//2, .5,  "gray",   .5),  # Fer
         (3,  Block.Redstone,  4, hauteur//5, .6,   "red",   .4),  # RedBlock.Stone
-        (2,  Block.Gold,      4, hauteur//4, .5,  "Block.Gold",   .7),  # Or
+        (2,  Block.Gold,      4, hauteur//4, .5,  "Gold",   .7),  # Or
         (2,  Block.Diamond,   2, hauteur//6, .4,  "aqua",   .8)]  # Diamant
 # HeightMap
 nb_vecteur = 4
@@ -463,8 +463,10 @@ nb_pt_grotte = 6
 fr = 256
 ampl_grotte = 256
 nb_br_grotte = 6
-nb_grotte = 0
-
+nb_grotte = 12
+# Plateau
+Entre = [256, 170, 155, 150, 130, 110, 105, 80, 0]
+Sortie = [200, 200, 190, 150, 146, 140, 90, 70, 70]
 
 # Création de l'Overworld
 

@@ -1,6 +1,6 @@
 # Importaion
 
-
+from math import cos, pi
 import random
 from random import randrange
 import numpy as np

@@ -1,11 +1,13 @@
 # Importation
 
-from math import sqrt, sin, cos, pi
+
+from math import sin, cos, pi
 import numpy as np
 import matplotlib.pyplot as plt
 from tqdm import trange
 from matplotlib.colors import ListedColormap
 import imageio
+
 
 # Fonctions utiles
 
@@ -24,6 +26,7 @@ def gradient(c, x, y, nb_vecteur):
     vecteurs = np.array([[sin((k*2*pi)/nb_vecteur), cos((k*2*pi)/nb_vecteur)] for k in range(nb_vecteur)])
     co_gradient = vecteurs[c % nb_vecteur]
     return co_gradient[:, :, 0] * x + co_gradient[:, :, 1] * y
+
 
 # Bruit de Perlin
 
@@ -46,9 +49,9 @@ def Perlin_2D(precsision, pixels, taille, nb_vecteur):
     # On chope les coords vecteur dans les 4 coins de la grille
     # (haut gauche/droite, bas gauche/droite)
 
-    n00 = gradient(perm[perm[x_int] + y_int],         x_dec,     y_dec,     nb_vecteur)
+    n00 = gradient(perm[perm[x_int]     + y_int],     x_dec,     y_dec,     nb_vecteur)
     n10 = gradient(perm[perm[x_int + 1] + y_int],     x_dec - 1, y_dec,     nb_vecteur)
-    n01 = gradient(perm[perm[x_int] + y_int + 1],     x_dec,     y_dec - 1, nb_vecteur)
+    n01 = gradient(perm[perm[x_int]     + y_int + 1], x_dec,     y_dec - 1, nb_vecteur)
     n11 = gradient(perm[perm[x_int + 1] + y_int + 1], x_dec - 1, y_dec - 1, nb_vecteur)
     
     x_lis, y_lis = lissage(x_dec), lissage(y_dec)
@@ -87,6 +90,7 @@ def Bruit_Overworld(taille, pixels, precsision, amplitude, nb_vecteur):
 
         Cat = np.array([[0 for i in range(taille)] for j in range(taille)])
         Temp2 = sum(resultats)
+        Temp2 = fonction_passage(Temp2, Entre, Sortie)
         for i in range(taille):
             for j in range(taille):
                 s = Temp2[i][j]
@@ -151,7 +155,7 @@ def Bruit_Overworld(taille, pixels, precsision, amplitude, nb_vecteur):
     plt.title('Heightmap')
     plt.savefig("HeightMap_et_BdP_2D/Height_map")
 
-    return resultat, Cat
+    return fonction_passage(resultat, Entre, Sortie), Cat
 
 
 def Bruit_Arbres(pixels, precsision):
@@ -172,3 +176,32 @@ def Bruit_Arbres(pixels, precsision):
     resultat = sum(resultats)
 
     return resultat
+
+
+# Plateau
+
+def miniAfine(x1, x2, y1, y2, x):
+    pente = (y2 - y1) / (x2 - x1)
+    x -= x1
+    y = pente * x
+    y += y1
+    return y
+
+
+def fonction_passage(BdP, Entre, Sortie):
+    for i in range(1, len(Entre)):
+        for x in range(len(BdP)):
+            for y in range(len(BdP[x])):
+                if Entre[i-1] >= BdP[x, y] > Entre[i]:
+                    BdP[x, y] = int(miniAfine(Entre[i-1], Entre[i], Sortie[i-1], Sortie[i], BdP[x, y]))
+    plt.close("all")
+    ax = plt.axes()
+    ax.plot(Entre[1:-1], Sortie[1:-1], 'r')
+    ax.invert_yaxis()
+    ax.invert_xaxis()
+    plt.savefig("HeightMap_et_BdP_2D/Courbe_Plateau")
+    return BdP
+
+
+Entre = [256, 170, 155, 150, 130, 110, 105, 80, 0]
+Sortie = [200, 200, 190, 150, 146, 140, 90, 70, 70]
