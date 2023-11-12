@@ -7,6 +7,7 @@ from matplotlib.colors import ListedColormap
 from tqdm import trange, tqdm
 from HeightMap import *
 from Grotte import *
+from Fun_With_3D import *
 from nbtschematic import SchematicFile
 from collections import deque
 
@@ -67,7 +68,7 @@ def Patron_carte(BdP):
                     sable.append((x, y, z))
             z += 1
             # Place des blocks en dessous (3 block)
-            a = 3
+            a = 2
             for i in range(a):
                 if z + i >= Heau - 4:  # Block de sable
                     Overworld[x][z + i][y] = Block.Sand
@@ -143,7 +144,7 @@ def minerais(Overworld, ax):
         Y = Y1
         Z = Z1
 
-        ax.scatter(X, Y, Z, c=color, s=bille)
+        #ax.scatter(X, Y, Z, c=color, s=bille)
 
     # Axes
     ax.set_xlabel('X')
@@ -152,7 +153,7 @@ def minerais(Overworld, ax):
     ax.invert_zaxis()
     # Titre et sauvegarde
     ax.set_title('Minerai 3D')
-    plt.savefig("Overworld/Minerai")
+    #plt.savefig("Overworld/Minerai")
 
 
 # Grottes
@@ -250,12 +251,12 @@ def Percolation(Overworld, Robinet):
 def Liste_arbre():
     # Défini la liste des arbres à placer et le bruit utilisé pour la densité d'arbre
     L_arbre = []
-    Bruit_arbre = Bruit_Arbres(taille//Chunks, 5)
+    Bruit_arbre = Bruit_Arbres(taille//Chunks, 3)
     # Parcours les chunks
     for i in trange(taille//Chunks):
         for j in range(taille//Chunks):
             L_arbre_chuck = []  # Liste des arbres par chunk
-            arbre = int(Bruit_arbre[i, j])  # Nombres d'arbres à poser
+            arbre = int(Bruit_arbre[i, j])*(Bruit_arbre[i, j]>0)  # Nombres d'arbres à poser
             d = arbre
             while arbre:
                 L = [(i*Chunks+k, j*Chunks+l)
@@ -275,7 +276,7 @@ def Liste_arbre():
     plt.ylabel('X')
     plt.colorbar()
     plt.title('Bruit des arbres')
-    plt.savefig(f"HeightMap_et_BdP_2D/Bruits_2D_arbre.jpg")
+    plt.savefig(f"HeightMap_et_BdP_2D/Arbre.jpg")
     plt.close()
     return L_arbre
 
@@ -373,8 +374,9 @@ def Make_an_Overworld(graine):
     # Bruit
     start = time.time()
     print("Start Bruit Perlin")
-    BdP, Cat = Bruit_Overworld(
-        taille, pixels, precsision, amplitude, nb_vecteur)
+    BdP, Cat = Bruit_Overworld(taille, pixels, precsision, amplitude, nb_vecteur, Entre, Sortie)
+    print(max([max(BdP[i]) for i in range(len(BdP))]))
+    print(min([min(BdP[i]) for i in range(len(BdP))]))
     print(f"End Bruit Perlin : {time.time() - start:.2f} s")
     print('')
 
@@ -439,7 +441,7 @@ def Make_an_Overworld(graine):
 
 # Seed et Dimensions
 graine = randrange(10000)
-taille = 1024
+taille = 512
 hauteur = 256
 # Neige, Lave, Eau, Arbre
 Hneige = 60
@@ -454,9 +456,9 @@ mine = [(4,  Block.Coal,     20,  hauteur-4, .6, "black", .001),  # Charbon
         (2,  Block.Gold,      4, hauteur//4, .5,  "Gold",   .7),  # Or
         (2,  Block.Diamond,   2, hauteur//6, .4,  "aqua",   .8)]  # Diamant
 # HeightMap
-nb_vecteur = 4
+nb_vecteur = 16
 precsision = 5
-amplitude = 128
+amplitude = 164
 pixels = 3000
 # Grotte
 nb_pt_grotte = 6
@@ -465,9 +467,20 @@ ampl_grotte = 256
 nb_br_grotte = 6
 nb_grotte = 12
 # Plateau
-Entre = [256, 170, 155, 150, 130, 110, 105, 80, 0]
-Sortie = [200, 200, 190, 150, 146, 140, 90, 70, 70]
+Sortie = [200, 200, 195, 163, 160, 150, 148, 140, 137, 115, 105, 70, 65, 60]
+Entre =  [256, 190, 175, 165, 155, 150, 145, 140, 130, 120,  90, 70, 60,  0]
+# Cave
+prec_cave = 5
+ampl_cave = 4
+nb_br_cave = 3
+# Island
+prec_island = 5
+ampl_island = 4
+nb_br_island = 3
+degrad_island = 9
+
 
 # Création de l'Overworld
+
 
 Make_an_Overworld(graine)

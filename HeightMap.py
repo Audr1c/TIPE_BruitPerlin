@@ -28,6 +28,76 @@ def gradient(c, x, y, nb_vecteur):
     return co_gradient[:, :, 0] * x + co_gradient[:, :, 1] * y
 
 
+# Affichage
+
+
+def Plot3DSuraface(table, taille):
+    orig_map = plt.cm.get_cmap('gray')
+    reversed_map = orig_map.reversed()
+    tab2 = np.linspace(0, taille, taille, endpoint=True)
+
+    # création de grille en utilisant le tableau 1d
+    X, Y = np.meshgrid(tab2, tab2)
+
+    plt.close("all")
+    ax = plt.axes(projection="3d")
+    ax.set_xlabel('X')
+    ax.set_ylabel('Y')
+    ax.set_zlabel('Z')
+    ax.invert_zaxis()
+    ax.plot_surface(X, Y, table.T, cmap=reversed_map)
+    plt.title('Heightmap')
+    plt.savefig("HeightMap_et_BdP_2D/Height_map.jpg", bbox_inches='tight')
+
+
+def Plot2DSurface(table):
+    orig_map = plt.cm.get_cmap('gray')
+    reversed_map = orig_map.reversed()
+    plt.close()
+    plt.imshow(table, origin='upper', cmap=reversed_map)
+    plt.xlabel('Y')
+    plt.ylabel('X')
+    plt.colorbar()
+    plt.title('Bruit de Perlin en 2D')
+    plt.savefig("HeightMap_et_BdP_2D/Bruit_2D_map.jpg")
+
+
+def PlotCat(table, taille, name_title, name_file):
+    echelle = ListedColormap(['#141872', '#0970a6', '#119fe9', '#eeec7e',
+                              '#5df147', '#38be2a', '#336e1c', '#004704', 'white'], 8)
+
+    Cat = np.zeros((taille, taille))
+
+    Temp2 = table
+    for i in range(taille):
+        for j in range(taille):
+            s = Temp2[i][j]
+            if 256 >= s > 180:
+                Cat[i, j] = 0
+            elif 180 >= s > 165:
+                Cat[i, j] = 1
+            elif 165 >= s > 150:
+                Cat[i, j] = 2
+            elif 150 >= s > 147:
+                Cat[i, j] = 3
+            elif 147 >= s > 120:
+                Cat[i, j] = 4
+            elif 120 >= s > 90:
+                Cat[i, j] = 5
+            elif 90 >= s > 60:
+                Cat[i, j] = 6
+            elif 60 >= s:
+                Cat[i, j] = 8
+
+    plt.close("all")
+    plt.imshow(Cat, origin='upper', cmap=echelle, vmin=0, vmax=7)
+    plt.xlabel('Y')
+    plt.ylabel('X')
+    plt.title(name_title)
+    plt.savefig(name_file)
+    return Cat
+
+
 # Bruit de Perlin
 
 
@@ -62,15 +132,11 @@ def Perlin_2D(precsision, pixels, taille, nb_vecteur):
     return resultat
 
 
-def Bruit_Overworld(taille, pixels, precsision, amplitude, nb_vecteur):
+def Bruit_Overworld(taille, pixels, precsision, amplitude, nb_vecteur, Entre, Sortie):
     frames_bruit = []
     frames_carte = []
 
     resultats = []
-    echelle = ListedColormap(['#141872', '#0970a6', '#119fe9', '#eeec7e',
-                             '#5df147', '#38be2a', '#336e1c', '#004704', 'white'], 8)
-    orig_map = plt.cm.get_cmap('gray')
-    reversed_map = orig_map.reversed()
     for Num_Bruit in trange(1, 9):
         temporaire = Perlin_2D(precsision, pixels, taille, nb_vecteur)
         if Num_Bruit == 1:
@@ -80,87 +146,29 @@ def Bruit_Overworld(taille, pixels, precsision, amplitude, nb_vecteur):
 
         resultats.append(temporaire)
 
-        plt.imshow(temporaire, origin='upper', cmap=reversed_map)
-        plt.xlabel('Y')
-        plt.ylabel('X')
-        plt.colorbar()
-        plt.title(f'Bruit de Perlin n°{Num_Bruit}')
-        plt.savefig(
-            f"HeightMap_et_BdP_2D/Bruits/Bruit_{Num_Bruit}_Amplitudes.jpg")
-
-        Cat = np.array([[0 for i in range(taille)] for j in range(taille)])
-        Temp2 = sum(resultats)
-        Temp2 = fonction_passage(Temp2, Entre, Sortie)
-        for i in range(taille):
-            for j in range(taille):
-                s = Temp2[i][j]
-                if 256 >= s > 180:
-                    Cat[i, j] = 0
-                elif 180 >= s > 165:
-                    Cat[i, j] = 1
-                elif 165 >= s > 150:
-                    Cat[i, j] = 2
-                elif 150 >= s > 147:
-                    Cat[i, j] = 3
-                elif 147 >= s > 120:
-                    Cat[i, j] = 4
-                elif 120 >= s > 90:
-                    Cat[i, j] = 5
-                elif 90 >= s > 60:
-                    Cat[i, j] = 6
-                elif 60 >= s:
-                    Cat[i, j] = 8
-
-        plt.close("all")
-        plt.imshow(Cat, origin='upper', cmap=echelle, vmin=0, vmax=7)
-        plt.xlabel('Y')
-        plt.ylabel('X')
-        plt.title(f'Carte au Trésor avec {Num_Bruit} bruits')
-        plt.savefig(f"Overworld/Cartes/carte_{Num_Bruit}.jpg")
-        image_bruit = imageio.v2.imread(
-            f"HeightMap_et_BdP_2D/Bruits/Bruit_{Num_Bruit}_Amplitudes.jpg")
+        Plot2DSurface(temporaire)
+        Cat = PlotCat(sum(resultats), taille, name_title=f'Carte au Trésor avec {Num_Bruit} bruits', name_file=f"Overworld/Cartes/carte_{Num_Bruit}.jpg")
+        image_bruit = imageio.v2.imread(f"HeightMap_et_BdP_2D/Bruits/Bruit_{Num_Bruit}_Amplitudes.jpg")
         frames_bruit.append(image_bruit)
-        image_carte = imageio.v2.imread(
-            f"Overworld/Cartes/carte_{Num_Bruit}.jpg")
+        image_carte = imageio.v2.imread(f"Overworld/Cartes/carte_{Num_Bruit}.jpg")
         frames_carte.append(image_carte)
 
         precsision *= 2
         amplitude //= 2
 
-    imageio.mimsave(f"Overworld/Evolution_Carte.gif",
-                    frames_carte, duration=500)
-    imageio.mimsave(f"HeightMap_et_BdP_2D/Tout_les_bruits.gif",
-                    frames_bruit, duration=500)
+    imageio.mimsave(f"Overworld/Evolution_Carte.gif", frames_carte, duration=500)
+    imageio.mimsave(f"HeightMap_et_BdP_2D/Tout_les_bruits.gif", frames_bruit, duration=500)
 
     resultat = sum(resultats)
-    tab2 = np.linspace(0, taille, taille, endpoint=True)
-
-    # création de grille en utilisant le tableau 1d
-    X, Y = np.meshgrid(tab2, tab2)
-
-    plt.imshow(resultat, origin='upper', cmap=reversed_map)
-    plt.xlabel('Y')
-    plt.ylabel('X')
-    plt.colorbar()
-    plt.title('Bruit de Perlin en 2D')
-    plt.savefig(f"HeightMap_et_BdP_2D/Bruit_2D_map.jpg")
-
-    plt.close("all")
-    ax = plt.axes(projection="3d")
-    ax.set_xlabel('X')
-    ax.set_ylabel('Y')
-    ax.set_zlabel('Z')
-    ax.invert_zaxis()
-    ax.plot_surface(X, Y, resultat.T, cmap=reversed_map)
-    plt.title('Heightmap')
-    plt.savefig("HeightMap_et_BdP_2D/Height_map")
-
-    return fonction_passage(resultat, Entre, Sortie), Cat
+    resultat = fonction_passage(resultat, Entre, Sortie)
+    Plot2DSurface(resultat)
+    Plot3DSuraface(resultat, taille)
+    return resultat, Cat
 
 
 def Bruit_Arbres(pixels, precsision):
 
-    amplitude = 8
+    amplitude = 12
     resultats = []
     for _ in range(1, 4):
         temporaire = Perlin_2D(precsision, pixels, pixels, 8)
@@ -175,7 +183,7 @@ def Bruit_Arbres(pixels, precsision):
 
     resultat = sum(resultats)
 
-    return resultat
+    return ((resultat - 3)//6)*6
 
 
 # Plateau
@@ -189,19 +197,17 @@ def miniAfine(x1, x2, y1, y2, x):
 
 
 def fonction_passage(BdP, Entre, Sortie):
-    for i in range(1, len(Entre)):
-        for x in range(len(BdP)):
-            for y in range(len(BdP[x])):
+    
+    for x in range(len(BdP)):
+        for y in range(len(BdP[x])):
+            for i in range(1, len(Entre)):
                 if Entre[i-1] >= BdP[x, y] > Entre[i]:
                     BdP[x, y] = int(miniAfine(Entre[i-1], Entre[i], Sortie[i-1], Sortie[i], BdP[x, y]))
     plt.close("all")
     ax = plt.axes()
     ax.plot(Entre[1:-1], Sortie[1:-1], 'r')
+    ax.plot([190, 60], [150, 150], 'b')
     ax.invert_yaxis()
     ax.invert_xaxis()
     plt.savefig("HeightMap_et_BdP_2D/Courbe_Plateau")
     return BdP
-
-
-Entre = [256, 170, 155, 150, 130, 110, 105, 80, 0]
-Sortie = [200, 200, 190, 150, 146, 140, 90, 70, 70]
