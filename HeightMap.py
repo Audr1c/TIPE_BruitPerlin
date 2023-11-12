@@ -50,28 +50,27 @@ def Plot3DSuraface(table, taille):
     plt.savefig("HeightMap_et_BdP_2D/Height_map.jpg", bbox_inches='tight')
 
 
-def Plot2DSurface(table):
+def Plot2DSurface(table, name_file="2DPlot", name_title="2D plot", dpi=100):
     orig_map = plt.cm.get_cmap('gray')
     reversed_map = orig_map.reversed()
-    plt.close()
+    plt.close("all")
     plt.imshow(table, origin='upper', cmap=reversed_map)
     plt.xlabel('Y')
     plt.ylabel('X')
     plt.colorbar()
-    plt.title('Bruit de Perlin en 2D')
-    plt.savefig("HeightMap_et_BdP_2D/Bruit_2D_map.jpg")
+    plt.title(name_title)
+    plt.savefig(name_file, dpi=dpi)
 
 
-def PlotCat(table, taille, name_title, name_file):
+def PlotCat(table, taille, name_title, name_file, alpha=None, bgColor='#000000'):
     echelle = ListedColormap(['#141872', '#0970a6', '#119fe9', '#eeec7e',
                               '#5df147', '#38be2a', '#336e1c', '#004704', 'white'], 8)
 
     Cat = np.zeros((taille, taille))
 
-    Temp2 = table
     for i in range(taille):
         for j in range(taille):
-            s = Temp2[i][j]
+            s = table[i][j]
             if 256 >= s > 180:
                 Cat[i, j] = 0
             elif 180 >= s > 165:
@@ -90,11 +89,12 @@ def PlotCat(table, taille, name_title, name_file):
                 Cat[i, j] = 8
 
     plt.close("all")
-    plt.imshow(Cat, origin='upper', cmap=echelle, vmin=0, vmax=7)
+    plt.imshow(np.zeros_like(Cat), cmap=ListedColormap([bgColor]), vmin=0, vmax=0)
+    plt.imshow(Cat, origin='upper', cmap=echelle, vmin=0, vmax=7, alpha=alpha)
     plt.xlabel('Y')
     plt.ylabel('X')
     plt.title(name_title)
-    plt.savefig(name_file)
+    plt.savefig(name_file, dpi=500)
     return Cat
 
 
@@ -123,11 +123,11 @@ def Perlin_2D(precsision, pixels, taille, nb_vecteur):
     n10 = gradient(perm[perm[x_int + 1] + y_int],     x_dec - 1, y_dec,     nb_vecteur)
     n01 = gradient(perm[perm[x_int]     + y_int + 1], x_dec,     y_dec - 1, nb_vecteur)
     n11 = gradient(perm[perm[x_int + 1] + y_int + 1], x_dec - 1, y_dec - 1, nb_vecteur)
-    
+
     x_lis, y_lis = lissage(x_dec), lissage(y_dec)
     x1 = lineaire(n00, n10, x_lis)
     x2 = lineaire(n01, n11, x_lis)
-    
+
     resultat = lineaire(x1, x2, y_lis)
     return resultat
 
@@ -146,8 +146,8 @@ def Bruit_Overworld(taille, pixels, precsision, amplitude, nb_vecteur, Entre, So
 
         resultats.append(temporaire)
 
-        Plot2DSurface(temporaire)
-        Cat = PlotCat(sum(resultats), taille, name_title=f'Carte au Trésor avec {Num_Bruit} bruits', name_file=f"Overworld/Cartes/carte_{Num_Bruit}.jpg")
+        Plot2DSurface(temporaire, name_title=f'Bruit de Perlin n°{Num_Bruit}', name_file=f"HeightMap_et_BdP_2D/Bruits/Bruit_{Num_Bruit}_Amplitudes.jpg")
+        Cat = PlotCat(fonction_passage(sum(resultats), Entre, Sortie), taille, name_title=f'Carte au Trésor avec {Num_Bruit} bruits', name_file=f"Overworld/Cartes/carte_{Num_Bruit}.jpg")
         image_bruit = imageio.v2.imread(f"HeightMap_et_BdP_2D/Bruits/Bruit_{Num_Bruit}_Amplitudes.jpg")
         frames_bruit.append(image_bruit)
         image_carte = imageio.v2.imread(f"Overworld/Cartes/carte_{Num_Bruit}.jpg")
@@ -161,7 +161,7 @@ def Bruit_Overworld(taille, pixels, precsision, amplitude, nb_vecteur, Entre, So
 
     resultat = sum(resultats)
     resultat = fonction_passage(resultat, Entre, Sortie)
-    Plot2DSurface(resultat)
+    Plot2DSurface(resultat, name_file=f"HeightMap_et_BdP_2D/Bruit_2D_map.jpg", name_title='Bruit de Perlin en 2D',)
     Plot3DSuraface(resultat, taille)
     return resultat, Cat
 
@@ -197,7 +197,6 @@ def miniAfine(x1, x2, y1, y2, x):
 
 
 def fonction_passage(BdP, Entre, Sortie):
-    
     for x in range(len(BdP)):
         for y in range(len(BdP[x])):
             for i in range(1, len(Entre)):
@@ -211,3 +210,13 @@ def fonction_passage(BdP, Entre, Sortie):
     ax.invert_xaxis()
     plt.savefig("HeightMap_et_BdP_2D/Courbe_Plateau")
     return BdP
+
+
+def derivate(tab: np.ndarray, dx, dy):
+    der = np.zeros_like(tab)
+    height, width = np.shape(der)
+    for x in range(height):
+        for y in range(width):
+            der[x, y] = abs(tab[max(0, x - dx), max(0, y - dy)]
+                            - tab[min(height - 1, x + dx), min(width - 1, y + dy)])
+    return der
