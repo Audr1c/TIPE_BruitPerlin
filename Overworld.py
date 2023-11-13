@@ -68,7 +68,7 @@ def Patron_carte(BdP):
                     sable.append((x, y, z))
             z += 1
             # Place des blocks en dessous (3 block)
-            a = 2
+            a = 1 + 2*(165 > Hsurface > 90)
             for i in range(a):
                 if z + i >= Heau - 4:  # Block de sable
                     Overworld[x][z + i][y] = Block.Sand
@@ -320,21 +320,25 @@ def Ecosia(Overworld, x, y, BdP, Cat, k):
         for i in range(-2, 3):
             for j in range(-2, 3):
                 # Si la feuille est dans un coin, proba de 2/3 d'apparaitre
-                if (random.random() < 2/3 or not (i, j) in coin_1) and in_Patron(x+i, y+j, z+k) and (i, j) != (0, 0) and Overworld[x+i][z+k][y+j] == 0:
+                if (random.random() < 2/3 or not (i, j) in coin_1) and in_Patron(x+i, y+j, z+k) and (i, j) != (0, 0) and Overworld[x+i][z+k][y+j] == Block.Air:
                     Overworld[x+i][z+k][y+j] = Block.Leaves  # Feuille dans L'Overworld
+                    if z + 3 < Hneige :
+                        Overworld[x+i][z+k-1][y+j] = Block.Snow
                     Cat[x+i][y+j] = 7  # Feuille sur la CaT
 
     # Feuilles hauts
     for i in range(-1, 2):  # Parcours le petit anneau du bas
         for j in range(-1, 2):
             # Si la feuille est dans un coin, proba de 1/4 d'apparaitre
-            if (random.random() < 1/4 or not (i, j) in coin_2) and in_Patron(x+i, y+j, z-1) and (i, j) != (0, 0):
+            if (random.random() < 1/4 or not (i, j) in coin_2) and in_Patron(x+i, y+j, z) and (i, j) != (0, 0) and Overworld[x+i][z][y+j] == Block.Air:
                 Overworld[x+i][z][y+j] = Block.Leaves
     for i in range(-1, 2):  # Parcours le petit anneau du haut
         for j in range(-1, 2):
             # Si la feuille est dans un coin, elle n'apparait pas
-            if (i, j) not in coin_2 and in_Patron(x+i, y+j, z-1):
+            if (i, j) not in coin_2 and in_Patron(x+i, y+j, z-1) and Overworld[x+i][z-1][y+j] == Block.Air:
                 Overworld[x+i][z-1][y+j] = Block.Leaves
+                if z + 3 < Hneige :
+                    Overworld[x+i][z+k-1][y+j] = Block.Snow
 
 
 # Conversion pour Minecraft
@@ -460,7 +464,7 @@ graine = randrange(10000)
 taille = 512
 hauteur = 256
 # Neige, Lave, Eau, Arbre
-Hneige = 60
+Hneige = 75
 Hlave = 230
 Heau = 150
 OverFlow = False
@@ -481,10 +485,10 @@ nb_pt_grotte = 6
 fr = 256
 ampl_grotte = 256
 nb_br_grotte = 6
-nb_grotte = 12
+nb_grotte = 10
 # Plateau
-Sortie = [200, 200, 195, 163, 160, 150, 148, 140, 137, 115, 105, 70, 65, 60]
-Entre =  [256, 190, 175, 165, 155, 150, 145, 140, 120, 110,  90, 70, 60,  0]
+Sortie = [200, 200, 195, 163, 160, 150, 148, 140, 137, 134, 115, 105, 70, 65, 60]
+Entre =  [256, 190, 175, 165, 155, 150, 145, 140, 125, 120, 110,  85, 70, 60,  0]
 # Cave
 prec_cave = 5
 ampl_cave = 4
