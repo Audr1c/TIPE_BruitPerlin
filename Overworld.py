@@ -320,7 +320,7 @@ def Ecosia(Overworld, x, y, BdP, Cat, k):
         for i in range(-2, 3):
             for j in range(-2, 3):
                 # Si la feuille est dans un coin, proba de 2/3 d'apparaitre
-                if (random.random() < 2/3 or not (i, j) in coin_1) and in_Patron(x+i, y+j, z+k) and (i, j) != (0, 0):
+                if (random.random() < 2/3 or not (i, j) in coin_1) and in_Patron(x+i, y+j, z+k) and (i, j) != (0, 0) and Overworld[x+i][z+k][y+j] == 0:
                     Overworld[x+i][z+k][y+j] = Block.Leaves  # Feuille dans L'Overworld
                     Cat[x+i][y+j] = 7  # Feuille sur la CaT
 
@@ -375,43 +375,26 @@ def Make_an_Overworld(graine):
     start = time.time()
     print("Start Bruit Perlin")
     BdP, Cat = Bruit_Overworld(taille, pixels, precsision, amplitude, nb_vecteur, Entre, Sortie)
-    print(max([max(BdP[i]) for i in range(len(BdP))]))
-    print(min([min(BdP[i]) for i in range(len(BdP))]))
     print(f"End Bruit Perlin : {time.time() - start:.2f} s")
     print('')
 
     # Sauvgarde des donnés
-    print("Satarting saving files...")
     np.savetxt('Files/cat.csv', Cat, delimiter=',')
     np.savetxt('Files/bdp.csv', BdP, delimiter=',')
-    print("File saved")
 
-
-    # Derivation et Map Amelioree
+    # Derivation
     start = time.time()
-    print("Start Derivation and Cartes Amélioré")
-
-
-    # derivation
-    Der1_x = derivate(BdP, 1, 0)
-    Der1_y = derivate(BdP, 0, 1)
-    Plot2DSurface(Der1_x, name_file="Derivation/Der1X_2D.jpg", name_title="Der1 X 2D")
-    Plot2DSurface(Der1_y, name_file="Derivation/Der1Y_2D.jpg", name_title="Der1 Y 2D")
-
-    Der1_combined = Der1_y + Der1_x
-    Plot2DSurface(Der1_combined, name_file="Derivation/Der1ALL_2D.jpg", name_title="Der1 Combined 2D", dpi=1000)
-
-    # Carte Amélioré
-    for inte, col, name in ((12, 6, "Dark"), (7, 9, "Middle"), (1, 11, "Light")):
-        intervalle = .025 * inte + 0.6
-        col = "#" + 3 * "{0:02x}".format(col)
-        alph = intervalle * Der1_combined / np.max(Der1_combined) + 1 - intervalle - .000000000000001
-        # essayons d'appliquer un filtre visuel sur le alpha de la carte au tresor avec la derive en tant que parametre
-        PlotCat(BdP, taille, name_title=f"Carte Modifier {name}", name_file=f"Overworld/Carte{name}.jpg", alpha=alph, bgColor=col)
-
-    print(f"End Derivation and Cartes Amélioré : {time.time() - start:.2f} s")
+    print("Start Derivation")
+    Der1_combined = Derivation(BdP)
+    print(f"End Derivation : {time.time() - start:.2f} s")
     print('')
 
+    # Map Amelioree
+    start = time.time()
+    print("Cartes Amélioré")
+    PlotNeon(BdP, taille, Der1_combined)
+    print(f"Cartes Amélioré : {time.time() - start:.2f} s")
+    print('')
 
     # Patron
     start = time.time()
@@ -474,7 +457,7 @@ def Make_an_Overworld(graine):
 
 # Seed et Dimensions
 graine = randrange(10000)
-taille = 1024
+taille = 512
 hauteur = 256
 # Neige, Lave, Eau, Arbre
 Hneige = 60
@@ -491,7 +474,7 @@ mine = [(4,  Block.Coal,     20,  hauteur-4, .6, "black", .001),  # Charbon
 # HeightMap
 nb_vecteur = 16
 precsision = 5
-amplitude = 128
+amplitude = 160
 pixels = 3000
 # Grotte
 nb_pt_grotte = 6
@@ -501,7 +484,7 @@ nb_br_grotte = 6
 nb_grotte = 12
 # Plateau
 Sortie = [200, 200, 195, 163, 160, 150, 148, 140, 137, 115, 105, 70, 65, 60]
-Entre =  [256, 190, 175, 165, 155, 150, 145, 140, 130, 120,  90, 70, 60,  0]
+Entre =  [256, 190, 175, 165, 155, 150, 145, 140, 120, 110,  90, 70, 60,  0]
 # Cave
 prec_cave = 5
 ampl_cave = 4
@@ -515,5 +498,5 @@ degrad_island = 9
 
 # Création de l'Overworld
 
-if __name__ == "__main__":
-    Make_an_Overworld(graine)
+
+Make_an_Overworld(graine)

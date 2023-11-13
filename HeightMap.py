@@ -98,6 +98,15 @@ def PlotCat(table, taille, name_title, name_file, alpha=None, bgColor='#000000')
     return Cat
 
 
+def PlotNeon(BdP, taille, Der1_combined):
+    for inte, col, name in ((12, 6, "Dark"), (7, 9, "Middle"), (1, 11, "Light")):
+        intervalle = .025 * inte + 0.6
+        col = "#" + 3 * "{0:02x}".format(col)
+        alph = intervalle * Der1_combined / np.max(Der1_combined) + 1 - intervalle - .000000000000001
+        # essayons d'appliquer un filtre visuel sur le alpha de la carte au tresor avec la derive en tant que parametre
+        PlotCat(BdP, taille, name_title=f"Carte Modifier {name}", name_file=f"Overworld/Neon/Carte{name}.jpg", alpha=alph, bgColor=col)
+
+
 # Bruit de Perlin
 
 
@@ -140,7 +149,7 @@ def Bruit_Overworld(taille, pixels, precsision, amplitude, nb_vecteur, Entre, So
     for Num_Bruit in trange(1, 9):
         temporaire = Perlin_2D(precsision, pixels, taille, nb_vecteur)
         if Num_Bruit == 1:
-            temporaire += 1
+            temporaire += .7
 
         temporaire *= amplitude
 
@@ -188,6 +197,7 @@ def Bruit_Arbres(pixels, precsision):
 
 # Plateau
 
+
 def miniAfine(x1, x2, y1, y2, x):
     pente = (y2 - y1) / (x2 - x1)
     x -= x1
@@ -210,6 +220,19 @@ def fonction_passage(BdP, Entre, Sortie):
     ax.invert_xaxis()
     plt.savefig("HeightMap_et_BdP_2D/Courbe_Plateau")
     return BdP
+
+
+# Derivation
+
+
+def Derivation(BdP):
+    Der1_x = derivate(BdP, 1, 0)
+    Der1_y = derivate(BdP, 0, 1)
+    Plot2DSurface(Der1_x, name_file="HeightMap_et_BdP_2D/Derivation/Der1X_2D.jpg", name_title="Der1 X 2D")
+    Plot2DSurface(Der1_y, name_file="HeightMap_et_BdP_2D/Derivation/Der1Y_2D.jpg", name_title="Der1 Y 2D")
+    Der1_combined = Der1_y + Der1_x
+    Plot2DSurface(Der1_combined, name_file="HeightMap_et_BdP_2D/Derivation/Der1ALL_2D.jpg", name_title="Der1 Combined 2D", dpi=1000)
+    return Der1_combined
 
 
 def derivate(tab: np.ndarray, dx, dy):
