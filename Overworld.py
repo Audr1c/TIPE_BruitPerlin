@@ -19,6 +19,7 @@ class Block:
     Dirt = 3
     Sand = 12
     Snow = 78
+    Ice = 79
     SnowBlock = 80
     Water = 9
     Lava = 11
@@ -57,9 +58,9 @@ def Patron_carte(BdP):
             # Regarde quel type de block poser une fois la hauteur atteinte
             if z < Hneige:
                 Overworld[x][z-1][y] = Block.Snow
-            if z < Hneige - 10:
-                Overworld[x][z][y] = Block.SnowBlock
-            elif z < Heau - 4:
+            elif z < Hneige - 10:
+                Overworld[x][z-1][y] = Block.SnowBlock
+            if z < Heau - 4:
                 Overworld[x][z][y] = Block.Grass
             else:
                 Overworld[x][z][y] = Block.Sand
@@ -215,6 +216,23 @@ def Source(Overworld, Liste_sable):
     return Robinet
 
 
+def mini_lac(Overworld, BdP, x, z, y):
+    mini_BdP_lac = mini_BdP_3D(x_lac, z_lac, y_lac)
+    Hlac = np.max(BdP[x : x + x_lac, y : y + y_lac])
+    for dx in range(x_lac):
+        for dy in range(y_lac):
+            for dz in range(z_lac):
+                if mini_BdP_lac[dx, dz, dy] == 1 and in_Patron(x+dx, y+dy, z+dz-(z_lac//2)):
+                    Overworld[x+dx, z+dz-(z_lac//2), y+dy] = Block.Water - (Block.Water - Block.Ice)*(z+dz-(z_lac//2) < Hneige) if z+dz-(z_lac//2) >= Hlac else Block.Air
+
+
+def lac(Overworld, BdP, deriv):
+    Liste_lac = [(randrange(taille), randrange(taille)) for _ in range(nb_lac)]
+    for x, y in Liste_lac:
+        if BdP[x, y] < Heau and abs(deriv[x, y]) < 4 :
+            mini_lac(Overworld, BdP, x, BdP[x, y], y) 
+
+
 def Percolation(Overworld, Robinet):
     voisin_horiz = ((1, 0), (-1, 0), (0, 1), (0, -1))
     while Robinet:
@@ -288,7 +306,7 @@ def Amazonie(Overworld, L_arbre, BdP, Cat):
         k += 1
         z = int(BdP[x, y])
         # Regarde s'il y a de la terre pour placer l'arbre
-        if Overworld[x][z][y] == 2:
+        if Overworld[x][z][y] == 2 :
             # Plante un arbre
             Ecosia(Overworld, x, y, BdP, Cat, k)
     # Affiche CaT avec les arbres
@@ -320,9 +338,9 @@ def Ecosia(Overworld, x, y, BdP, Cat, k):
         for i in range(-2, 3):
             for j in range(-2, 3):
                 # Si la feuille est dans un coin, proba de 2/3 d'apparaitre
-                if (random.random() < 2/3 or not (i, j) in coin_1) and in_Patron(x+i, y+j, z+k) and (i, j) != (0, 0) and Overworld[x+i][z+k][y+j] == Block.Air:
+                if (random.random() < 2/3 or not (i, j) in coin_1) and in_Patron(x+i, y+j, z+k) and (i, j) != (0, 0) and Overworld[x+i][z+k][y+j] in (Block.Air, Block.Snow):
                     Overworld[x+i][z+k][y+j] = Block.Leaves  # Feuille dans L'Overworld
-                    if z + 3 < Hneige :
+                    if z + 3 < Hneige and Overworld[x+i][z+k-1][y+j] == Block.Air:
                         Overworld[x+i][z+k-1][y+j] = Block.Snow
                     Cat[x+i][y+j] = 7  # Feuille sur la CaT
 
@@ -332,13 +350,16 @@ def Ecosia(Overworld, x, y, BdP, Cat, k):
             # Si la feuille est dans un coin, proba de 1/4 d'apparaitre
             if (random.random() < 1/4 or not (i, j) in coin_2) and in_Patron(x+i, y+j, z) and (i, j) != (0, 0) and Overworld[x+i][z][y+j] == Block.Air:
                 Overworld[x+i][z][y+j] = Block.Leaves
+                if z + 3 < Hneige and Overworld[x+i][z-1][y+j] == Block.Air:
+                    Overworld[x+i][z-1][y+j] = Block.Snow
+                
     for i in range(-1, 2):  # Parcours le petit anneau du haut
         for j in range(-1, 2):
             # Si la feuille est dans un coin, elle n'apparait pas
             if (i, j) not in coin_2 and in_Patron(x+i, y+j, z-1) and Overworld[x+i][z-1][y+j] == Block.Air:
                 Overworld[x+i][z-1][y+j] = Block.Leaves
-                if z + 3 < Hneige :
-                    Overworld[x+i][z+k-1][y+j] = Block.Snow
+                if z + 3 < Hneige and Overworld[x+i][z-2][y+j] == Block.Air:
+                    Overworld[x+i][z-2][y+j] = Block.Snow
 
 
 # Conversion pour Minecraft
@@ -378,7 +399,7 @@ def Make_an_Overworld(graine):
     # Bruit
     start = time.time()
     print("Start Bruit Perlin")
-    BdP, Cat = Bruit_Overworld(taille, pixels, precsision, amplitude, nb_vecteur, Entre, Sortie)
+    BdP, Cat = Bruit_Overworld(taille, pixels, precsision, amplitude, nb_vecteur, Cat_scratcher, Entre, Sortie)
     print(f"End Bruit Perlin : {time.time() - start:.2f} s")
     print('')
 
@@ -395,9 +416,9 @@ def Make_an_Overworld(graine):
 
     # Map Amelioree
     start = time.time()
-    print("Cartes Amélioré")
-    PlotNeon(BdP, taille, Der1_combined)
-    print(f"Cartes Amélioré : {time.time() - start:.2f} s")
+    print("Cartes Améliorées")
+    PlotNeon(BdP, taille, Der1_combined, Cat_scratcher)
+    print(f"Cartes Améliorées : {time.time() - start:.2f} s")
     print('')
 
     # Patron
@@ -461,12 +482,14 @@ def Make_an_Overworld(graine):
 
 # Seed et Dimensions
 graine = randrange(10000)
-taille = 512
+taille = 1024
 hauteur = 256
 # Neige, Lave, Eau, Arbre
 Hneige = 75
 Hlave = 230
 Heau = 150
+Cat_scratcher = [['#141872', '#0970a6', '#119fe9', '#eeec7e', '#5df147', '#38be2a', '#336e1c', '#004704', 'white'], 
+                 [hauteur,   Heau + 35, Heau + 15, Heau, Heau - 3, Heau - 30, Hneige + 28, Hneige, 0]]
 OverFlow = False
 Chunks = 16
 # Minerai (coté, Id, NbFilon, couche, prob, color, bille)
@@ -485,10 +508,13 @@ nb_pt_grotte = 6
 fr = 256
 ampl_grotte = 256
 nb_br_grotte = 6
-nb_grotte = 10
+nb_grotte = 25
+# Lac
+nb_lac = 12
+x_lac, y_lac, z_lac = 12, 12, 6
 # Plateau
-Sortie = [200, 200, 195, 163, 160, 150, 148, 140, 137, 134, 115, 105, 70, 65, 60]
-Entre =  [256, 190, 175, 165, 155, 150, 145, 140, 125, 120, 110,  85, 70, 60,  0]
+Sortie = [200, 200, 195, 163, 160, 150, 148, 140, 137, 134, 115, 105, 70, 65, 55, 55]
+Entre =  [256, 190, 175, 165, 155, 150, 145, 140, 120, 115, 105,  80, 65, 55, 45,  0]
 # Cave
 prec_cave = 5
 ampl_cave = 4

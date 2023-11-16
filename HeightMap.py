@@ -4,7 +4,7 @@
 from math import sin, cos, pi
 import numpy as np
 import matplotlib.pyplot as plt
-from tqdm import trange
+from tqdm import trange, tqdm
 from matplotlib.colors import ListedColormap
 import imageio
 
@@ -50,7 +50,7 @@ def Plot3DSuraface(table, taille):
     plt.savefig("HeightMap_et_BdP_2D/Height_map.jpg", bbox_inches='tight')
 
 
-def Plot2DSurface(table, name_file="2DPlot", name_title="2D plot", dpi=100):
+def Plot2DSurface(table, name_file="2DPlot", name_title="2D plot", dpi=500):
     orig_map = plt.cm.get_cmap('gray')
     reversed_map = orig_map.reversed()
     plt.close("all")
@@ -62,31 +62,17 @@ def Plot2DSurface(table, name_file="2DPlot", name_title="2D plot", dpi=100):
     plt.savefig(name_file, dpi=dpi)
 
 
-def PlotCat(table, taille, name_title, name_file, alpha=None, bgColor='#000000'):
-    echelle = ListedColormap(['#141872', '#0970a6', '#119fe9', '#eeec7e',
-                              '#5df147', '#38be2a', '#336e1c', '#004704', 'white'], 8)
+def PlotCat(table, taille, Cat_scratcher, name_title, name_file, alpha=None, bgColor='#000000', dpi=1000):
+    echelle = ListedColormap(Cat_scratcher[0], len(Cat_scratcher[0]))
 
     Cat = np.zeros((taille, taille))
 
     for i in range(taille):
         for j in range(taille):
             s = table[i][j]
-            if 256 >= s > 180:
-                Cat[i, j] = 0
-            elif 180 >= s > 165:
-                Cat[i, j] = 1
-            elif 165 >= s > 150:
-                Cat[i, j] = 2
-            elif 150 >= s > 147:
-                Cat[i, j] = 3
-            elif 147 >= s > 120:
-                Cat[i, j] = 4
-            elif 120 >= s > 90:
-                Cat[i, j] = 5
-            elif 90 >= s > 60:
-                Cat[i, j] = 6
-            elif 60 >= s:
-                Cat[i, j] = 8
+            for k in range(len(Cat_scratcher[1])-1):
+                if Cat_scratcher[1][k] >= s > Cat_scratcher[1][k+1]:
+                    Cat[i, j] = k + (k == len(Cat_scratcher)-2)
 
     plt.close("all")
     plt.imshow(np.zeros_like(Cat), cmap=ListedColormap([bgColor]), vmin=0, vmax=0)
@@ -94,17 +80,17 @@ def PlotCat(table, taille, name_title, name_file, alpha=None, bgColor='#000000')
     plt.xlabel('Y')
     plt.ylabel('X')
     plt.title(name_title)
-    plt.savefig(name_file, dpi=500)
+    plt.savefig(name_file, dpi=dpi)
     return Cat
 
 
-def PlotNeon(BdP, taille, Der1_combined):
-    for inte, col, name in ((12, 6, "Dark"), (7, 9, "Middle"), (1, 11, "Light")):
+def PlotNeon(BdP, taille, Der1_combined, Cat_scratcher):
+    for inte, col, name in tqdm([(12, 6, "Dark"), (7, 9, "Middle"), (1, 11, "Light")]):
         intervalle = .025 * inte + 0.6
         col = "#" + 3 * "{0:02x}".format(col)
         alph = intervalle * Der1_combined / np.max(Der1_combined) + 1 - intervalle - .000000000000001
         # essayons d'appliquer un filtre visuel sur le alpha de la carte au tresor avec la derive en tant que parametre
-        PlotCat(BdP, taille, name_title=f"Carte Modifier {name}", name_file=f"Overworld/Neon/Carte{name}.jpg", alpha=alph, bgColor=col)
+        PlotCat(BdP, taille, Cat_scratcher, name_title=f"Carte Modifier {name}", name_file=f"Overworld/Neon/Carte{name}.jpg", alpha=alph, bgColor=col, dpi=5000)
 
 
 # Bruit de Perlin
@@ -141,7 +127,7 @@ def Perlin_2D(precsision, pixels, taille, nb_vecteur):
     return resultat
 
 
-def Bruit_Overworld(taille, pixels, precsision, amplitude, nb_vecteur, Entre, Sortie):
+def Bruit_Overworld(taille, pixels, precsision, amplitude, nb_vecteur, Cat_scratcher, Entre, Sortie):
     frames_bruit = []
     frames_carte = []
 
@@ -156,7 +142,7 @@ def Bruit_Overworld(taille, pixels, precsision, amplitude, nb_vecteur, Entre, So
         resultats.append(temporaire)
 
         Plot2DSurface(temporaire, name_title=f'Bruit de Perlin n°{Num_Bruit}', name_file=f"HeightMap_et_BdP_2D/Bruits/Bruit_{Num_Bruit}_Amplitudes.jpg")
-        Cat = PlotCat(fonction_passage(sum(resultats), Entre, Sortie), taille, name_title=f'Carte au Trésor avec {Num_Bruit} bruits', name_file=f"Overworld/Cartes/carte_{Num_Bruit}.jpg")
+        Cat = PlotCat(fonction_passage(sum(resultats), Entre, Sortie), taille, Cat_scratcher, name_title=f'Carte au Trésor avec {Num_Bruit} bruits', name_file=f"Overworld/Cartes/carte_{Num_Bruit}.jpg")
         image_bruit = imageio.v2.imread(f"HeightMap_et_BdP_2D/Bruits/Bruit_{Num_Bruit}_Amplitudes.jpg")
         frames_bruit.append(image_bruit)
         image_carte = imageio.v2.imread(f"Overworld/Cartes/carte_{Num_Bruit}.jpg")
@@ -215,7 +201,7 @@ def fonction_passage(BdP, Entre, Sortie):
     plt.close("all")
     ax = plt.axes()
     ax.plot(Entre[1:-1], Sortie[1:-1], 'r')
-    ax.plot([190, 60], [150, 150], 'b')
+    ax.plot([190, 40], [150, 150], 'b')
     ax.invert_yaxis()
     ax.invert_xaxis()
     plt.savefig("HeightMap_et_BdP_2D/Courbe_Plateau")
@@ -228,17 +214,17 @@ def fonction_passage(BdP, Entre, Sortie):
 def Derivation(BdP):
     Der1_x = derivate(BdP, 1, 0)
     Der1_y = derivate(BdP, 0, 1)
-    Plot2DSurface(Der1_x, name_file="HeightMap_et_BdP_2D/Derivation/Der1X_2D.jpg", name_title="Der1 X 2D")
-    Plot2DSurface(Der1_y, name_file="HeightMap_et_BdP_2D/Derivation/Der1Y_2D.jpg", name_title="Der1 Y 2D")
+    Plot2DSurface(Der1_x, name_file="HeightMap_et_BdP_2D/Derivation/Der1X_2D.jpg", name_title="Der1 X 2D", dpi=1500)
+    Plot2DSurface(Der1_y, name_file="HeightMap_et_BdP_2D/Derivation/Der1Y_2D.jpg", name_title="Der1 Y 2D", dpi=1500)
     Der1_combined = Der1_y + Der1_x
-    Plot2DSurface(Der1_combined, name_file="HeightMap_et_BdP_2D/Derivation/Der1ALL_2D.jpg", name_title="Der1 Combined 2D", dpi=1000)
+    Plot2DSurface(Der1_combined, name_file="HeightMap_et_BdP_2D/Derivation/Der1ALL_2D.jpg", name_title="Der1 Combined 2D", dpi=1500)
     return Der1_combined
 
 
 def derivate(tab: np.ndarray, dx, dy):
     der = np.zeros_like(tab)
     height, width = np.shape(der)
-    for x in range(height):
+    for x in trange(height):
         for y in range(width):
             der[x, y] = abs(tab[max(0, x - dx), max(0, y - dy)]
                             - tab[min(height - 1, x + dx), min(width - 1, y + dy)])
