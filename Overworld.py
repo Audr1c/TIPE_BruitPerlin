@@ -2,7 +2,7 @@
 
 
 import time
-from math import sqrt
+from math import sqrt, exp
 from matplotlib.colors import ListedColormap
 from tqdm import trange, tqdm
 from HeightMap import *
@@ -12,6 +12,7 @@ from nbtschematic import SchematicFile
 from collections import deque
 
 # Valeurs Blocks
+
 class Block:
     Air = 0
     Stone = 1
@@ -216,21 +217,50 @@ def Source(Overworld, Liste_sable):
     return Robinet
 
 
-def mini_lac(Overworld, BdP, x, z, y):
-    mini_BdP_lac = mini_BdP_3D(x_lac, z_lac, y_lac)
-    Hlac = np.max(BdP[x : x + x_lac, y : y + y_lac])
-    for dx in range(x_lac):
-        for dy in range(y_lac):
-            for dz in range(z_lac):
-                if mini_BdP_lac[dx, dz, dy] == 1 and in_Patron(x+dx, y+dy, z+dz-(z_lac//2)):
-                    Overworld[x+dx, z+dz-(z_lac//2), y+dy] = Block.Water - (Block.Water - Block.Ice)*(z+dz-(z_lac//2) < Hneige) if z+dz-(z_lac//2) >= Hlac else Block.Air
+def mini_lac():
+    # mini_BdP_lac = mini_BdP_3D(x_lac, z_lac, y_lac)
+    # Hlac = np.max(BdP[x : x + x_lac, y : y + y_lac])
+    # for dx in range(x_lac):
+    #     for dy in range(y_lac):
+    #         for dz in range(z_lac):
+    #             if mini_BdP_lac[dx, dz, dy] == 1 and in_Patron(x+dx, y+dy, z+dz-(z_lac//2)):
+    #                 Overworld[x+dx, z+dz-(z_lac//2), y+dy] = Block.Water - (Block.Water - Block.Ice)*(z+dz-(z_lac//2) < Hneige) if z+dz-(z_lac//2) >= Hlac else Block.Air
+    f = lambda d: exp(-d/20)
+    voisins = ((1, 0, 0), (-1, 0, 0), (0, 0, 1), (0, 0, -1), (0, 1, 0), (0, -1, 0))
+    Lac = [[[-1  for y in range(y_lac)] for z in range(z_lac)] for x in range(x_lac)]
+    origine = (x_lac//2, z_lac//2, y_lac//2)
+    queue = [origine]
+    Lac[x_lac//2][z_lac//2][y_lac//2] = 0
+    while queue:
+        (x, z, y) = queue.pop(0)
+        d = Lac[x][z][y]
+        for (dx, dz, dy) in voisins:
+            (xp, zp, yp) = x + dx, z + dz, y + dy
+            if zp<z_lac and xp<x_lac and yp<x_lac and Lac[xp][zp][yp] == -1:
+                if random.random() <= f(d):
+                    # ajout de la branche 
+                    queue.append((xp, zp, yp))
+                    Lac[xp][zp][yp] = d + 1 + 2*(dz!=0)
+
+    return Lac
 
 
 def lac(Overworld, BdP, deriv):
-    Liste_lac = [(randrange(taille), randrange(taille)) for _ in range(nb_lac)]
+    Liste_lac = [(randrange(x_lac, taille-x_lac), randrange(y_lac,taille-y_lac)) for _ in range(nb_lac)]
     for x, y in Liste_lac:
-        if BdP[x, y] < Heau and abs(deriv[x, y]) < 4 :
-            mini_lac(Overworld, BdP, x, BdP[x, y], y) 
+        if BdP[x, y] < Heau and abs(deriv[x, y]) < 6 :
+            z = int(BdP[x, y])
+            Lac = mini_lac() 
+            voisins = ((0, 1), (0, -1), (-1, 0), (1, 0))
+            #poser le lac dans overworld
+            for dx in range(len(Lac)):
+                for dz in range(len(Lac[dx])):
+                    for dy in range(len(Lac[dx][dz])):
+                        if Lac[dx][dz][dy]!=-1 :
+                            if dz<z_lac//2:
+                                Overworld[x + dx - x_lac//2][z + dz - z_lac//2][y + dy - y_lac//2] = Block.Air
+                            elif not ["cheh" for x1, y1 in voisins if BdP[x + dx - x_lac//2 + x1][y + dy - y_lac//2 + y1]> z + dz - z_lac//2] and Overworld[x + dx - x_lac//2][z + dz -1 - z_lac//2][y + dy - y_lac//2] not in (Block.Grass, Block.Dirt):
+                                Overworld[x + dx - x_lac//2][z + dz - z_lac//2][y + dy - y_lac//2] = Block.Water
 
 
 def Percolation(Overworld, Robinet):
@@ -348,7 +378,7 @@ def Ecosia(Overworld, x, y, BdP, Cat, k):
     for i in range(-1, 2):  # Parcours le petit anneau du bas
         for j in range(-1, 2):
             # Si la feuille est dans un coin, proba de 1/4 d'apparaitre
-            if (random.random() < 1/4 or not (i, j) in coin_2) and in_Patron(x+i, y+j, z) and (i, j) != (0, 0) and Overworld[x+i][z][y+j] == Block.Air:
+            if (random.random() < 1/4 or not (i, j) in coin_2) and in_Patron(x+i, y+j, z) and (i, j) != (0, 0) and Overworld[x+i][z][y+j] in (Block.Air, Block.Snow) :
                 Overworld[x+i][z][y+j] = Block.Leaves
                 if z + 3 < Hneige and Overworld[x+i][z-1][y+j] == Block.Air:
                     Overworld[x+i][z-1][y+j] = Block.Snow
@@ -411,13 +441,14 @@ def Make_an_Overworld(graine):
     start = time.time()
     print("Start Derivation")
     Der1_combined = Derivation(BdP)
+    # Der2_combined = Laplacien(BdP)
     print(f"End Derivation : {time.time() - start:.2f} s")
     print('')
 
     # Map Amelioree
     start = time.time()
     print("Cartes Améliorées")
-    PlotNeon(BdP, taille, Der1_combined, Cat_scratcher)
+    #PlotNeon(BdP, taille, Der1_combined, Cat_scratcher)
     print(f"Cartes Améliorées : {time.time() - start:.2f} s")
     print('')
 
@@ -454,6 +485,7 @@ def Make_an_Overworld(graine):
     Eau(Overworld, Liste_o)
     Robinet = Source(Overworld, Liste_sable)
     Percolation(Overworld, Robinet)
+    lac(Overworld, BdP, Der1_combined)
     print(f"End Eau : {time.time() - start:.2f} s")
     print('')
 
@@ -482,10 +514,10 @@ def Make_an_Overworld(graine):
 
 # Seed et Dimensions
 graine = randrange(10000)
-taille = 1024
+taille = 512
 hauteur = 256
 # Neige, Lave, Eau, Arbre
-Hneige = 75
+Hneige = 65
 Hlave = 230
 Heau = 150
 Cat_scratcher = [['#141872', '#0970a6', '#119fe9', '#eeec7e', '#5df147', '#38be2a', '#336e1c', '#004704', 'white'], 
@@ -508,13 +540,13 @@ nb_pt_grotte = 6
 fr = 256
 ampl_grotte = 256
 nb_br_grotte = 6
-nb_grotte = 25
+nb_grotte = 12
 # Lac
 nb_lac = 12
-x_lac, y_lac, z_lac = 12, 12, 6
+x_lac, y_lac, z_lac = 40, 40, 10
 # Plateau
-Sortie = [200, 200, 195, 163, 160, 150, 148, 140, 137, 134, 115, 105, 70, 65, 55, 55]
-Entre =  [256, 190, 175, 165, 155, 150, 145, 140, 120, 115, 105,  80, 65, 55, 45,  0]
+Sortie = [205, 205, 195, 185, 163, 160, 150, 148, 140, 137, 134, 115, 105, 70, 65, 45, 40, 40]
+Entre =  [256, 205, 180, 175, 165, 155, 150, 145, 140, 120, 115, 105,  80, 65, 55, 35, 25, 0]
 # Cave
 prec_cave = 5
 ampl_cave = 4

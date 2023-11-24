@@ -84,13 +84,14 @@ def PlotCat(table, taille, Cat_scratcher, name_title, name_file, alpha=None, bgC
     return Cat
 
 
-def PlotNeon(BdP, taille, Der1_combined, Cat_scratcher):
+def PlotNeon(BdP, taille, Der, Cat_scratcher):
     for inte, col, name in tqdm([(12, 6, "Dark"), (7, 9, "Middle"), (1, 11, "Light")]):
         intervalle = .025 * inte + 0.6
         col = "#" + 3 * "{0:02x}".format(col)
-        alph = intervalle * Der1_combined / np.max(Der1_combined) + 1 - intervalle - .000000000000001
+        alph = intervalle * Der / np.max(Der) + 1 - intervalle - .000000000000001
         # essayons d'appliquer un filtre visuel sur le alpha de la carte au tresor avec la derive en tant que parametre
-        PlotCat(BdP, taille, Cat_scratcher, name_title=f"Carte Modifier {name}", name_file=f"Overworld/Neon/Carte{name}.jpg", alpha=alph, bgColor=col, dpi=5000)
+        PlotCat(BdP, taille, Cat_scratcher, name_title=f"Carte Modifier {name}", name_file=f"Overworld/Neon/Carte{name}.jpg", alpha=alph,
+                bgColor=col, dpi=4000)
 
 
 # Bruit de Perlin
@@ -201,7 +202,7 @@ def fonction_passage(BdP, Entre, Sortie):
     plt.close("all")
     ax = plt.axes()
     ax.plot(Entre[1:-1], Sortie[1:-1], 'r')
-    ax.plot([190, 40], [150, 150], 'b')
+    ax.plot([205, 25], [150, 150], 'b')
     ax.invert_yaxis()
     ax.invert_xaxis()
     plt.savefig("HeightMap_et_BdP_2D/Courbe_Plateau")
@@ -214,11 +215,21 @@ def fonction_passage(BdP, Entre, Sortie):
 def Derivation(BdP):
     Der1_x = derivate(BdP, 1, 0)
     Der1_y = derivate(BdP, 0, 1)
-    Plot2DSurface(Der1_x, name_file="HeightMap_et_BdP_2D/Derivation/Der1X_2D.jpg", name_title="Der1 X 2D", dpi=1500)
-    Plot2DSurface(Der1_y, name_file="HeightMap_et_BdP_2D/Derivation/Der1Y_2D.jpg", name_title="Der1 Y 2D", dpi=1500)
+    # Plot2DSurface(Der1_x, name_file="HeightMap_et_BdP_2D/Derivation/Der1X_2D.jpg", name_title="Der1 X 2D", dpi=1500)
+    # Plot2DSurface(Der1_y, name_file="HeightMap_et_BdP_2D/Derivation/Der1Y_2D.jpg", name_title="Der1 Y 2D", dpi=1500)
     Der1_combined = Der1_y + Der1_x
-    Plot2DSurface(Der1_combined, name_file="HeightMap_et_BdP_2D/Derivation/Der1ALL_2D.jpg", name_title="Der1 Combined 2D", dpi=1500)
+    Plot2DSurface(Der1_combined, name_file="HeightMap_et_BdP_2D/Derivation/Der1ALL_2D.jpg", name_title="Der1 Combined 2D", dpi=4000)
     return Der1_combined
+
+
+def Laplacien(BdP: np.ndarray):
+    Der2_x = derivate(derivate(BdP, 1, 0), 1, 0)
+    Der2_y = derivate(derivate(BdP, 0, 1), 0, 1)
+    Der2_combined = Der2_y + Der2_x
+    # Plot2DSurface(Der2_x, name_file="HeightMap_et_BdP_2D/Derivation/Der2X_2D.jpg", name_title="Der2 X 2D", dpi=1500)
+    # Plot2DSurface(Der2_y, name_file="HeightMap_et_BdP_2D/Derivation/Der2Y_2D.jpg", name_title="Der2 Y 2D", dpi=1500)
+    Plot2DSurface(Der2_combined, name_file="HeightMap_et_BdP_2D/Derivation/Der2ALL_2D.jpg", name_title="Der2 Combined 2D", dpi=5000)
+    return Der2_combined
 
 
 def derivate(tab: np.ndarray, dx, dy):
@@ -229,3 +240,4 @@ def derivate(tab: np.ndarray, dx, dy):
             der[x, y] = abs(tab[max(0, x - dx), max(0, y - dy)]
                             - tab[min(height - 1, x + dx), min(width - 1, y + dy)])
     return der
+
